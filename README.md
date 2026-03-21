@@ -90,7 +90,7 @@ Bridge mode provides:
 | 7860 | 7860 | Stable Diffusion WebUI |
 
 Access the UI at:
-http://:7860
+http://unraidIP:7860
 
 ---
 
