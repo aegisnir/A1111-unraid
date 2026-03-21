@@ -1,29 +1,50 @@
 # syntax=docker/dockerfile:1
 #
-# Dockerfile - Security-focused AUTOMATIC1111 Stable Diffusion WebUI image (Unraid-friendly)
+# Dockerfile - AUTOMATIC1111 Stable Diffusion WebUI (Unraid-friendly)
 #
-# Security goals:
-#   - Reduce attack surface (minimal packages, no dev toolchains)
-#   - Least privilege (run as non-root)
-#   - Reproducibility / supply-chain integrity (pin base image by digest)
-#   - Clear defaults and easy overrides (COMMANDLINE_ARGS)
+# Design intent:
+#   - Keep the runtime image reasonably small (avoid dev toolchains where possible)
+#   - Run as a non-root user where practical
+#   - Pin the CUDA base image by digest for reproducibility
+#   - Allow controlled pinning of upstream WebUI code (WEBUI_REF)
 #
-# Docker guidance highlights:
-#   - Choose a trusted base and keep it small
-#   - Rebuild images often to pick up security patches
-# [1](https://docs.docker.com/build/building/best-practices/)
+# General Docker build guidance (reference):
+# https://docs.docker.com/build/building/best-practices/
 
 # ------------------------------------------------------------------------------
-# Base image: NVIDIA CUDA runtime (Ubuntu 22.04) pinned by digest for immutability.
-# Why digest pinning?
-#   - Tags can be updated/repointed; digests are immutable.
-#   - This helps prevent supply-chain surprises and makes builds reproducible.
+# Design Notes (Why some security/ops choices are intentionally NOT baked in)
+#
+# 1) Runtime hardening flags:
+#    This image does not embed runtime security flags (read-only FS, cap drops,
+#    no-new-privileges, tmpfs, etc.) because those controls are applied by the
+#    container runtime (Unraid/Docker) and may need tuning per environment.
+#    If you choose not to apply them, the deployment may be less constrained than
+#    originally intended.
+#
+# 2) Network exposure & authentication:
+#    This image starts a local web service. It does not configure TLS, auth, or
+#    reverse-proxy integration by default because those are deployment concerns
+#    that vary by environment. If you expose the service beyond a trusted network,
+#    the resulting setup may not be as safe as originally intended.
+#
+# 3) GPU drivers:
+#    NVIDIA kernel drivers live on the host. This image includes user-space CUDA
+#    components and expects GPU access to be granted explicitly at runtime.
+#
+# 4) Supply chain & updates:
+#    - The CUDA base image is pinned by digest to reduce unexpected upstream change.
+#    - The WebUI source can be pinned via WEBUI_REF for more controlled builds.
+#      If you track a moving branch (e.g., "master"), behavior and risk may change
+#      over time.
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Base image: NVIDIA CUDA runtime (Ubuntu 22.04), pinned by digest.
+# Digest confirmed on Docker Hub layer details. https://hub.docker.com/layers/nvidia/cuda/12.9.1-runtime-ubuntu22.04/images/sha256-6553b9635f35d992cf0473f55d1e998935a2dd1e2e604d3cbfb2bf295a8faa79/
 # ------------------------------------------------------------------------------
 FROM nvidia/cuda:12.9.1-runtime-ubuntu22.04@sha256:d90541b92124899904e0860a4ac1955606b3bc45ad6cc9dab16567fd1111e326
 
-# ------------------------------------------------------------------------------
 # Use bash with pipefail for safer RUN pipelines.
-# ------------------------------------------------------------------------------
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # ------------------------------------------------------------------------------
@@ -31,36 +52,26 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # ------------------------------------------------------------------------------
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Pin A1111 to a specific branch/tag/commit for stability.
-# SECURITY NOTE:
-#   - For maximum safety, use a specific commit SHA and update intentionally.
+# Pin the WebUI to a branch/tag/commit. For more controlled builds,
+# consider using a specific commit SHA and updating intentionally.
 ARG WEBUI_REF=master
 
-# Unraid-friendly defaults (nobody/users). You can change these if needed.
+# Unraid-friendly defaults (nobody/users). Adjust if you use a different strategy.
 ARG APP_UID=99
 ARG APP_GID=100
 
 # ------------------------------------------------------------------------------
 # Runtime defaults
-# SECURITY NOTE:
-#   - --listen binds to all interfaces. Safe on LAN if you do NOT expose it to the internet.
-#   - Do NOT use --share (public exposure risk).
+# NOTE: --listen binds to all interfaces. On a trusted LAN this is often OK,
+# but exposing this service beyond a trusted network may not be as safe as intended.
 # ------------------------------------------------------------------------------
 ENV COMMANDLINE_ARGS="--listen --port 7860"
 ENV WEBUI_DIR="/opt/stable-diffusion-webui"
 
 # ------------------------------------------------------------------------------
-# Install minimal dependencies.
-# We intentionally avoid large toolchains and keep packages minimal.
-#
-# Why minimal packages?
-#   - Fewer packages = smaller attack surface and fewer CVEs to manage.
-# [1](https://docs.docker.com/build/building/best-practices/)[2](https://dockerbuild.com/blog/security-best-practices)
-#
-# NOTE about git:
-#   - A1111 can use git for extensions / updates.
-#   - If you want maximum hardening, you can remove git after clone,
-#     but you’ll lose “install extension from git” convenience.
+# Install minimal runtime dependencies.
+# Docker guidance recommends keeping images small and rebuilding regularly to
+# pick up updates. https://docs.docker.com/build/building/best-practices/
 # ------------------------------------------------------------------------------
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -77,17 +88,13 @@ RUN apt-get update \
 
 # ------------------------------------------------------------------------------
 # Create a dedicated non-root user.
-# Why?
-#   - Running as root increases impact if the app is compromised.
-# [2](https://dockerbuild.com/blog/security-best-practices)
+# Running as non-root can reduce impact in some failure scenarios.
 # ------------------------------------------------------------------------------
 RUN groupadd --gid "${APP_GID}" app \
- && useradd  --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash app
+ && useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash app
 
 # ------------------------------------------------------------------------------
 # Fetch A1111 source code
-# SECURITY NOTE:
-#   - Pin WEBUI_REF to a commit SHA for strongest reproducibility.
 # ------------------------------------------------------------------------------
 WORKDIR /opt
 RUN git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
@@ -97,7 +104,7 @@ RUN git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.
  && chown -R app:app "${WEBUI_DIR}"
 
 # ------------------------------------------------------------------------------
-# Copy entrypoint script (already committed in your repo)
+# Copy entrypoint script (from this repository)
 # ------------------------------------------------------------------------------
 COPY start.sh /start.sh
 RUN chmod 0755 /start.sh \
@@ -110,17 +117,13 @@ EXPOSE 7860
 
 # ------------------------------------------------------------------------------
 # Healthcheck
-# Purpose:
-#   - Detect "container is up but app is dead" situations.
-# NOTE:
-#   - This checks if something is listening on localhost:7860.
+# Checks if something is listening on localhost:7860.
+# This is a lightweight signal, not a full correctness check.
 # ------------------------------------------------------------------------------
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD python3 -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 7860)); s.close()" || exit 1
 
-# ------------------------------------------------------------------------------
 # Drop privileges at runtime
-# ------------------------------------------------------------------------------
 USER app:app
 
 ENTRYPOINT ["/start.sh"]
