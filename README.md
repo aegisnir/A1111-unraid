@@ -1,4 +1,7 @@
-# ⚠️⚠️⚠️ WORK IN PROGRESS!!! DO NOT USE!!! ⚠️⚠️⚠️ 
+# ⚠️⚠️⚠️ WORK IN PROGRESS ⚠️⚠️⚠️ 
+DO NOT USE UNTIL WORK IN PROGRESS STATUS IS REMOVED
+
+I’m not a programmer, just a curious hobbyist building personal projects for fun.  I openly use AI to help me make things, so please expect mistakes as I learn!
 
 ---
 
