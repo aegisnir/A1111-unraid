@@ -1,0 +1,25 @@
+# Git metadata
+.git
+.gitignore
+
+# GitHub config
+.github
+
+# Documentation
+README.md
+SECURITY.md
+LICENSE
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+build/
+dist/
