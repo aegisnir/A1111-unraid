@@ -1,3 +1,7 @@
+# ⚠️⚠️⚠️ WORK IN PROGRESS!!! DO NOT USE!!! ⚠️⚠️⚠️ 
+
+---
+
 # Stable Diffusion WebUI (AUTOMATIC1111) – Docker for Unraid (Security‑Focused)
 
 ![CUDA](https://img.shields.io/badge/CUDA-12.9.1-76B900?logo=nvidia&logoColor=white)
