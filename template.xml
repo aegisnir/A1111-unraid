@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>A1111-WebUI-Aegisnir</Name>
-  <Repository>a1111-webui-aegisnir:latest</Repository>
+  <Repository>ghcr.io/aegisnir/a1111-unraid:latest</Repository>
   <Registry></Registry>
-  <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.svg</Icon>
+  <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.png</Icon>
   <ExtraParams>--runtime=nvidia --read-only --tmpfs /tmp:rw,noexec,nosuid,size=2g --security-opt no-new-privileges:true --cap-drop=ALL --pids-limit=512</ExtraParams>
   <PostArgs></PostArgs>
   <Description>
     AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
 
-    This template is configured for a locally built image named a1111-webui-aegisnir:latest.
-    Build the image on your Unraid host before creating the container from this template.
+    This template is configured to pull a published image from:
+    <b>ghcr.io/aegisnir/a1111-unraid:latest</b>
 
     ## Security Hardening Defaults
     The template now sets the following security options by default:
@@ -35,8 +35,8 @@
   You can also mount an auth file and set <b>WEBUI_AUTH_FILE</b> to avoid storing credentials directly in template variables.
   </Description>
   <Overview>
-  This template expects a locally built Docker image named a1111-webui-aegisnir:latest.
-  It does not pull from Docker Hub unless you change the Repository field to a published image.
+  This template is configured for a published container image by default.
+  If you maintain your own custom image, you can override the Repository field.
   The default Extra Parameters include --runtime=nvidia so Docker can expose the NVIDIA runtime inside the container.
 
     This template passes Automatic1111 data storage through --data-dir.
@@ -73,5 +73,6 @@
   <Config Name="WebUI Auth File" Type="Variable" Target="WEBUI_AUTH_FILE" Default="" Display="advanced" Required="false" Mask="false" Description="Optional path inside the container to an AUTOMATIC1111 auth file. If set, this takes precedence over WEBUI_USERNAME/WEBUI_PASSWORD unless you explicitly pass --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS."/>
   <Config Name="API Auth Mode" Type="Variable" Target="API_AUTH_MODE" Default="mirror-webui" Display="advanced" Required="false" Mask="false" Description="Controls API authentication. 'mirror-webui' reuses WEBUI_USERNAME/WEBUI_PASSWORD for --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS. Avoid sharing logs that may include custom auth arguments."/>
   <Config Name="API Auth File Mode" Type="Variable" Target="API_AUTH_FILE_MODE" Default="mirror-webui-file" Display="advanced" Required="false" Mask="false" Description="Controls API authentication when WEBUI_AUTH_FILE is set. 'mirror-webui-file' mirrors the auth file into --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS."/>
+  <Config Name="UMASK" Type="Variable" Target="UMASK" Default="" Display="advanced" Required="false" Mask="false" Description="Optional file creation mask (octal), for example 0027. Leave empty to keep the container default behavior and easier host-side access."/>
   <Config Name="Extra Args" Type="Variable" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data --xformers --no-download-sd-model" Display="advanced" Required="false" Mask="false" Description="Extra arguments for launch.py. Default includes --data-dir /data, --xformers, and --no-download-sd-model so the container does not silently download a large default checkpoint. Provide your own model under /data/models/Stable-diffusion or override this if you intentionally want automatic download behavior. For GPU errors, try adding --skip-torch-cuda-test temporarily."/>
 </Container>
