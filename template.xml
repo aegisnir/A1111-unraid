@@ -4,7 +4,7 @@
   <Repository>a1111-webui-aegisnir:local</Repository>
   <Registry></Registry>
   <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.png</Icon>
-  <ExtraParams>--runtime=nvidia --read-only --tmpfs /tmp:rw,noexec,nosuid,size=2g --security-opt no-new-privileges:true --cap-drop=ALL --pids-limit=2048</ExtraParams>
+  <ExtraParams>--runtime=nvidia --read-only --tmpfs /tmp:rw,noexec,nosuid,size=2g --security-opt no-new-privileges:true --cap-drop=ALL --cap-add=CHOWN --cap-add=FOWNER --cap-add=SETUID --cap-add=SETGID --pids-limit=2048</ExtraParams>
   <PostArgs></PostArgs>
   <Description>
     AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
@@ -21,7 +21,7 @@
     - <b>--read-only</b>: Makes the container filesystem read-only except for explicitly mounted paths (like /data).
     - <b>--tmpfs /tmp:rw,noexec,nosuid,size=2g</b>: Provides a safe, writable /tmp.
     - <b>--security-opt no-new-privileges:true</b>: Prevents processes from gaining new privileges.
-    - <b>--cap-drop=ALL</b>: Drops all Linux capabilities except those required by the base image.
+    - <b>--cap-drop=ALL --cap-add=CHOWN --cap-add=FOWNER --cap-add=SETUID --cap-add=SETGID</b>: Uses a least-privilege capability set needed for startup self-heal and privilege drop.
     - <b>--pids-limit=2048</b>: A practical default to contain runaway process spawning without being overly restrictive.
 
     To change PID limit in Unraid: edit this container, switch to advanced view, adjust <b>--pids-limit=&lt;value&gt;</b> in Extra Parameters, and apply.

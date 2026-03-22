@@ -244,6 +244,10 @@ This container now uses the following security options by default (see Unraid te
 --tmpfs /tmp:rw,noexec,nosuid,size=2g
 --security-opt no-new-privileges:true
 --cap-drop=ALL
+--cap-add=CHOWN
+--cap-add=FOWNER
+--cap-add=SETUID
+--cap-add=SETGID
 --pids-limit=2048
 ```
 
@@ -251,7 +255,10 @@ This container now uses the following security options by default (see Unraid te
 - `--read-only`: Reduces write access to the container filesystem, limiting persistence for attackers.
 - `--tmpfs /tmp:...`: Provides a safe, writable /tmp for runtime needs.
 - `no-new-privileges:true`: Prevents processes from gaining new privileges, reducing escalation risk.
-- `--cap-drop=ALL`: Removes all Linux capabilities not required by the base image, reducing attack surface.
+- `--cap-drop=ALL` + targeted `--cap-add`: Keeps a least-privilege capability profile while preserving required startup operations:
+	- `CHOWN`: required when `/data` ownership must be repaired
+	- `FOWNER`: required to fix mode bits on host-mounted paths not owned by uid 0
+	- `SETUID` / `SETGID`: required to drop from root to uid 99/gid 100 before launching WebUI
 - `--pids-limit=2048`: A practical default to contain runaway process spawning without being overly restrictive.
 
 PID limit defaults to `2048` in this template and can be tuned per host in Unraid.

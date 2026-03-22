@@ -49,6 +49,9 @@ print_runtime_diagnostics() {
   fi
 
   echo "${C_SILVER}[entrypoint] Runtime diagnostics: uid=$(id -u) gid=$(id -g) NoNewPrivs=${no_new_privs} Seccomp=${seccomp_mode} CapEff=${cap_eff}${C_RESET}" >&2
+  if [[ "${cap_eff}" == "0000000000000000" ]]; then
+    echo "${C_ORANGE}[entrypoint] CapEff is zero (all capabilities dropped). Add required caps or remove --cap-drop=ALL.${C_RESET}" >&2
+  fi
   echo "${C_ORANGE}[entrypoint] Likely causes: rootless/userns remap, no-new-privileges policy, NFS root-squash, or share ACL/mount restrictions.${C_RESET}" >&2
 }
 

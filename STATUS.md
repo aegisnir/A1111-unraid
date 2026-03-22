@@ -8,7 +8,7 @@ Last updated: 2026-03-22
   - read-only root filesystem
   - tmpfs for `/tmp`
   - `no-new-privileges`
-  - `cap-drop=ALL`
+  - `cap-drop=ALL` + minimal `cap-add` set (`CHOWN`, `FOWNER`, `SETUID`, `SETGID`)
   - default `--pids-limit=2048` with tuning guidance
 - Startup/bootstrap flow hardened:
   - persistent `/data/venv`
