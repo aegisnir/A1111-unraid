@@ -3,7 +3,7 @@
   <Name>A1111-WebUI-Aegisnir</Name>
   <Repository>aegisnir/a1111-unraid</Repository>
   <Registry>https://hub.docker.com/r/aegisnir/a1111-unraid</Registry>
-  <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.png</Icon>
+  <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.svg</Icon>
   <ExtraParams></ExtraParams>
   <PostArgs></PostArgs>
   <Description>
@@ -36,7 +36,6 @@
   <TemplateURL>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/template.xml</TemplateURL>
 
   <!--
-    Icon: Uses the repo's icon.png for a consistent Unraid look.
     Changelog: Linked to the repo's CHANGELOG.md for update tracking.
     Support: Points to the repo issues page for help.
     TemplateURL: Always points to the latest template in main.
