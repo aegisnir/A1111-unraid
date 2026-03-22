@@ -1,0 +1,45 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="waferBg" cx="50%" cy="50%" r="80%">
+      <stop offset="0%" stop-color="#23232b"/>
+      <stop offset="60%" stop-color="#18181B"/>
+      <stop offset="100%" stop-color="#23232b"/>
+    </radialGradient>
+    <linearGradient id="holo1" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="30%" stop-color="#00FFD0"/>
+      <stop offset="60%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#C0C0C0"/>
+    </linearGradient>
+    <linearGradient id="holo2" x1="128" y1="0" x2="0" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C0C0C0"/>
+      <stop offset="40%" stop-color="#FF5CF6"/>
+      <stop offset="80%" stop-color="#00FFD0"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="trace1" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="trace2" x1="128" y1="0" x2="0" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00FFD0"/>
+      <stop offset="100%" stop-color="#FF5CF6"/>
+    </linearGradient>
+    <filter id="glowViolet" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="#18181B"/>
+  <!-- Subtle holographic wafer border -->
+  <ellipse cx="64" cy="64" rx="56" ry="56" fill="none" stroke="url(#holo1)" stroke-width="6"/>
+  <ellipse cx="64" cy="64" rx="44" ry="44" fill="none" stroke="url(#holo2)" stroke-width="3"/>
+  <!-- Center node and glow -->
+  <circle cx="64" cy="64" r="10" fill="#23232b" stroke="#8B5CF6" stroke-width="2" filter="url(#glowViolet)"/>
+  <circle cx="64" cy="64" r="3" fill="#8B5CF6"/>
+  <!-- A1111 text, perfectly centered -->
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="36" font-weight="bold" fill="#18181B" stroke="#8B5CF6" stroke-width="2" paint-order="stroke fill">A1111</text>
+</svg>
