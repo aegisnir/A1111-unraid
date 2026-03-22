@@ -25,7 +25,8 @@ This is a personal hobby project. It is heavily AI-assisted, and it is also a le
 These are the defaults I would start with on a trusted LAN.
 
 1. Install the template from the Unraid CA app flow (or import `template.xml`).
-2. Confirm the image repository is set to `ghcr.io/aegisnir/a1111-webui-aegisnir:latest` unless you intentionally use your own image.
+2. For local testing, confirm the image repository is set to `a1111-webui-aegisnir:local`.
+	For a published-image workflow, set it to `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`.
 3. Use **Bridge** networking.
 4. Map container port `7860` to a host port of your choice.
 5. Make sure NVIDIA GPU access works on the Unraid host.
@@ -41,10 +42,14 @@ On first startup, the container creates a Python virtual environment under `/dat
 
 The bootstrap currently pins `torch`, `torchvision`, and `xformers` as a tested set so the startup environment stays consistent. These values are meant to track the current expectations of the upstream `AUTOMATIC1111` `dev` branch rather than floating to whatever pip resolves that day. If you decide to change them, treat them as a tested group rather than bumping one package at a time.
 
-The included `template.xml` is set up for a published image by default:
+The included `template.xml` is set up for a local test image by default:
 
-- Repository: `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`
+- Repository: `a1111-webui-aegisnir:local`
 - Extra Parameters: `--runtime=nvidia`
+
+If you publish an image, switch the template repository to:
+
+- `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`
 
 Once the container is running, the WebUI is typically available at:
 
@@ -88,6 +93,8 @@ Set your real login values in the container configuration with:
 - `WEBUI_USERNAME`
 - `WEBUI_PASSWORD`
 
+Use `WEBUI_PASSWORD` for convenience/testing. For live deployments, prefer `WEBUI_AUTH_FILE` so credentials are managed from a mounted file instead of template variables.
+
 The container also mirrors those credentials to `--api-auth` by default so the API is not left unauthenticated while the UI is protected.
 
 If you prefer not to store credentials directly in template variables, mount an auth file and set:
@@ -114,6 +121,8 @@ By default, the container also mirrors auth-file credentials into API auth. You 
 - `API_AUTH_FILE_MODE=disabled`
 
 Important security note: upstream AUTOMATIC1111 parses auth from command-line flags internally. This repo masks those values from the startup log, but command-line style auth should still be treated as sensitive and avoided in screenshots, copied logs, or shared diagnostics.
+
+Operational warning: in some startup paths, credentials provided via `WEBUI_PASSWORD` may still appear in logs (for example as part of generated launch arguments). Treat container logs as sensitive and rotate credentials if they were exposed. Using `WEBUI_AUTH_FILE` is strongly recommended for non-test deployments.
 
 If you want to manage authentication manually, you can still pass your own auth flags in `COMMANDLINE_ARGS`:
 
@@ -279,6 +288,11 @@ If you use `--read-only`, expect to provide explicit writable mounts for anythin
 - Confirm the container is still running.
 - On first launch, allow extra time for the Python environment bootstrap under `/data/venv`.
 - Make sure you have provided a model checkpoint under `/data/models/Stable-diffusion` if you keep the default `--no-download-sd-model` behavior enabled.
+
+### Error: "No checkpoints found"
+- This is expected if you keep the default `--no-download-sd-model` flag and have not placed a model yet.
+- Fix: place at least one `.safetensors` or `.ckpt` file in `/data/models/Stable-diffusion` (host default: `/mnt/user/ai/data/models/Stable-diffusion`).
+- Restart the container (or refresh models in the UI) and select the checkpoint.
 
 ### The GPU is not being used
 - Re-run the GPU sanity check above.

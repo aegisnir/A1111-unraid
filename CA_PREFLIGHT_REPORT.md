@@ -4,12 +4,14 @@ Date: 2026-03-22
 Repository: aegisnir/A1111-unraid
 Branch: main
 
+Scope note: This report covers the published-image (GHCR) path used for CA readiness checks. The current local testing template default may differ.
+
 ## Gate Summary
 
 - PASS: `start.sh` shell syntax validation (`bash -n start.sh`)
 - PASS: `template.xml` XML parse validation
-- PASS: CA/security markers present in docs and config:
-	- published repository string in template
+- PASS: CA/security markers present in docs and config at the time of testing:
+	- published repository string documented for CA path
 	- optional `UMASK` variable in template and README guidance
 	- `WEBUI_REF` build-time behavior documented
 	- auth/log-redaction references present
@@ -22,7 +24,7 @@ Branch: main
 
 ## Blocking Issue
 
-1. The current template default image reference is not pullable at the tested tag:
+1. The published image reference tested for CA path was not pullable at the tested tag:
 	- `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`
 	 - Docker daemon response: `manifest unknown`
 

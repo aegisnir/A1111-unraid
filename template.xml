@@ -13,6 +13,9 @@
     <b>a1111-webui-aegisnir:local</b>
     Build this image on your Unraid host before creating the container.
 
+    README:
+    <b>https://github.com/aegisnir/A1111-unraid/blob/main/README.md</b>
+
     ## Security Hardening Defaults
     The template now sets the following security options by default:
     - <b>--read-only</b>: Makes the container filesystem read-only except for explicitly mounted paths (like /data).
@@ -35,12 +38,19 @@
     Default WebUI username: <b>admin</b>
     Default WebUI password placeholder: <b>changeme-now</b>
     The container will refuse to start until you replace that password or explicitly manage auth via COMMANDLINE_ARGS.
-  You can also mount an auth file and set <b>WEBUI_AUTH_FILE</b> to avoid storing credentials directly in template variables.
+    For live deployments, prefer <b>WEBUI_AUTH_FILE</b> over <b>WEBUI_PASSWORD</b>.
+    <b>WEBUI_PASSWORD</b> is intended for convenience/testing and credentials may appear in logs in some startup paths.
+    You can mount an auth file and set <b>WEBUI_AUTH_FILE</b> to avoid storing credentials directly in template variables.
+
+    <b>Model checkpoint note:</b>
+    The default args include <b>--no-download-sd-model</b>. If no checkpoint exists yet, startup can report "No checkpoints found".
+    Add a <b>.safetensors</b> or <b>.ckpt</b> file under <b>/data/models/Stable-diffusion</b>.
   </Description>
   <Overview>
   This template is configured for a local test image by default.
   If you maintain your own custom image, you can override the Repository field.
   The default Extra Parameters include --runtime=nvidia so Docker can expose the NVIDIA runtime inside the container.
+  Full setup and usage docs: https://github.com/aegisnir/A1111-unraid/blob/main/README.md
 
     This template passes Automatic1111 data storage through --data-dir.
 
@@ -72,8 +82,8 @@
   <Config Name="WebUI" Type="Port" Target="7860" Default="7860" Mode="tcp" Display="always" Required="true" Mask="false" Description="Port exposed by the AUTOMATIC1111 WebUI (default: 7860)."/>
   <Config Name="Data Directory" Type="Path" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Display="always" Required="true" Mask="false" Description="Host path mapped to --data-dir. Default: /mnt/user/ai/data/ (outside appdata)."/>
   <Config Name="WebUI Username" Type="Variable" Target="WEBUI_USERNAME" Default="admin" Display="always" Required="true" Mask="false" Description="Default username for the AUTOMATIC1111 login page. Change this from the default before exposing the container to other users."/>
-  <Config Name="WebUI Password" Type="Variable" Target="WEBUI_PASSWORD" Default="changeme-now" Display="always" Required="true" Mask="true" Description="Password for the AUTOMATIC1111 login page. The container will refuse to start until you replace the default placeholder value."/>
-  <Config Name="WebUI Auth File" Type="Variable" Target="WEBUI_AUTH_FILE" Default="" Display="advanced" Required="false" Mask="false" Description="Optional path inside the container to an AUTOMATIC1111 auth file. If set, this takes precedence over WEBUI_USERNAME/WEBUI_PASSWORD unless you explicitly pass --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS."/>
+  <Config Name="WebUI Password" Type="Variable" Target="WEBUI_PASSWORD" Default="changeme-now" Display="always" Required="true" Mask="true" Description="Password for the AUTOMATIC1111 login page. The container will refuse to start until you replace the default placeholder value. Use WEBUI_PASSWORD for convenience/testing; for live deployments prefer WEBUI_AUTH_FILE. Credentials may appear in logs in some startup paths."/>
+  <Config Name="WebUI Auth File" Type="Variable" Target="WEBUI_AUTH_FILE" Default="" Display="advanced" Required="false" Mask="false" Description="Recommended for live deployments. Path inside the container to an AUTOMATIC1111 auth file. If set, this takes precedence over WEBUI_USERNAME/WEBUI_PASSWORD unless you explicitly pass --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS."/>
   <Config Name="API Auth Mode" Type="Variable" Target="API_AUTH_MODE" Default="mirror-webui" Display="advanced" Required="false" Mask="false" Description="Controls API authentication. 'mirror-webui' reuses WEBUI_USERNAME/WEBUI_PASSWORD for --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS. Avoid sharing logs that may include custom auth arguments."/>
   <Config Name="API Auth File Mode" Type="Variable" Target="API_AUTH_FILE_MODE" Default="mirror-webui-file" Display="advanced" Required="false" Mask="false" Description="Controls API authentication when WEBUI_AUTH_FILE is set. 'mirror-webui-file' mirrors the auth file into --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS."/>
   <Config Name="UMASK" Type="Variable" Target="UMASK" Default="" Display="advanced" Required="false" Mask="false" Description="Optional file creation mask (octal), for example 0027. Leave empty to keep the container default behavior and easier host-side access."/>

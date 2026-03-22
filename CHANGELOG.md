@@ -19,6 +19,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- pinned `torch`, `torchvision`, and `xformers` as an explicit tested set
 	- added installed-version logging and a dependency sanity check
 	- relaxed the sanity check to accept valid CUDA local version suffixes such as `+cu126`
+	- made `xformers` truly optional in sanity checks so startup does not fail when it is unavailable
 - Authentication/security defaults:
 	- enabled WebUI login by default
 	- mirrored credentials to API auth by default
@@ -31,8 +32,12 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- updated `template.xml` to reflect current hardening and auth behavior
 	- synchronized current defaults across docs, template, and scripts
 	- added third-party licensing notices (`THIRD_PARTY_NOTICES.md`, AGPL copy)
-	- switched template default repository to a published image for CA-style installs
-	- updated quick start guidance to CA/template-first workflow
+	- switched template/runtime naming to `a1111-webui-aegisnir` for local Unraid testing consistency
+	- added default `--pids-limit=2048` and documented how to tune PID limits in Unraid Extra Parameters
+	- added template links to the GitHub README for quick user access
+	- documented that `No checkpoints found` is expected with `--no-download-sd-model` until a model is added
+	- added stronger guidance to prefer `WEBUI_AUTH_FILE` for live deployments and treat `WEBUI_PASSWORD` as convenience/testing
+	- added warnings that credentials may appear in logs in some startup paths when password-based auth is used
 
 ## Notes
 

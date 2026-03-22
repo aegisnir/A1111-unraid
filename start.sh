@@ -218,16 +218,19 @@ import sys
 def normalize_version(version: str) -> str:
   return version.split("+", 1)[0]
 
-expected = {
+required_expected = {
   "torch": os.environ["TORCH_VERSION"],
   "torchvision": os.environ["TORCHVISION_VERSION"],
+}
+optional_expected = {
   "xformers": os.environ["XFORMERS_VERSION"],
 }
 
 installed = {}
 errors = []
+warnings = []
 
-for name, expected_version in expected.items():
+for name, expected_version in required_expected.items():
   try:
     module = importlib.import_module(name)
     installed_version = getattr(module, "__version__", "unknown")
@@ -237,7 +240,22 @@ for name, expected_version in expected.items():
   except Exception as exc:
     errors.append(f"{name}: not importable ({exc.__class__.__name__})")
 
-print("Dependency sanity check: " + ", ".join(f"{name}={installed.get(name, 'missing')}" for name in expected))
+for name, expected_version in optional_expected.items():
+  try:
+    module = importlib.import_module(name)
+    installed_version = getattr(module, "__version__", "unknown")
+    installed[name] = installed_version
+    if normalize_version(installed_version) != normalize_version(expected_version):
+      warnings.append(f"{name}: expected {expected_version}, found {installed_version} (continuing)")
+  except Exception as exc:
+    warnings.append(f"{name}: not importable ({exc.__class__.__name__}) (continuing)")
+
+print("Dependency sanity check: " + ", ".join(f"{name}={installed.get(name, 'missing')}" for name in {**required_expected, **optional_expected}))
+
+if warnings:
+  print("Optional dependency warnings:", file=sys.stderr)
+  for warning in warnings:
+    print(f" - {warning}", file=sys.stderr)
 
 if errors:
   print("Dependency version mismatch detected:", file=sys.stderr)
