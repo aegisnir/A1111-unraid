@@ -333,79 +333,93 @@ else
   echo "${C_VIOLET}WebUI login is enabled by default. Username: ${WEBUI_USERNAME}${C_RESET}" >&2
 fi
 
-if [[ "${USING_WEBUI_AUTH_FILE}" == "1" ]]; then
-  if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-    echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
-  elif [[ "${API_AUTH_FILE_MODE}" == "mirror-webui-file" ]]; then
-    api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-entries = []
-
-for raw_line in path.read_text(encoding='utf-8').splitlines():
-    line = raw_line.strip()
-    if not line or line.startswith('#'):
-        continue
-    for cred in line.split(','):
-        cred = cred.strip()
-        if cred:
-            entries.append(cred)
-
-print(','.join(entries))
-PY
-)"
-    if [[ -z "${api_auth_value}" ]]; then
-      echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
-      exit 1
-    fi
-    AUTH_ARGS+=("--api-auth" "${api_auth_value}")
-    echo "${C_VIOLET}API authentication is mirrored from WEBUI_AUTH_FILE.${C_RESET}" >&2
-  elif [[ "${API_AUTH_FILE_MODE}" == "disabled" ]]; then
-    echo "${C_SILVER}API auth mirroring from WEBUI_AUTH_FILE disabled via API_AUTH_FILE_MODE=disabled.${C_RESET}" >&2
-  else
-    echo "${C_ORANGE}[WARNING] Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to mirror-webui-file." >&2
-    api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-entries = []
-
-for raw_line in path.read_text(encoding='utf-8').splitlines():
-    line = raw_line.strip()
-    if not line or line.startswith('#'):
-        continue
-    for cred in line.split(','):
-        cred = cred.strip()
-        if cred:
-            entries.append(cred)
-
-print(','.join(entries))
-PY
-)"
-    if [[ -z "${api_auth_value}" ]]; then
-      echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
-      exit 1
-    fi
-    AUTH_ARGS+=("--api-auth" "${api_auth_value}")
-    echo "${C_VIOLET}API authentication is mirrored from WEBUI_AUTH_FILE.${C_RESET}" >&2
-  fi
-elif [[ "${API_AUTH_MODE}" == "mirror-webui" ]]; then
-  if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-    echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
-  else
-    AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
-  fi
-elif [[ "${API_AUTH_MODE}" == "disabled" ]]; then
-  echo "${C_SILVER}API authentication mirroring disabled via API_AUTH_MODE=disabled.${C_RESET}" >&2
+API_ENABLED=0
+if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api([=[:space:]]|$) ]]; then
+  API_ENABLED=1
+  echo "${C_VIOLET}API is explicitly enabled via COMMANDLINE_ARGS (--api).${C_RESET}" >&2
 else
-  echo "${C_ORANGE}[WARNING] Unrecognized API_AUTH_MODE=${API_AUTH_MODE}. Expected mirror-webui or disabled. Falling back to mirror-webui.${C_RESET}" >&2
-  if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-    echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
+  echo "${C_SILVER}API is disabled by default. Add --api to COMMANDLINE_ARGS to enable it.${C_RESET}" >&2
+fi
+
+if [[ "${API_ENABLED}" == "1" ]]; then
+  if [[ "${USING_WEBUI_AUTH_FILE}" == "1" ]]; then
+    if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
+      echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
+    elif [[ "${API_AUTH_FILE_MODE}" == "mirror-webui-file" ]]; then
+      api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+entries = []
+
+for raw_line in path.read_text(encoding='utf-8').splitlines():
+    line = raw_line.strip()
+    if not line or line.startswith('#'):
+        continue
+    for cred in line.split(','):
+        cred = cred.strip()
+        if cred:
+            entries.append(cred)
+
+print(','.join(entries))
+PY
+)"
+      if [[ -z "${api_auth_value}" ]]; then
+        echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
+        exit 1
+      fi
+      AUTH_ARGS+=("--api-auth" "${api_auth_value}")
+      echo "${C_VIOLET}API authentication is mirrored from WEBUI_AUTH_FILE.${C_RESET}" >&2
+    elif [[ "${API_AUTH_FILE_MODE}" == "disabled" ]]; then
+      echo "${C_SILVER}API auth mirroring from WEBUI_AUTH_FILE disabled via API_AUTH_FILE_MODE=disabled.${C_RESET}" >&2
+    else
+      echo "${C_ORANGE}[WARNING] Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to mirror-webui-file." >&2
+      api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+entries = []
+
+for raw_line in path.read_text(encoding='utf-8').splitlines():
+    line = raw_line.strip()
+    if not line or line.startswith('#'):
+        continue
+    for cred in line.split(','):
+        cred = cred.strip()
+        if cred:
+            entries.append(cred)
+
+print(','.join(entries))
+PY
+)"
+      if [[ -z "${api_auth_value}" ]]; then
+        echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
+        exit 1
+      fi
+      AUTH_ARGS+=("--api-auth" "${api_auth_value}")
+      echo "${C_VIOLET}API authentication is mirrored from WEBUI_AUTH_FILE.${C_RESET}" >&2
+    fi
+  elif [[ "${API_AUTH_MODE}" == "mirror-webui" ]]; then
+    if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
+      echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
+    else
+      AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
+    fi
+  elif [[ "${API_AUTH_MODE}" == "disabled" ]]; then
+    echo "${C_SILVER}API authentication mirroring disabled via API_AUTH_MODE=disabled.${C_RESET}" >&2
   else
-    AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
+    echo "${C_ORANGE}[WARNING] Unrecognized API_AUTH_MODE=${API_AUTH_MODE}. Expected mirror-webui or disabled. Falling back to mirror-webui.${C_RESET}" >&2
+    if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
+      echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
+    else
+      AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
+    fi
+  fi
+else
+  if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
+    echo "${C_ORANGE}[WARNING] --api-auth was provided but --api is not enabled. API auth flags will be ignored unless --api is set.${C_RESET}" >&2
   fi
 fi
 

@@ -82,6 +82,7 @@ That gives the container access to the NVIDIA runtime when the NVIDIA Container 
 ### Authentication defaults
 
 This container now enables the AUTOMATIC1111 login page by default.
+The AUTOMATIC1111 API is disabled by default unless you explicitly add `--api` to `COMMANDLINE_ARGS`.
 
 Default login configuration:
 
@@ -97,7 +98,7 @@ Set your real login values in the container configuration with:
 
 Use `WEBUI_PASSWORD` for convenience/testing. For live deployments, prefer `WEBUI_AUTH_FILE` so credentials are managed from a mounted file instead of template variables.
 
-The container also mirrors those credentials to `--api-auth` by default so the API is not left unauthenticated while the UI is protected.
+When API is explicitly enabled (`--api`), the container mirrors those credentials to `--api-auth` by default so the API is not left unauthenticated while the UI is protected.
 
 If you prefer not to store credentials directly in template variables, mount an auth file and set:
 
@@ -117,7 +118,7 @@ viewer:another-password
 
 When `WEBUI_AUTH_FILE` is set, it takes precedence over `WEBUI_USERNAME` and `WEBUI_PASSWORD` unless you explicitly provide your own `--gradio-auth` or `--gradio-auth-path` in `COMMANDLINE_ARGS`.
 
-By default, the container also mirrors auth-file credentials into API auth. You can control that with:
+If API is enabled, the container also mirrors auth-file credentials into API auth by default. You can control that with:
 
 - `API_AUTH_FILE_MODE=mirror-webui-file`
 - `API_AUTH_FILE_MODE=disabled`
@@ -133,6 +134,7 @@ If you want to manage authentication manually, you can still pass your own auth 
 - `--api-auth username:password`
 
 If you provide your own auth flags in `COMMANDLINE_ARGS`, the container will not add duplicate auth arguments.
+If `--api-auth` is provided without `--api`, startup logs now warn that API auth flags are ignored until API is explicitly enabled.
 
 ### `COMMANDLINE_ARGS`
 
@@ -142,6 +144,10 @@ If you provide your own auth flags in `COMMANDLINE_ARGS`, the container will not
 
 - `--listen --port 7860 --data-dir /data --xformers --no-download-sd-model`
 
+API is intentionally not part of the default args. Add `--api` only when you explicitly need API access in your environment.
+
+This is a personal, hardware-tuned project first. Some defaults (for example `--xformers`) are chosen because they work well for my setup and goals. Use these defaults as a starting point, then tune for your own hardware, risk tolerance, and workflow.
+
 The `--xformers` flag enables memory-efficient attention and faster image generation on supported GPUs such as the NVIDIA 4090. It is enabled by default for better performance. If you run into issues, you can remove `--xformers` from the arguments.
 
 The `--no-download-sd-model` flag is enabled by default so first startup does not automatically download a multi-gigabyte checkpoint into your data directory. That makes container behavior more predictable on Unraid and avoids unexpected bandwidth and storage use.
@@ -149,6 +155,10 @@ The `--no-download-sd-model` flag is enabled by default so first startup does no
 To make troubleshooting easier, the startup logs now report both the target bootstrap versions and the installed versions for `torch`, `torchvision`, and `xformers` during first-run setup.
 
 If you change these arguments, keep in mind that some flags can weaken the container's security posture. Be especially careful with anything that increases exposure or enables public sharing behavior.
+
+Extension note:
+- Leaving `--enable-insecure-extension-access` unset will not prevent existing installed extensions from loading.
+- It mainly blocks extension install/update/management actions from the WebUI itself; manual extension management on disk still works.
 
 ### HTTPS / TLS options
 

@@ -7,6 +7,12 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- API/default behavior clarification:
+	- startup now treats API as explicitly opt-in: API auth injection runs only when `--api` is present in `COMMANDLINE_ARGS`
+	- added startup note that API is disabled by default unless `--api` is set
+	- added warning when users pass `--api-auth` without enabling `--api`
+	- updated README/template docs to clarify API-off-by-default behavior and when `API_AUTH_MODE` / `API_AUTH_FILE_MODE` apply
+	- documented extension-access tradeoff: omitting `--enable-insecure-extension-access` does not block existing extension runtime; it mainly limits install/update/management from the WebUI
 - Security review workflow:
 	- added a reusable "Security baseline regression checklist" section to `SECURITY.md` with pass/fail gates for runtime hardening defaults, privilege-drop model, auth guardrails, and docs consistency
 	- added quick verification commands for template flags, startup scripts, auth behavior, bash syntax, and XML parsing
