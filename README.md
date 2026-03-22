@@ -120,9 +120,10 @@ It also stores the runtime-cloned AUTOMATIC1111 support repositories at:
 
 That means you do not need to redownload the heavy Python packages every time you recreate the container, as long as you keep the same host data path.
 
-## Hardening ideas for Unraid
 
-These are optional, but they are common ways to reduce container blast radius:
+## Security Hardening Defaults
+
+This container now uses the following security options by default (see Unraid template or Extra Parameters):
 
 ```bash
 --read-only
@@ -132,14 +133,19 @@ These are optional, but they are common ways to reduce container blast radius:
 --pids-limit=512
 ```
 
-Quick explanation:
-- `--read-only` reduces write access to the container filesystem.
-- `--tmpfs /tmp:...` gives the container a writable temporary area.
-- `no-new-privileges:true` helps limit privilege escalation paths.
-- `--cap-drop=ALL` removes Linux capabilities the container may not need.
-- `--pids-limit=512` can help contain runaway process spawning.
+**What these do:**
+- `--read-only`: Reduces write access to the container filesystem, limiting persistence for attackers.
+- `--tmpfs /tmp:...`: Provides a safe, writable /tmp for runtime needs.
+- `no-new-privileges:true`: Prevents processes from gaining new privileges, reducing escalation risk.
+- `--cap-drop=ALL`: Removes all Linux capabilities not required by the base image, reducing attack surface.
+- `--pids-limit=512`: Contains runaway process spawning.
 
-If you use `--read-only`, expect to provide explicit writable mounts for things like models, outputs, and extensions.
+If you use `--read-only`, expect to provide explicit writable mounts for things like models, outputs, and extensions (e.g., `/data`).
+
+### Additional Security Measures
+
+- The container will refuse to start as root (UID 0) for safety.
+- All SUID/SGID bits are removed from binaries at build time to prevent privilege escalation via legacy system tools.
 
 ## Storage and permissions
 

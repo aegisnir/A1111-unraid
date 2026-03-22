@@ -1,3 +1,7 @@
+if [[ "$(id -u)" == "0" ]]; then
+  echo "ERROR: Refusing to run as root. Please use a non-root user (UID 99 recommended for Unraid)." >&2
+  exit 1
+fi
 #!/usr/bin/env bash
 #
 # start.sh - Container entrypoint for AUTOMATIC1111 Stable Diffusion WebUI

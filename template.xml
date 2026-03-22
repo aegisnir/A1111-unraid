@@ -4,7 +4,7 @@
   <Repository>a1111-webui-aegisnir:latest</Repository>
   <Registry></Registry>
   <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.svg</Icon>
-  <ExtraParams>--runtime=nvidia</ExtraParams>
+  <ExtraParams>--runtime=nvidia --read-only --tmpfs /tmp:rw,noexec,nosuid,size=2g --security-opt no-new-privileges:true --cap-drop=ALL --pids-limit=512</ExtraParams>
   <PostArgs></PostArgs>
   <Description>
     AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
@@ -12,7 +12,15 @@
     This template is configured for a locally built image named a1111-webui-aegisnir:latest.
     Build the image on your Unraid host before creating the container from this template.
 
-    DATA DIRECTORY WARNING:
+    ## Security Hardening Defaults
+    The template now sets the following security options by default:
+    - <b>--read-only</b>: Makes the container filesystem read-only except for explicitly mounted paths (like /data).
+    - <b>--tmpfs /tmp:rw,noexec,nosuid,size=2g</b>: Provides a safe, writable /tmp.
+    - <b>--security-opt no-new-privileges:true</b>: Prevents processes from gaining new privileges.
+    - <b>--cap-drop=ALL</b>: Drops all Linux capabilities except those required by the base image.
+    - <b>--pids-limit=512</b>: Limits the number of processes to contain runaway spawning.
+
+    <b>DATA DIRECTORY WARNING:</b>
     The path used with --data-dir grows very large very quickly because it can hold models, outputs, extensions, caches, and other working data.
     I recommend storing it outside of appdata when possible.
     You can still place it inside appdata if you want the convenience, but it may consume space very quickly and can fill the location you use for Docker-related storage.

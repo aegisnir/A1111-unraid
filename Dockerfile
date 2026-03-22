@@ -158,6 +158,10 @@ EXPOSE 7860
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD python3 -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 7860)); s.close()" || exit 1
 
+
+# Remove all SUID/SGID bits from binaries except in /proc, /sys, /dev
+RUN find / -perm /6000 -type f -not -path '/proc/*' -not -path '/sys/*' -not -path '/dev/*' -exec chmod a-s {} + || true
+
 # Run the application as the dedicated non-root runtime user.
 # Runtime hardening should still be reviewed at the container runtime layer
 # (for example: read-only root filesystem, dropped capabilities, no-new-
