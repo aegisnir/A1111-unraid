@@ -132,11 +132,8 @@ RUN set -eux; \
 # is not available inside the image, so deeper forensics or history inspection
 # would need to happen outside this build context.
 # ------------------------------------------------------------------------------
-RUN git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
-    && cd "${WEBUI_DIR}" \
-    && git fetch --depth 1 origin "${WEBUI_REF}" \
-    && git checkout "${WEBUI_REF}" \
-    && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
+RUN git clone --branch dev --single-branch https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
+  && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
 
 # ------------------------------------------------------------------------------
 # Copy entrypoint script (from this repository)
