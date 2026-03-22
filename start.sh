@@ -69,6 +69,13 @@ WEBUI_AUTH_FILE="${WEBUI_AUTH_FILE:-}"
 API_AUTH_MODE="${API_AUTH_MODE:-mirror-webui}"
 API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-mirror-webui-file}"
 UMASK="${UMASK:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+EXTENSIONS_BOOTSTRAP_FILE="${EXTENSIONS_BOOTSTRAP_FILE:-/data/extensions-bootstrap.txt}"
+EXTENSIONS_BOOTSTRAP_FORCE="${EXTENSIONS_BOOTSTRAP_FORCE:-false}"
+EXTENSIONS_DIR_DEFAULT="/data/extensions"
+EXTENSIONS_BOOTSTRAP_STATE_DIR="/data/.state"
+EXTENSIONS_BOOTSTRAP_MARKER="${EXTENSIONS_BOOTSTRAP_STATE_DIR}/extensions-bootstrap-v1.done"
+EXTENSIONS_BOOTSTRAP_SAMPLE_FILE="${SCRIPT_DIR}/extensions-bootstrap.txt"
 export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
 
 if [[ -n "${UMASK}" ]]; then
@@ -556,6 +563,99 @@ monitor_webui_output() {
   done
 }
 
+is_truthy() {
+  case "${1,,}" in
+    1|true|yes|on) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+bootstrap_extensions_once() {
+  local force_mode="${EXTENSIONS_BOOTSTRAP_FORCE}"
+  local installed_count=0
+  local skipped_count=0
+  local failed_count=0
+  local line repo_url dest_name dest_path
+
+  mkdir -p "${EXTENSIONS_BOOTSTRAP_STATE_DIR}"
+  mkdir -p "${EXTENSIONS_DIR_DEFAULT}"
+
+  if [[ -f "${EXTENSIONS_BOOTSTRAP_SAMPLE_FILE}" && ! -e "${EXTENSIONS_BOOTSTRAP_FILE}" ]]; then
+    cp -f "${EXTENSIONS_BOOTSTRAP_SAMPLE_FILE}" "${EXTENSIONS_BOOTSTRAP_FILE}"
+    echo "${C_VIOLET}Created extension bootstrap list at ${EXTENSIONS_BOOTSTRAP_FILE}${C_RESET}" >&2
+  fi
+
+  if [[ -f "${EXTENSIONS_BOOTSTRAP_MARKER}" ]] && ! is_truthy "${force_mode}"; then
+    echo "${C_SILVER}Extension bootstrap already completed previously; skipping one-time extension install.${C_RESET}" >&2
+    return 0
+  fi
+
+  if is_truthy "${force_mode}"; then
+    echo "${C_ORANGE}Extension bootstrap force mode enabled (EXTENSIONS_BOOTSTRAP_FORCE=${force_mode}); processing list now.${C_RESET}" >&2
+  else
+    echo "${C_VIOLET}Running one-time extension bootstrap from ${EXTENSIONS_BOOTSTRAP_FILE}${C_RESET}" >&2
+  fi
+
+  if [[ ! -f "${EXTENSIONS_BOOTSTRAP_FILE}" ]]; then
+    echo "${C_ORANGE}[WARNING] Extension bootstrap list not found: ${EXTENSIONS_BOOTSTRAP_FILE}${C_RESET}" >&2
+    echo "${C_ORANGE}[WARNING] Continuing startup without extension bootstrap and marking bootstrap as complete.${C_RESET}" >&2
+    touch "${EXTENSIONS_BOOTSTRAP_MARKER}"
+    return 0
+  fi
+
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    repo_url="${line%%#*}"
+    repo_url="${repo_url%$'\r'}"
+    repo_url="${repo_url%${repo_url##*[![:space:]]}}"
+    repo_url="${repo_url#${repo_url%%[![:space:]]*}}"
+
+    if [[ -z "${repo_url}" ]]; then
+      continue
+    fi
+
+    if [[ ! "${repo_url}" =~ ^https?:// ]]; then
+      echo "${C_ORANGE}[WARNING] Invalid extension URL in bootstrap list (must start with http/https): ${repo_url}${C_RESET}" >&2
+      ((failed_count+=1))
+      continue
+    fi
+
+    dest_name="$(basename "${repo_url}")"
+    dest_name="${dest_name%.git}"
+
+    if [[ -z "${dest_name}" || "${dest_name}" == "." || "${dest_name}" == ".." ]]; then
+      echo "${C_ORANGE}[WARNING] Could not derive extension directory name from URL: ${repo_url}${C_RESET}" >&2
+      ((failed_count+=1))
+      continue
+    fi
+
+    dest_path="${EXTENSIONS_DIR_DEFAULT}/${dest_name}"
+
+    if [[ -d "${dest_path}" ]]; then
+      echo "${C_SILVER}Extension already present, skipping clone: ${dest_name}${C_RESET}" >&2
+      ((skipped_count+=1))
+      continue
+    fi
+
+    echo "${C_VIOLET}Installing extension: ${repo_url}${C_RESET}" >&2
+    if git clone --depth 1 "${repo_url}" "${dest_path}"; then
+      ((installed_count+=1))
+    else
+      echo "${C_ORANGE}[WARNING] Failed to install extension: ${repo_url}${C_RESET}" >&2
+      echo "${C_ORANGE}[WARNING] Continuing with next extension.${C_RESET}" >&2
+      rm -rf "${dest_path}" || true
+      ((failed_count+=1))
+    fi
+  done < "${EXTENSIONS_BOOTSTRAP_FILE}"
+
+  touch "${EXTENSIONS_BOOTSTRAP_MARKER}"
+
+  if [[ "${failed_count}" -gt 0 ]]; then
+    echo "${C_ORANGE}Extension bootstrap finished with warnings: installed=${installed_count}, skipped=${skipped_count}, failed=${failed_count}.${C_RESET}" >&2
+  else
+    echo "${C_VIOLET}Extension bootstrap complete: installed=${installed_count}, skipped=${skipped_count}, failed=${failed_count}.${C_RESET}" >&2
+  fi
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Build final COMMANDLINE_ARGS with auth flags appended, then launch.
 #
@@ -570,6 +670,14 @@ if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
   done
   export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} ${quoted_auth_args[*]}"
 fi
+
+if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--extensions-dir([=[:space:]]|$) ]]; then
+  echo "${C_SILVER}Using user-defined extensions directory from COMMANDLINE_ARGS.${C_RESET}" >&2
+else
+  export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} --extensions-dir ${EXTENSIONS_DIR_DEFAULT}"
+fi
+
+bootstrap_extensions_once
 
 if [[ -n "${COMMANDLINE_ARGS:-}" ]]; then
   echo "${C_SILVER}Starting WebUI (COMMANDLINE_ARGS set).${C_RESET}"

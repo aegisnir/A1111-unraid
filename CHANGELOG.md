@@ -7,6 +7,15 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- One-time extension bootstrap:
+	- added first-launch extension bootstrap in `start.sh` driven by `EXTENSIONS_BOOTSTRAP_FILE` (default `/data/extensions-bootstrap.txt`)
+	- bootstrap installs extensions into `/data/extensions` and writes persistent completion marker `/data/.state/extensions-bootstrap-v1.done`
+	- bootstrap is fail-open by design: extension clone errors are logged as warnings and startup proceeds to the next entry without blocking WebUI launch
+	- added `EXTENSIONS_BOOTSTRAP_FORCE` to allow manual rerun on demand without reintroducing per-start retry loops
+	- startup now appends `--extensions-dir /data/extensions` automatically unless user already provides `--extensions-dir` in `COMMANDLINE_ARGS`
+	- replaced repository-level `extensions-bootstrap.txt` with a pre-populated, fully commented list compiled from the official `AUTOMATIC1111/stable-diffusion-webui-extensions` index
+	- each extension entry in `extensions-bootstrap.txt` now includes a commented stats line (stars from index snapshot, created date, last updated commit time, added-to-index date, tags)
+	- startup auto-seeds `/data/extensions-bootstrap.txt` from that template on first launch if missing; users uncomment the entries they want
 - API/default behavior clarification:
 	- startup now treats API as explicitly opt-in: API auth injection runs only when `--api` is present in `COMMANDLINE_ARGS`
 	- added startup note that API is disabled by default unless `--api` is set

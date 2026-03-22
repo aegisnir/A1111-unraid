@@ -1,0 +1,1083 @@
+# One extension repository URL per line.
+#
+# This file is pre-populated from the official AUTOMATIC1111 extension index and GitHub repo metadata.
+# Source index: https://raw.githubusercontent.com/AUTOMATIC1111/stable-diffusion-webui-extensions/master/index.json
+# Source repo API: https://api.github.com/repos/{owner}/{repo}
+# Snapshot date: 2026-03-22
+# Total indexed extensions: 354
+#
+# All entries are commented out by default.
+# Uncomment only the extensions you want to auto-install on first launch.
+# Blank lines and lines starting with # are ignored by start.sh.
+#
+# Stats legend per extension:
+# stars = GitHub stars from index snapshot
+# created = repository created date from index snapshot
+# last_updated = default branch commit time from index snapshot
+# added_to_index = date extension was added to official index
+#
+# Example (uncomment one line):
+# https://github.com/Mikubill/sd-webui-controlnet.git
+
+# 3D Editor
+# stats: stars=143, created=2023-06-30T00:17:21Z, last_updated=2023-07-31T00:06:22Z, added_to_index=2023-06-30, tags=tab
+# https://github.com/jtydhr88/sd-webui-3d-editor.git
+# 3D Model&Pose Loader
+# stats: stars=247, created=2023-03-06T01:39:23Z, last_updated=2023-09-11T23:58:28Z, added_to_index=2023-03-11, tags=tab
+# https://github.com/jtydhr88/sd-3dmodel-loader.git
+# 3D Openpose Editor
+# stats: stars=807, created=2023-03-14T12:04:41Z, last_updated=2023-04-15T13:21:06Z, added_to_index=2023-03-16, tags=tab
+# https://github.com/nonnonstop/sd-webui-3d-open-pose-editor.git
+# A Person Mask Generator
+# stats: stars=300, created=2023-11-16T22:51:53Z, last_updated=2025-01-05T19:29:53Z, added_to_index=2023-11-18, tags=script|editing
+# https://github.com/djbielejeski/a-person-mask-generator.git
+# a1111-sd-webui-lycoris
+# stats: stars=892, created=2023-04-09T08:20:56Z, last_updated=2024-02-16T08:38:27Z, added_to_index=2023-04-10, tags=script
+# https://github.com/KohakuBlueleaf/a1111-sd-webui-lycoris.git
+# ABG_extension
+# stats: stars=248, created=2022-12-23T16:11:31Z, last_updated=2023-05-01T21:25:47Z, added_to_index=2022-12-24, tags=editing
+# https://github.com/KutsuyaYuki/ABG_extension.git
+# Abysz LAB
+# stats: stars=148, created=2023-03-17T20:42:26Z, last_updated=2023-04-15T04:28:34Z, added_to_index=2023-04-01, tags=tab|animation
+# https://github.com/AbyszOne/Abysz-LAB-Ext.git
+# Add image number to grid
+# stats: stars=28, created=2023-01-01T09:52:26Z, last_updated=2023-09-08T06:46:59Z, added_to_index=2023-01-01, tags=script
+# https://github.com/AlUlkesh/sd_grid_add_image_number.git
+# ADetailer
+# stats: stars=4706, created=2023-04-26T07:54:51Z, last_updated=2026-02-05T13:43:40Z, added_to_index=2023-05-12, tags=manipulations
+# https://github.com/Bing-su/adetailer.git
+# Aesthetic Gradients
+# stats: stars=456, created=2022-10-22T09:22:04Z, last_updated=2023-01-06T10:59:30Z, added_to_index=2022-11-01, tags=tab|dropdown|training
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui-aesthetic-gradients.git
+# Aesthetic Image Scorer
+# stats: stars=145, created=2022-10-23T20:48:55Z, last_updated=2022-12-11T05:52:39Z, added_to_index=2022-11-01, tags=query
+# https://github.com/tsngo/stable-diffusion-webui-aesthetic-image-scorer.git
+# Aesthetic Scorer
+# stats: stars=80, created=2023-01-14T17:09:32Z, last_updated=2023-05-21T15:23:49Z, added_to_index=2023-01-21, tags=query
+# https://github.com/vladmandic/sd-extension-aesthetic-scorer.git
+# Agent Attention
+# stats: stars=41, created=2023-12-15T07:17:18Z, last_updated=2024-04-22T06:35:06Z, added_to_index=2023-12-15, tags=dropdown|manipulations
+# https://github.com/v0xie/sd-webui-agentattention.git
+# Agent Scheduler
+# stats: stars=690, created=2023-05-16T04:35:16Z, last_updated=2025-01-13T10:03:39Z, added_to_index=2023-06-23, tags=tab
+# https://github.com/ArtVentureX/sd-webui-agent-scheduler.git
+# AMD FSR 1.0 integration
+# stats: stars=7, created=2024-07-21T17:57:42Z, last_updated=2024-10-27T18:47:38Z, added_to_index=2024-07-22, tags=editing|script|extras
+# https://github.com/AndreyRGW/sd-webui-fsr-integration.git
+# anti-burn
+# stats: stars=165, created=2023-02-01T12:46:19Z, last_updated=2023-11-11T17:40:08Z, added_to_index=2023-02-09, tags=manipulations
+# https://github.com/klimaleksus/stable-diffusion-webui-anti-burn.git
+# Artists to study
+# stats: stars=85, created=2022-10-25T16:07:14Z, last_updated=2023-06-26T08:38:08Z, added_to_index=2022-11-01, tags=tab|UI related
+# https://github.com/camenduru/stable-diffusion-webui-artists-to-study.git
+# Aspect Ratio and Resolution Buttons (ar-plusplus)
+# stats: stars=43, created=2024-03-13T15:09:15Z, last_updated=2024-08-21T16:27:17Z, added_to_index=2024-06-23, tags=UI related
+# https://github.com/altoiddealer/--sd-webui-ar-plusplus.git
+# Aspect Ratio Helper
+# stats: stars=446, created=2023-03-20T03:11:58Z, last_updated=2025-02-20T15:03:31Z, added_to_index=2023-03-20, tags=script|dropdown|UI related
+# https://github.com/thomasasfk/sd-webui-aspect-ratio-helper.git
+# Aspect Ratio Resolutions selector-xhox
+# stats: stars=36, created=2024-02-11T08:57:58Z, last_updated=2024-03-15T12:36:11Z, added_to_index=2024-03-11, tags=UI related
+# https://github.com/xhoxye/sd-webui-ar_xhox.git
+# Aspect Ratio selector
+# stats: stars=250, created=2023-02-02T10:36:43Z, last_updated=2023-09-26T13:23:07Z, added_to_index=2023-02-04, tags=UI related
+# https://github.com/alemelis/sd-webui-ar.git
+# Aspect Ratio selector plus
+# stats: stars=60, created=2023-06-29T16:37:47Z, last_updated=2024-08-22T18:28:29Z, added_to_index=2023-06-30, tags=UI related
+# https://github.com/LEv145/--sd-webui-ar-plus
+# Asymmetric Tiling
+# stats: stars=214, created=2022-10-11T15:09:31Z, last_updated=2022-11-18T17:42:54Z, added_to_index=2023-01-13, tags=manipulations
+# https://github.com/tjm35/asymmetric-tiling-sd-webui.git
+# Auto TLS-HTTPS
+# stats: stars=61, created=2022-11-12T09:49:16Z, last_updated=2024-05-12T03:15:57Z, added_to_index=2022-11-14, tags=script
+# https://github.com/papuSpartan/stable-diffusion-webui-auto-tls-https.git
+# Auto Translate
+# stats: stars=34, created=2023-03-23T16:49:52Z, last_updated=2023-05-30T07:04:06Z, added_to_index=2023-03-24, tags=UI related
+# https://github.com/hyd998877/stable-diffusion-webui-auto-translate-language.git
+# Auto-Photoshop-StableDiffusion-Plugin
+# stats: stars=7230, created=2022-12-20T20:09:54Z, last_updated=2023-12-09T13:58:35Z, added_to_index=2023-07-07, tags=script
+# https://github.com/AbdullahAlfaraj/Auto-Photoshop-StableDiffusion-Plugin.git
+# auto-sd-paint-ext
+# stats: stars=488, created=2022-10-28T01:54:07Z, last_updated=2023-05-03T12:34:30Z, added_to_index=2022-11-04, tags=editing
+# https://github.com/Interpause/auto-sd-paint-ext.git
+# auxiliary API
+# stats: stars=4, created=2023-08-14T09:49:30Z, last_updated=2024-05-07T06:16:28Z, added_to_index=2023-10-17, tags=script
+# https://github.com/aria1th/webui-model-uploader.git
+# Batch Checkpoints and Prompts
+# stats: stars=56, created=2023-04-01T18:21:17Z, last_updated=2025-01-30T01:55:17Z, added_to_index=2023-06-16, tags=script
+# https://github.com/h43lb1t0/SD-WebUI-BatchCheckpointPrompt
+# Batch Face Swap
+# stats: stars=334, created=2023-01-11T04:09:21Z, last_updated=2023-09-14T04:23:07Z, added_to_index=2023-01-13, tags=editing
+# https://github.com/kex0/batch-face-swap.git
+# Bilingual Localization
+# stats: stars=916, created=2023-02-26T07:26:55Z, last_updated=2023-08-29T01:14:56Z, added_to_index=2023-02-28, tags=UI related
+# https://github.com/journey-ad/sd-webui-bilingual-localization.git
+# Bilingual Localization Refactored Fork
+# stats: stars=3, created=2023-08-23T02:46:02Z, last_updated=2024-06-09T12:21:04Z, added_to_index=2024-06-11, tags=UI related
+# https://github.com/bluelovers/sd-webui-bilingual-localization.git
+# Booru tag autocompletion
+# stats: stars=2775, created=2022-10-11T17:33:14Z, last_updated=2026-03-21T10:51:51Z, added_to_index=2022-11-04, tags=prompting
+# https://github.com/DominikDoom/a1111-sd-webui-tagcomplete.git
+# booru2prompt
+# stats: stars=61, created=2022-11-20T23:57:26Z, last_updated=2022-11-23T14:41:10Z, added_to_index=2022-11-21, tags=tab|online
+# https://github.com/Malisius/booru2prompt.git
+# CADS
+# stats: stars=108, created=2023-10-31T22:36:03Z, last_updated=2024-04-22T04:29:12Z, added_to_index=2023-11-01, tags=dropdown|manipulations
+# https://github.com/v0xie/sd-webui-cads.git
+# cafe-aesthetic
+# stats: stars=38, created=2023-01-23T01:22:15Z, last_updated=2023-03-26T13:36:41Z, added_to_index=2023-01-28, tags=tab|query
+# https://github.com/p1atdev/stable-diffusion-webui-cafe-aesthetic.git
+# Canvas Zoom
+# stats: stars=361, created=2023-02-27T09:06:55Z, last_updated=2024-08-13T12:02:30Z, added_to_index=2023-03-27, tags=UI related
+# https://github.com/richrobber2/canvas-zoom.git
+# Card Master
+# stats: stars=44, created=2023-11-25T13:54:58Z, last_updated=2024-03-24T12:22:29Z, added_to_index=2023-11-25, tags=UI related
+# https://github.com/SenshiSentou/sd-webui-cardmaster.git
+# Catppuccin Theme
+# stats: stars=304, created=2022-12-29T20:58:40Z, last_updated=2023-04-06T18:22:37Z, added_to_index=2023-02-04, tags=UI related
+# https://github.com/catppuccin/stable-diffusion-webui.git
+# CD(Color/Detail) Tuner
+# stats: stars=224, created=2023-07-08T17:05:49Z, last_updated=2025-06-23T13:57:17Z, added_to_index=2023-10-17, tags=manipulations
+# https://github.com/hako-mikan/sd-webui-cd-tuner.git
+# CFG-Schedule-for-Automatic1111-SD
+# stats: stars=42, created=2022-11-12T13:31:11Z, last_updated=2023-03-09T10:43:02Z, added_to_index=2023-03-04, tags=script
+# https://github.com/guzuligo/CFG-Schedule-for-Automatic1111-SD.git
+# chara-searcher
+# stats: stars=25, created=2024-07-13T02:59:00Z, last_updated=2024-11-03T09:31:02Z, added_to_index=2024-07-22, tags=tab|editing|query
+# https://github.com/NON906/chara-searcher.git
+# Characteristic Guidance Web UI
+# stats: stars=81, created=2023-12-27T13:23:33Z, last_updated=2024-12-04T03:36:19Z, added_to_index=2024-01-04, tags=dropdown|manipulations|science
+# https://github.com/scraed/CharacteristicGuidanceWebUI.git
+# CivBrowser
+# stats: stars=111, created=2023-02-08T13:37:20Z, last_updated=2026-03-21T14:15:09Z, added_to_index=2023-10-02, tags=script|tab|online
+# https://github.com/SignalFlagZ/sd-webui-civbrowser.git
+# CivitAI Browser+
+# stats: stars=383, created=2023-08-20T21:35:48Z, last_updated=2025-07-09T22:26:46Z, added_to_index=2023-08-24, tags=script|tab|online
+# https://github.com/BlafKing/sd-civitai-browser-plus.git
+# Civitai Shortcut
+# stats: stars=150, created=2023-03-27T13:58:05Z, last_updated=2024-06-19T11:29:01Z, added_to_index=2023-07-08, tags=models|extras
+# https://github.com/sunnyark/civitai-shortcut.git
+# Clear Screen
+# stats: stars=6, created=2023-05-24T08:06:58Z, last_updated=2024-08-27T05:59:58Z, added_to_index=2024-03-08, tags=script
+# https://github.com/Haoming02/sd-webui-clear-screen.git
+# cli-interruption
+# stats: stars=10, created=2024-03-26T07:44:09Z, last_updated=2024-04-05T19:39:29Z, added_to_index=2024-03-26, tags=none
+# https://github.com/light-and-ray/sd-webui-cli-interruption.git
+# Clip I/O
+# stats: stars=20, created=2023-04-23T12:48:27Z, last_updated=2023-09-23T10:42:20Z, added_to_index=2023-06-06, tags=script|tab|science
+# https://github.com/Filexor/Clip_IO.git
+# Clip Interrogator
+# stats: stars=540, created=2023-02-11T22:52:11Z, last_updated=2023-09-10T01:35:46Z, added_to_index=2023-02-21, tags=tab|query
+# https://github.com/pharmapsychotic/clip-interrogator-ext.git
+# Color Correction Extras
+# stats: stars=20, created=2023-12-06T18:35:20Z, last_updated=2024-08-02T07:21:56Z, added_to_index=2023-12-09, tags=extras
+# https://github.com/light-and-ray/sd-webui-color-correction-extras.git
+# ComfyUI
+# stats: stars=539, created=2023-03-19T10:13:42Z, last_updated=2024-02-01T12:17:42Z, added_to_index=2023-07-14, tags=script|tab|UI related|manipulations
+# https://github.com/ModelSurge/sd-webui-comfyui.git
+# Composable LoRA
+# stats: stars=163, created=2023-04-13T10:25:40Z, last_updated=2023-07-26T08:58:15Z, added_to_index=2023-02-25, tags=manipulations
+# https://github.com/a2569875/stable-diffusion-webui-composable-lora.git
+# conditioning-highres-fix
+# stats: stars=45, created=2022-11-08T17:56:49Z, last_updated=2023-11-11T17:38:43Z, added_to_index=2022-11-11, tags=prompting
+# https://github.com/klimaleksus/stable-diffusion-webui-conditioning-highres-fix.git
+# Config-Presets
+# stats: stars=309, created=2022-12-13T07:05:08Z, last_updated=2025-04-24T22:54:10Z, added_to_index=2022-12-13, tags=UI related
+# https://github.com/Zyin055/Config-Presets.git
+# Controlnet Fastload
+# stats: stars=37, created=2023-08-07T01:37:32Z, last_updated=2023-09-17T07:02:00Z, added_to_index=2023-08-07, tags=script|manipulations
+# https://github.com/pk5ls20/sd-webui-controlnet-fastload.git
+# ControlNet Preprocessor in extras tab
+# stats: stars=17, created=2024-02-03T06:02:31Z, last_updated=2024-06-12T12:22:18Z, added_to_index=2024-02-06, tags=script|dropdown|editing|extras
+# https://github.com/light-and-ray/sd-webui-cn-in-extras-tab.git
+# ControlNet preprocessor: Segment Anything
+# stats: stars=12, created=2024-06-11T22:51:28Z, last_updated=2024-07-15T15:02:50Z, added_to_index=2024-06-15, tags=manipulations
+# https://github.com/light-and-ray/sd-webui-cn-sam-preprocessor.git
+# Corridor Crawler Outpainting
+# stats: stars=35, created=2023-03-08T18:44:03Z, last_updated=2023-03-28T23:58:24Z, added_to_index=2023-03-11, tags=tab
+# https://github.com/brick2face/corridor-crawler-outpainting.git
+# Custom AutoLaunch
+# stats: stars=8, created=2023-09-13T09:04:05Z, last_updated=2023-09-14T23:14:48Z, added_to_index=2024-02-18, tags=script
+# https://github.com/w-e-w/sd-webui-custom-autolaunch.git
+# Custom Diffusion
+# stats: stars=70, created=2023-01-18T03:51:21Z, last_updated=2023-05-14T02:45:38Z, added_to_index=2023-01-28, tags=tab|training
+# https://github.com/guaneec/custom-diffusion-webui.git
+# Custom Hires Fix
+# stats: stars=48, created=2023-02-01T09:45:43Z, last_updated=2023-10-16T07:18:48Z, added_to_index=2023-07-30, tags=script|manipulations
+# https://github.com/wcde/custom-hires-fix-for-automatic1111.git
+# D2 Prompt Selector
+# stats: stars=4, created=2024-04-30T08:36:28Z, last_updated=2024-05-08T19:42:58Z, added_to_index=2024-05-04, tags=prompting
+# https://github.com/da2el-ai/sd-d2-prompt-selector.git
+# DAAM
+# stats: stars=166, created=2022-12-01T15:33:16Z, last_updated=2024-01-28T08:07:54Z, added_to_index=2022-12-02, tags=science
+# https://github.com/kousw/stable-diffusion-webui-daam.git
+# Danbooru Prompt
+# stats: stars=22, created=2023-06-24T18:04:27Z, last_updated=2024-03-26T15:04:37Z, added_to_index=2023-06-25, tags=online
+# https://github.com/EnsignMK/danbooru-prompt.git
+# Dataset Tag Editor
+# stats: stars=728, created=2022-10-26T10:37:10Z, last_updated=2024-06-27T11:03:26Z, added_to_index=2022-11-01, tags=tab|training
+# https://github.com/toshiaki1729/stable-diffusion-webui-dataset-tag-editor.git
+# db-storage1111
+# stats: stars=50, created=2023-03-10T09:41:20Z, last_updated=2023-10-02T03:44:08Z, added_to_index=2023-03-12, tags=script
+# https://github.com/takoyaro/db-storage1111.git
+# de_DE Localization
+# stats: stars=2, created=2022-11-06T12:38:13Z, last_updated=2024-05-24T19:49:26Z, added_to_index=2022-11-07, tags=localization
+# https://github.com/Strothis/stable-diffusion-webui-de_DE
+# Deep Shrink Hires.fix
+# stats: stars=228, created=2023-11-15T19:52:20Z, last_updated=2023-12-23T17:35:10Z, added_to_index=2023-11-26, tags=manipulations
+# https://github.com/wcde/sd-webui-kohya-hiresfix.git
+# Deepdanbooru object recognition
+# stats: stars=34, created=2023-12-13T23:32:48Z, last_updated=2023-12-18T21:51:30Z, added_to_index=2023-12-16, tags=tab|query
+# https://github.com/Jibaku789/sd-webui-deepdanbooru-object-recognition.git
+# Deepdanbooru Tag2Folder
+# stats: stars=9, created=2023-12-26T20:23:50Z, last_updated=2024-01-28T23:45:52Z, added_to_index=2024-01-03, tags=tab|query
+# https://github.com/Jibaku789/sd-webui-deepdanbooru-tag2folder
+# Deforum
+# stats: stars=2853, created=2022-10-14T22:29:12Z, last_updated=2024-05-15T00:07:19Z, added_to_index=2022-11-01, tags=tab|animation
+# https://github.com/deforum-art/deforum-for-automatic1111-webui.git
+# DemoFusion
+# stats: stars=20, created=2024-03-26T00:25:46Z, last_updated=2024-04-21T13:53:33Z, added_to_index=2024-04-03, tags=script|tab|manipulations
+# https://github.com/sebaxakerhtc/sd-webui-demofusion.git
+# Depth Image I/O
+# stats: stars=72, created=2023-01-10T06:12:24Z, last_updated=2023-02-04T06:52:38Z, added_to_index=2023-01-17, tags=manipulations
+# https://github.com/AnonymousCervine/depth-image-io-for-SDWebui.git
+# Depth Maps
+# stats: stars=1850, created=2022-11-03T17:21:15Z, last_updated=2024-08-18T05:59:53Z, added_to_index=2022-11-30, tags=editing
+# https://github.com/thygate/stable-diffusion-webui-depthmap-script.git
+# depthmap2mask
+# stats: stars=360, created=2022-11-25T18:52:59Z, last_updated=2023-04-13T04:10:08Z, added_to_index=2022-11-26, tags=editing|manipulations
+# https://github.com/Extraltodeus/depthmap2mask.git
+# Detail Daemon
+# stats: stars=143, created=2024-05-09T21:58:52Z, last_updated=2024-07-07T22:14:47Z, added_to_index=2024-07-02, tags=manipulations
+# https://github.com/muerrilla/sd-webui-detail-daemon.git
+# Detection Detailer
+# stats: stars=132, created=2023-04-04T05:36:02Z, last_updated=2023-08-14T12:58:00Z, added_to_index=2022-11-09, tags=editing
+# https://github.com/Bing-su/dddetailer.git
+# DevDark theme
+# stats: stars=21, created=2023-05-29T18:18:02Z, last_updated=2024-08-12T23:36:59Z, added_to_index=2023-10-17, tags=UI related
+# https://github.com/devdarktheme/stable-diffusion-webui-devdark.git
+# DH Patch
+# stats: stars=12, created=2022-12-14T16:20:42Z, last_updated=2023-01-03T03:00:30Z, added_to_index=2022-12-16, tags=script
+# https://github.com/d8ahazard/sd_auto_fix.git
+# Diffusion Cocktail (Ditail)
+# stats: stars=10, created=2024-01-31T16:03:30Z, last_updated=2024-09-17T08:39:25Z, added_to_index=2024-09-17, tags=manipulations
+# https://github.com/MAPS-research/sd-webui-ditail.git
+# Diffusion Color Grading
+# stats: stars=69, created=2023-11-15T07:15:51Z, last_updated=2024-10-18T04:13:16Z, added_to_index=2024-03-08, tags=manipulations
+# https://github.com/Haoming02/sd-webui-diffusion-cg.git
+# Diffusion Defender
+# stats: stars=29, created=2022-12-13T07:54:23Z, last_updated=2023-05-11T23:08:43Z, added_to_index=2022-12-20, tags=script
+# https://github.com/WildBanjos/DiffusionDefender.git
+# Discord - Dynamic Rich Presence
+# stats: stars=23, created=2023-03-31T23:41:23Z, last_updated=2024-10-27T18:03:09Z, added_to_index=2023-04-04, tags=online|script
+# https://github.com/davehornik/sd-discord-rich_presence.git
+# Discord Rich Presence
+# stats: stars=20, created=2023-01-20T20:19:01Z, last_updated=2023-06-12T16:00:34Z, added_to_index=2023-01-20, tags=online
+# https://github.com/kabachuha/discord-rpc-for-automatic1111-webui.git
+# Distributed
+# stats: stars=184, created=2023-03-06T02:01:42Z, last_updated=2024-10-27T02:46:01Z, added_to_index=2023-05-23, tags=script
+# https://github.com/papuSpartan/stable-diffusion-webui-distributed.git
+# DreamArtist
+# stats: stars=689, created=2022-11-12T12:17:15Z, last_updated=2023-04-24T05:53:26Z, added_to_index=2022-11-15, tags=training
+# https://github.com/7eu7d7/DreamArtist-sd-webui-extension.git
+# Dreambooth
+# stats: stars=1892, created=2022-11-06T02:40:44Z, last_updated=2025-09-17T21:59:03Z, added_to_index=2022-11-07, tags=tab|training
+# https://github.com/d8ahazard/sd_dreambooth_extension.git
+# Dump U-Net
+# stats: stars=108, created=2023-01-02T11:41:06Z, last_updated=2023-12-30T03:24:42Z, added_to_index=2023-03-04, tags=science
+# https://github.com/hnmr293/stable-diffusion-webui-dumpunet.git
+# Dynamic Javascript
+# stats: stars=24, created=2023-07-21T21:08:54Z, last_updated=2023-08-21T07:30:47Z, added_to_index=2023-07-22, tags=prompting
+# https://github.com/pmcculler/sd-dynamic-javascript
+# Dynamic Prompts
+# stats: stars=2258, created=2022-10-08T17:58:22Z, last_updated=2024-05-26T19:33:58Z, added_to_index=2022-11-01, tags=prompting|online
+# https://github.com/adieyal/sd-dynamic-prompts.git
+# Dynamic Thresholding
+# stats: stars=1233, created=2023-01-27T02:23:12Z, last_updated=2025-03-14T09:33:31Z, added_to_index=2023-02-01, tags=manipulations
+# https://github.com/mcmonkeyprojects/sd-dynamic-thresholding.git
+# e621 Prompt
+# stats: stars=30, created=2023-06-12T20:55:03Z, last_updated=2024-02-20T09:39:31Z, added_to_index=2023-06-15, tags=online|prompting
+# https://github.com/nochnoe/sd-webui-e621-prompt.git
+# Easy Tag Insert
+# stats: stars=51, created=2023-05-31T08:16:33Z, last_updated=2024-10-30T12:34:58Z, added_to_index=2024-03-09, tags=prompting
+# https://github.com/Haoming02/sd-webui-easy-tag-insert.git
+# EasyPhoto
+# stats: stars=5176, created=2023-08-28T10:46:27Z, last_updated=2024-07-10T08:40:20Z, added_to_index=2023-10-01, tags=script|tab|training|manipulations
+# https://github.com/aigc-apps/sd-webui-EasyPhoto.git
+# ebsynth_utility
+# stats: stars=1284, created=2022-12-29T12:10:49Z, last_updated=2023-10-23T01:48:26Z, added_to_index=2023-03-04, tags=tab|animation
+# https://github.com/s9roll7/ebsynth_utility.git
+# Embedding Merge
+# stats: stars=123, created=2023-01-28T22:14:57Z, last_updated=2025-06-06T15:10:56Z, added_to_index=2023-02-09, tags=tab|models|manipulations
+# https://github.com/klimaleksus/stable-diffusion-webui-embedding-merge.git
+# embedding-inspector
+# stats: stars=21, created=2024-01-04T05:11:38Z, last_updated=2024-01-06T07:26:53Z, added_to_index=2022-12-06, tags=tab|models
+# https://github.com/w-e-w/embedding-inspector.git
+# Embeddings editor
+# stats: stars=73, created=2022-11-06T07:36:50Z, last_updated=2022-12-04T04:55:54Z, added_to_index=2022-11-06, tags=tab|models
+# https://github.com/CodeExplode/stable-diffusion-webui-embedding-editor.git
+# encrypt-image
+# stats: stars=64, created=2023-10-08T05:19:28Z, last_updated=2024-09-24T14:41:12Z, added_to_index=2023-10-19, tags=script
+# https://github.com/viyiviyi/sd-encrypt-image.git
+# es_ES Localization
+# stats: stars=0, created=2022-11-09T00:35:33Z, last_updated=2022-11-09T00:43:55Z, added_to_index=2022-11-09, tags=localization
+# https://github.com/innovaciones/stable-diffusion-webui-localization-es_ES
+# extra-network-side-panel-for-a1111
+# stats: stars=4, created=2024-07-23T20:05:28Z, last_updated=2024-07-25T22:35:53Z, added_to_index=2024-07-25, tags=UI related
+# https://github.com/CurtisDS/extra-network-side-panel-for-a1111.git
+# Eye Mask
+# stats: stars=59, created=2023-05-10T18:08:16Z, last_updated=2025-11-23T19:45:05Z, added_to_index=2023-05-11, tags=script|dropdown|manipulations
+# https://github.com/ilian6806/stable-diffusion-webui-eyemask.git
+# FABRIC
+# stats: stars=408, created=2023-07-20T18:40:21Z, last_updated=2024-03-09T17:26:54Z, added_to_index=2023-08-17, tags=script|manipulations
+# https://github.com/dvruette/sd-webui-fabric.git
+# Face manipulations - extras
+# stats: stars=15, created=2024-07-13T10:47:03Z, last_updated=2024-08-01T16:52:38Z, added_to_index=2024-07-29, tags=manipulations|editing
+# https://github.com/light-and-ray/sd-webui-face-manipulation-extras.git
+# FaceChain
+# stats: stars=9505, created=2023-08-10T10:46:54Z, last_updated=2025-06-06T09:32:00Z, added_to_index=2023-11-05, tags=script|tab|training|online
+# https://github.com/modelscope/facechain.git
+# FaceSwapLab
+# stats: stars=819, created=2023-07-24T21:27:53Z, last_updated=2023-09-10T14:06:47Z, added_to_index=2023-07-27, tags=editing|manipulations
+# https://github.com/glucauze/sd-webui-faceswaplab
+# Fast PNG Info
+# stats: stars=44, created=2023-03-09T13:23:58Z, last_updated=2024-12-07T17:02:08Z, added_to_index=2023-09-17, tags=tab
+# https://github.com/NoCrypt/sd-fast-pnginfo.git
+# fi_FI Localization
+# stats: stars=0, created=2022-12-28T13:32:39Z, last_updated=2022-12-30T14:05:23Z, added_to_index=2022-12-28, tags=localization
+# https://github.com/otsoniemi/stable-diffusion-webui-localization-fi_FI
+# GeekyRemB
+# stats: stars=16, created=2024-08-04T01:33:34Z, last_updated=2024-10-24T03:25:27Z, added_to_index=2024-08-19, tags=editing|tab
+# https://github.com/GeekyGhost/Automatic1111-Geeky-Remb.git
+# Gelbooru Prompt
+# stats: stars=41, created=2022-11-23T00:07:19Z, last_updated=2024-09-09T21:34:50Z, added_to_index=2022-12-20, tags=online
+# https://github.com/antis0007/sd-webui-gelbooru-prompt.git
+# Gelbooru Prompt Randomizer
+# stats: stars=2, created=2024-12-13T18:29:04Z, last_updated=2025-01-09T16:17:25Z, added_to_index=2024-12-21, tags=prompting|online
+# https://github.com/RED1cat/Gelbooru-Prompt-Randomizer.git
+# gif2gif
+# stats: stars=248, created=2023-02-03T01:26:37Z, last_updated=2023-05-13T14:56:04Z, added_to_index=2023-02-09, tags=animation
+# https://github.com/LonicaMewinsky/gif2gif.git
+# GPT-4 Vision Image Captioner
+# stats: stars=102, created=2024-01-14T07:25:05Z, last_updated=2024-12-27T08:51:17Z, added_to_index=2024-01-14, tags=tab|online
+# https://github.com/SleeeepyZhou/sd-webui-GPT4V-Image-Captioner.git
+# GPU temperature protection
+# stats: stars=36, created=2023-07-14T12:20:09Z, last_updated=2024-05-19T14:44:03Z, added_to_index=2023-07-14, tags=script
+# https://github.com/w-e-w/stable-diffusion-webui-GPU-temperature-protection.git
+# haku-img
+# stats: stars=201, created=2023-01-05T03:14:11Z, last_updated=2025-03-17T05:15:38Z, added_to_index=2023-01-17, tags=tab|editing
+# https://github.com/KohakuBlueleaf/a1111-sd-webui-haku-img.git
+# Hardware Info in metadata
+# stats: stars=4, created=2024-05-17T20:50:40Z, last_updated=2024-07-09T11:19:56Z, added_to_index=2024-05-18, tags=script
+# https://github.com/light-and-ray/sd-webui-hardware-info-in-metadata.git
+# Hires Fix Tweaks
+# stats: stars=41, created=2023-11-27T02:17:32Z, last_updated=2024-11-24T10:59:50Z, added_to_index=2024-03-13, tags=script|prompting|manipulations
+# https://github.com/w-e-w/sd-webui-hires-fix-tweaks.git
+# Hotshot-XL-Automatic1111
+# stats: stars=80, created=2023-10-05T15:19:33Z, last_updated=2023-11-03T10:30:56Z, added_to_index=2023-11-03, tags=tab|animation
+# https://github.com/hotshotco/Hotshot-XL-Automatic1111.git
+# Hypernetwork-Monkeypatch-Extension
+# stats: stars=113, created=2022-11-23T07:44:32Z, last_updated=2023-08-28T13:35:26Z, added_to_index=2023-01-12, tags=tab|training
+# https://github.com/aria1th/Hypernetwork-MonkeyPatch-Extension.git
+# IF_prompt_MKR
+# stats: stars=107, created=2023-06-05T07:47:20Z, last_updated=2024-02-24T14:29:02Z, added_to_index=2023-06-30, tags=script|prompting
+# https://github.com/if-ai/IF_prompt_MKR.git
+# Image browser
+# stats: stars=655, created=2023-01-14T16:20:37Z, last_updated=2026-03-19T07:25:49Z, added_to_index=2022-11-01, tags=tab|UI related
+# https://github.com/AlUlkesh/stable-diffusion-webui-images-browser.git
+# Img2img batch interrogator
+# stats: stars=26, created=2023-03-27T21:21:09Z, last_updated=2025-01-04T22:29:16Z, added_to_index=2023-08-31, tags=script
+# https://github.com/Alvi-alvarez/sd-Img2img-batch-interrogator.git
+# img2img-hires-fix
+# stats: stars=24, created=2024-09-02T03:37:24Z, last_updated=2024-09-18T06:31:04Z, added_to_index=2024-09-17, tags=script|manipulations
+# https://github.com/Amadeus-AI/img2img-hires-fix.git
+# Incantations
+# stats: stars=141, created=2024-01-16T02:56:36Z, last_updated=2024-08-05T03:03:30Z, added_to_index=2024-04-03, tags=dropdown|manipulations
+# https://github.com/v0xie/sd-webui-incantations.git
+# Infinite image browsing
+# stats: stars=1274, created=2023-03-07T18:26:27Z, last_updated=2026-03-20T19:02:07Z, added_to_index=2023-04-16, tags=tab|UI related
+# https://github.com/zanllp/sd-webui-infinite-image-browsing.git
+# Infinite Zoom
+# stats: stars=676, created=2023-03-23T09:19:22Z, last_updated=2024-05-17T11:39:23Z, added_to_index=2023-04-13, tags=tab|animation
+# https://github.com/v8hid/infinite-zoom-automatic1111-webui.git
+# Infinity Grid Generator
+# stats: stars=189, created=2022-12-08T18:25:14Z, last_updated=2024-07-01T04:53:37Z, added_to_index=2022-12-09, tags=UI related
+# https://github.com/mcmonkeyprojects/sd-infinity-grid-generator-script.git
+# Inpaint Anything
+# stats: stars=1292, created=2023-04-16T01:46:03Z, last_updated=2024-12-27T10:04:52Z, added_to_index=2023-06-09, tags=tab|editing|manipulations
+# https://github.com/Uminosachi/sd-webui-inpaint-anything.git
+# Inpaint background
+# stats: stars=59, created=2023-11-03T11:09:28Z, last_updated=2024-08-12T03:57:17Z, added_to_index=2024-01-23, tags=tab|UI related|manipulations
+# https://github.com/John-WL/sd-webui-inpaint-background.git
+# Inpaint difference
+# stats: stars=56, created=2023-10-30T16:17:34Z, last_updated=2024-08-12T03:53:32Z, added_to_index=2023-11-03, tags=tab|UI related|manipulations
+# https://github.com/John-WL/sd-webui-inpaint-difference
+# InputAccordion Highlight
+# stats: stars=8, created=2024-05-15T17:04:16Z, last_updated=2024-05-15T19:36:02Z, added_to_index=2024-05-20, tags=UI related
+# https://github.com/w-e-w/sd-webui-input-accordion-highlight.git
+# Inspiration
+# stats: stars=114, created=2022-10-20T14:21:15Z, last_updated=2022-12-09T03:50:47Z, added_to_index=2022-11-01, tags=tab|UI related
+# https://github.com/yfszzx/stable-diffusion-webui-inspiration.git
+# it_IT Localization
+# stats: stars=5, created=2022-11-06T22:28:04Z, last_updated=2024-11-03T17:51:41Z, added_to_index=2022-11-07, tags=localization
+# https://github.com/Harvester62/stable-diffusion-webui-localization-it_IT
+# ja_JP Localization
+# stats: stars=60, created=2022-11-21T16:08:31Z, last_updated=2023-11-22T03:02:41Z, added_to_index=2022-11-07, tags=localization
+# https://github.com/AI-Creators-Society/stable-diffusion-webui-localization-ja_JP
+# Kandinsky
+# stats: stars=101, created=2023-06-11T02:39:57Z, last_updated=2023-08-22T03:58:54Z, added_to_index=2023-06-11, tags=script|editing
+# https://github.com/MMqd/kandinsky-for-automatic1111
+# Kitchen Theme
+# stats: stars=30, created=2023-06-27T16:44:35Z, last_updated=2023-06-27T17:17:12Z, added_to_index=2023-02-28, tags=UI related|online
+# https://github.com/canisminor1990/sd-webui-kitchen-theme-legacy.git
+# ko_KR Localization
+# stats: stars=26, created=2022-11-06T10:30:18Z, last_updated=2023-08-02T14:14:57Z, added_to_index=2022-11-06, tags=localization
+# https://github.com/36DB/stable-diffusion-webui-localization-ko_KR
+# Kohaku-NAI
+# stats: stars=81, created=2023-11-22T04:18:35Z, last_updated=2024-10-01T17:02:16Z, added_to_index=2023-12-02, tags=script|online
+# https://github.com/KohakuBlueleaf/Kohaku-NAI
+# Kohya-ss Additional Networks
+# stats: stars=1827, created=2022-12-27T09:03:08Z, last_updated=2023-05-23T12:31:15Z, added_to_index=2023-01-06, tags=models
+# https://github.com/kohya-ss/sd-webui-additional-networks.git
+# Lama cleaner as masked content
+# stats: stars=91, created=2024-01-05T00:35:23Z, last_updated=2024-08-07T05:30:43Z, added_to_index=2024-01-14, tags=script|editing|manipulations|extras
+# https://github.com/light-and-ray/sd-webui-lama-cleaner-masked-content.git
+# Latent Consistency Models
+# stats: stars=612, created=2023-10-22T11:53:48Z, last_updated=2023-10-26T10:33:14Z, added_to_index=2023-10-22, tags=tab
+# https://github.com/0xbitches/sd-webui-lcm.git
+# Latent Couple
+# stats: stars=436, created=2023-02-15T04:38:54Z, last_updated=2023-04-02T11:22:41Z, added_to_index=2023-02-18, tags=manipulations
+# https://github.com/ashen-sensored/stable-diffusion-webui-two-shot.git
+# Latent Mirroring
+# stats: stars=112, created=2022-11-03T00:32:57Z, last_updated=2023-03-25T14:37:33Z, added_to_index=2022-11-06, tags=manipulations
+# https://github.com/dfaker/SD-latent-mirroring.git
+# Latent Regional Helper
+# stats: stars=22, created=2023-12-31T09:51:50Z, last_updated=2024-02-13T14:44:42Z, added_to_index=2024-01-14, tags=script|tab
+# https://github.com/safubuki/sd-webui-latent-regional-helper.git
+# Latent Upscale
+# stats: stars=78, created=2023-06-29T23:49:27Z, last_updated=2023-07-17T21:55:32Z, added_to_index=2023-07-15, tags=script
+# https://github.com/feynlee/latent-upscale.git
+# LLuL
+# stats: stars=808, created=2023-02-25T07:14:11Z, last_updated=2023-12-30T09:00:13Z, added_to_index=2023-03-04, tags=manipulations
+# https://github.com/hnmr293/sd-webui-llul.git
+# Lobe Theme
+# stats: stars=2678, created=2023-02-25T06:41:18Z, last_updated=2024-05-24T15:36:04Z, added_to_index=2023-06-28, tags=UI related|online
+# https://github.com/canisminor1990/sd-webui-lobe-theme.git
+# Loopback Scaler
+# stats: stars=181, created=2023-03-23T06:34:27Z, last_updated=2023-06-23T21:42:22Z, added_to_index=2023-07-11, tags=script|manipulations
+# https://github.com/Elldreth/loopback_scaler.git
+# LoRA Block Weight
+# stats: stars=1167, created=2023-01-29T16:37:35Z, last_updated=2025-06-19T14:05:20Z, added_to_index=2023-02-28, tags=models
+# https://github.com/hako-mikan/sd-webui-lora-block-weight.git
+# LoRA Control
+# stats: stars=266, created=2023-07-22T20:57:49Z, last_updated=2023-09-20T01:16:38Z, added_to_index=2023-08-07, tags=models|prompting|manipulations
+# https://github.com/cheald/sd-webui-loractl.git
+# LoRA Keywords Finder
+# stats: stars=10, created=2024-10-25T11:20:44Z, last_updated=2024-11-03T08:25:50Z, added_to_index=2024-11-02, tags=prompting|online
+# https://github.com/Avaray/lora-keywords-finder.git
+# Lora Queue Helper
+# stats: stars=34, created=2023-11-25T13:17:02Z, last_updated=2024-12-22T14:16:15Z, added_to_index=2023-11-26, tags=script
+# https://github.com/Yinzo/sd-webui-Lora-queue-helper.git
+# Lua
+# stats: stars=37, created=2023-04-21T19:08:39Z, last_updated=2023-10-17T20:15:33Z, added_to_index=2023-05-29, tags=tab|science
+# https://github.com/yownas/sd-webui-lua.git
+# Manga Inpainting
+# stats: stars=6, created=2024-07-12T15:48:43Z, last_updated=2024-07-26T21:09:21Z, added_to_index=2024-07-17, tags=manipulations|extras
+# https://github.com/light-and-ray/sd-webui-manga-inpainting.git
+# Mask2Background
+# stats: stars=47, created=2023-07-11T06:56:21Z, last_updated=2023-09-26T01:52:56Z, added_to_index=2023-07-11, tags=tab
+# https://github.com/limithit/Mask2Background.git
+# Merge Block Weighted
+# stats: stars=322, created=2022-12-15T05:29:22Z, last_updated=2023-01-19T21:31:06Z, added_to_index=2023-01-13, tags=tab|models
+# https://github.com/bbc-mc/sdweb-merge-block-weighted-gui.git
+# Merge Board
+# stats: stars=77, created=2022-11-07T16:25:50Z, last_updated=2023-09-03T15:30:00Z, added_to_index=2022-11-21, tags=tab|models
+# https://github.com/bbc-mc/sdweb-merge-board.git
+# Metadata Utils
+# stats: stars=5, created=2024-05-27T17:58:16Z, last_updated=2024-09-27T17:17:12Z, added_to_index=2024-06-07, tags=tab|models
+# https://github.com/Tzigo/metadata_utils.git
+# Miaoshouai Assistant
+# stats: stars=316, created=2023-03-16T05:44:50Z, last_updated=2024-08-15T08:01:08Z, added_to_index=2023-05-18, tags=tab|models|UI related|online
+# https://github.com/miaoshouai/miaoshouai-assistant.git
+# mine-diffusion
+# stats: stars=20, created=2023-02-06T12:49:17Z, last_updated=2023-03-31T14:38:41Z, added_to_index=2023-02-11, tags=tab
+# https://github.com/fropych/mine-diffusion.git
+# miniPaint
+# stats: stars=124, created=2023-05-16T20:45:42Z, last_updated=2025-11-04T17:07:49Z, added_to_index=2023-05-16, tags=tab|editing
+# https://github.com/0Tick/a1111-mini-paint
+# Moar Generate Button
+# stats: stars=24, created=2023-09-01T10:11:45Z, last_updated=2025-01-15T03:07:56Z, added_to_index=2024-03-08, tags=UI related
+# https://github.com/Haoming02/sd-webui-moar-generate.git
+# Mobile friendly UI tweaks
+# stats: stars=13, created=2023-09-04T06:39:05Z, last_updated=2023-09-04T06:49:38Z, added_to_index=2024-03-08, tags=UI related
+# https://github.com/Haoming02/sd-webui-mobile-friendly.git
+# Model Converter
+# stats: stars=341, created=2023-01-05T03:50:13Z, last_updated=2024-12-24T12:56:13Z, added_to_index=2023-01-05, tags=tab|models
+# https://github.com/Akegarasu/sd-webui-model-converter.git
+# Model Downloader
+# stats: stars=53, created=2023-02-28T14:43:20Z, last_updated=2024-04-03T12:43:29Z, added_to_index=2023-06-05, tags=tab|script|online
+# https://github.com/Iyashinouta/sd-model-downloader.git
+# Model Mixer
+# stats: stars=115, created=2023-08-28T13:12:51Z, last_updated=2025-01-28T07:10:40Z, added_to_index=2023-09-16, tags=models|manipulations
+# https://github.com/wkpark/sd-webui-model-mixer.git
+# Model Organizer
+# stats: stars=98, created=2023-04-09T11:29:30Z, last_updated=2025-03-28T12:03:27Z, added_to_index=2023-05-05, tags=tab|UI related|online
+# https://github.com/alexandersokol/sd-model-organizer.git
+# Model Preset Manager
+# stats: stars=102, created=2023-05-14T18:53:50Z, last_updated=2023-05-30T15:07:37Z, added_to_index=2023-05-15, tags=online|prompting|tab
+# https://github.com/rifeWithKaiju/model_preset_manager.git
+# Model toolkit
+# stats: stars=534, created=2023-01-05T05:29:13Z, last_updated=2024-05-12T04:20:22Z, added_to_index=2023-05-10, tags=tab|models
+# https://github.com/arenasys/stable-diffusion-webui-model-toolkit.git
+# model-keyword
+# stats: stars=270, created=2022-12-01T03:07:53Z, last_updated=2026-03-21T18:03:03Z, added_to_index=2022-12-28, tags=prompting
+# https://github.com/mix1009/model-keyword.git
+# Mosaic Outpaint
+# stats: stars=92, created=2024-02-01T04:21:48Z, last_updated=2024-08-09T13:58:56Z, added_to_index=2024-03-08, tags=tab
+# https://github.com/Haoming02/sd-webui-mosaic-outpaint.git
+# Multi-Prompt Manager
+# stats: stars=6, created=2024-07-09T16:59:22Z, last_updated=2024-07-10T12:27:16Z, added_to_index=2024-07-11, tags=prompting
+# https://github.com/camdenFletcher03/sd-webui-Multi-Prompt-Manager.git
+# multi-subject-render
+# stats: stars=376, created=2022-11-24T04:33:02Z, last_updated=2023-03-06T14:11:30Z, added_to_index=2022-11-24, tags=editing|manipulations
+# https://github.com/Extraltodeus/multi-subject-render.git
+# Multiple Hypernetworks
+# stats: stars=95, created=2022-11-15T21:18:07Z, last_updated=2023-01-10T06:48:35Z, added_to_index=2023-01-13, tags=script
+# https://github.com/antis0007/sd-webui-multiple-hypernetworks.git
+# Negative Prompt Weight
+# stats: stars=111, created=2023-04-01T13:47:06Z, last_updated=2024-06-28T20:08:02Z, added_to_index=2023-04-02, tags=script|manipulations|prompting
+# https://github.com/muerrilla/stable-diffusion-NPW.git
+# NegPiP
+# stats: stars=251, created=2023-07-26T15:58:03Z, last_updated=2025-11-30T09:31:57Z, added_to_index=2023-10-17, tags=manipulations
+# https://github.com/hako-mikan/sd-webui-negpip.git
+# Neutral Prompt
+# stats: stars=188, created=2023-05-17T15:02:06Z, last_updated=2024-03-22T09:23:04Z, added_to_index=2023-05-28, tags=manipulations
+# https://github.com/ljleb/sd-webui-neutral-prompt.git
+# Nevysha's Cozy Nest
+# stats: stars=379, created=2023-04-30T08:47:39Z, last_updated=2023-10-13T09:29:36Z, added_to_index=2023-05-02, tags=UI related
+# https://github.com/Nevysha/Cozy-Nest.git
+# no_NO Localization
+# stats: stars=0, created=2022-11-15T23:06:01Z, last_updated=2022-11-15T23:08:10Z, added_to_index=2022-11-16, tags=localization
+# https://github.com/Cyanz83/stable-diffusion-webui-localization-no_NO
+# novelai-2-local-prompt
+# stats: stars=74, created=2022-10-23T08:28:06Z, last_updated=2023-01-28T06:33:03Z, added_to_index=2022-11-05, tags=prompting
+# https://github.com/animerl/novelai-2-local-prompt.git
+# NSFW Blurrer-NSFWJS
+# stats: stars=21, created=2023-10-05T14:05:49Z, last_updated=2023-10-26T03:49:12Z, added_to_index=2023-10-17, tags=script|manipulations
+# https://github.com/aria1th/sd-webui-nsfw-filter.git
+# NSFW checker
+# stats: stars=136, created=2022-12-10T11:34:12Z, last_updated=2022-12-10T11:33:46Z, added_to_index=2022-12-10, tags=script
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui-nsfw-censor.git
+# NudeNet NSFW Censor
+# stats: stars=127, created=2023-10-16T16:44:07Z, last_updated=2025-06-11T17:34:08Z, added_to_index=2023-10-22, tags=editing|extras
+# https://github.com/w-e-w/sd-webui-nudenet-nsfw-censor.git
+# old localizations
+# stats: stars=23, created=2022-11-08T06:50:16Z, last_updated=2023-01-20T14:17:33Z, added_to_index=2022-11-08, tags=localization
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui-old-localizations.git
+# Old Photo Restoration
+# stats: stars=122, created=2023-12-04T04:11:47Z, last_updated=2024-11-05T02:14:30Z, added_to_index=2024-03-08, tags=extras
+# https://github.com/Haoming02/sd-webui-old-photo-restoration.git
+# Old SD firstpasser
+# stats: stars=31, created=2024-04-01T14:35:13Z, last_updated=2024-06-12T19:39:03Z, added_to_index=2024-04-05, tags=script|manipulations
+# https://github.com/light-and-ray/sd-webui-old-sd-firstpasser.git
+# One Button Prompt
+# stats: stars=1054, created=2023-04-08T15:16:25Z, last_updated=2025-07-20T12:15:47Z, added_to_index=2023-05-14, tags=script|prompting
+# https://github.com/AIrjen/OneButtonPrompt
+# openOutpaint extension
+# stats: stars=407, created=2022-12-18T20:11:06Z, last_updated=2024-08-31T15:43:44Z, added_to_index=2022-12-23, tags=tab|UI related|editing
+# https://github.com/zero01101/openOutpaint-webUI-extension.git
+# OpenPose Editor
+# stats: stars=1768, created=2023-02-19T04:24:44Z, last_updated=2023-10-11T09:04:20Z, added_to_index=2023-02-18, tags=tab
+# https://github.com/fkunn1326/openpose-editor.git
+# Panorama Viewer
+# stats: stars=180, created=2023-03-05T16:11:10Z, last_updated=2023-10-22T18:54:07Z, added_to_index=2023-03-11, tags=tab
+# https://github.com/GeorgLegato/sd-webui-panorama-viewer.git
+# PBRemTools
+# stats: stars=371, created=2023-04-04T23:38:33Z, last_updated=2024-11-04T06:05:07Z, added_to_index=2023-04-05, tags=extras|editing
+# https://github.com/mattyamonaca/PBRemTools.git
+# Pixel
+# stats: stars=52, created=2023-05-05T02:27:27Z, last_updated=2023-08-12T18:20:36Z, added_to_index=2023-05-05, tags=editing|extras
+# https://github.com/Leodotpy/sd-pixel.git
+# Pixel art
+# stats: stars=195, created=2023-06-28T09:05:53Z, last_updated=2023-06-28T09:45:44Z, added_to_index=2023-06-28, tags=script|editing|extras
+# https://github.com/mrreplicart/sd-webui-pixelart.git
+# Pixelization
+# stats: stars=624, created=2023-01-23T10:57:20Z, last_updated=2024-03-31T08:48:11Z, added_to_index=2023-01-23, tags=editing|extras
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui-pixelization.git
+# PNGINFO Beautify
+# stats: stars=22, created=2024-05-18T20:40:08Z, last_updated=2024-11-29T22:04:39Z, added_to_index=2024-05-19, tags=UI related|prompting
+# https://github.com/bluelovers/sd-webui-pnginfo-beautify.git
+# posex
+# stats: stars=595, created=2023-02-15T17:49:04Z, last_updated=2023-05-03T08:59:57Z, added_to_index=2023-03-04, tags=script
+# https://github.com/hnmr293/posex.git
+# Preset Utilities
+# stats: stars=255, created=2022-12-15T10:09:22Z, last_updated=2024-02-18T01:57:24Z, added_to_index=2022-12-19, tags=UI related
+# https://github.com/Gerschel/sd_web_ui_preset_utils.git
+# Prevent interruption
+# stats: stars=1, created=2024-06-24T07:41:26Z, last_updated=2024-06-26T03:34:43Z, added_to_index=2024-07-01, tags=UI related
+# https://github.com/light-and-ray/sd-webui-prevent-interruption.git
+# Prompt Format - by Haoming02
+# stats: stars=89, created=2023-05-04T12:17:01Z, last_updated=2025-11-19T03:58:08Z, added_to_index=2023-08-17, tags=script|prompting
+# https://github.com/Haoming02/sd-webui-prompt-format.git
+# Prompt Formatter - by uwidev
+# stats: stars=96, created=2023-04-23T22:13:45Z, last_updated=2024-09-30T18:08:54Z, added_to_index=2023-08-16, tags=script|prompting
+# https://github.com/uwidev/sd_extension-prompt_formatter.git
+# Prompt Fusion
+# stats: stars=270, created=2022-12-10T23:19:17Z, last_updated=2023-12-13T01:00:15Z, added_to_index=2023-01-28, tags=manipulations
+# https://github.com/ljleb/prompt-fusion-extension.git
+# Prompt Gallery
+# stats: stars=161, created=2022-11-24T12:58:58Z, last_updated=2023-10-28T07:51:07Z, added_to_index=2022-12-02, tags=tab|UI related
+# https://github.com/dr413677671/PromptGallery-stable-diffusion-webui.git
+# Prompt Generator
+# stats: stars=248, created=2022-12-29T00:40:40Z, last_updated=2024-11-21T12:27:26Z, added_to_index=2022-12-30, tags=tab|prompting
+# https://github.com/imrayya/stable-diffusion-webui-Prompt_Generator.git
+# Prompt Translator
+# stats: stars=250, created=2023-02-09T10:20:30Z, last_updated=2023-05-09T08:30:09Z, added_to_index=2023-02-11, tags=tab|prompting|online
+# https://github.com/butaixianran/Stable-Diffusion-Webui-Prompt-Translator
+# Prompt Translator
+# stats: stars=164, created=2023-03-27T09:46:46Z, last_updated=2024-12-25T15:32:21Z, added_to_index=2023-03-28, tags=prompting
+# https://github.com/ParisNeo/prompt_translator.git
+# prompt travel
+# stats: stars=268, created=2022-11-10T14:01:14Z, last_updated=2024-02-02T09:37:13Z, added_to_index=2022-11-11, tags=animation
+# https://github.com/Kahsolt/stable-diffusion-webui-prompt-travel.git
+# Promptgen
+# stats: stars=530, created=2023-01-18T09:50:34Z, last_updated=2023-01-20T11:15:12Z, added_to_index=2023-01-18, tags=tab|prompting
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui-promptgen.git
+# prompts filter
+# stats: stars=10, created=2023-07-19T05:12:45Z, last_updated=2024-06-28T03:49:36Z, added_to_index=2023-07-20, tags=script
+# https://github.com/viyiviyi/prompts-filter.git
+# PromptsBrowser
+# stats: stars=47, created=2023-03-27T16:56:08Z, last_updated=2024-06-02T12:24:27Z, added_to_index=2023-09-15, tags=UI related|prompting
+# https://github.com/AlpacaInTheNight/PromptsBrowser.git
+# pt_BR Localization
+# stats: stars=3, created=2022-11-09T13:06:08Z, last_updated=2022-12-19T22:18:03Z, added_to_index=2022-11-09, tags=localization
+# https://github.com/M-art-ucci/stable-diffusion-webui-localization-pt_BR
+# QIC Console
+# stats: stars=6, created=2024-02-11T09:48:56Z, last_updated=2024-02-11T14:26:03Z, added_to_index=2024-02-11, tags=tab
+# https://github.com/SenshiSentou/sd-webui-qic-console
+# QR Code Generator
+# stats: stars=48, created=2023-06-07T03:41:46Z, last_updated=2024-04-24T01:17:12Z, added_to_index=2023-06-08, tags=script|tab
+# https://github.com/missionfloyd/webui-qrcode-generator.git
+# Quick Tab Switch
+# stats: stars=10, created=2023-05-13T22:28:36Z, last_updated=2023-05-30T23:23:23Z, added_to_index=2023-05-26, tags=script|UI related
+# https://github.com/AJpon/a1111-sd-webui-quickswitch.git
+# quick-css
+# stats: stars=73, created=2022-12-19T21:44:12Z, last_updated=2023-04-26T18:17:08Z, added_to_index=2022-12-30, tags=tab|UI related
+# https://github.com/Gerschel/sd-web-ui-quickcss.git
+# Ranbooru
+# stats: stars=77, created=2023-06-18T12:11:02Z, last_updated=2025-07-24T06:52:44Z, added_to_index=2023-10-01, tags=script|dropdown|prompting|online
+# https://github.com/Inzaniak/sd-webui-ranbooru.git
+# Randomize
+# stats: stars=26, created=2023-01-02T16:36:16Z, last_updated=2023-12-02T11:14:15Z, added_to_index=2022-11-11, tags=prompting
+# https://github.com/innightwolfsleep/stable-diffusion-webui-randomize.git
+# ReActor
+# stats: stars=2620, created=2023-06-18T19:47:02Z, last_updated=2024-10-07T20:40:22Z, added_to_index=2023-10-17, tags=editing|manipulations
+# https://github.com/Gourieff/sd-webui-reactor.git
+# Readme browser
+# stats: stars=12, created=2024-04-25T15:43:40Z, last_updated=2024-06-12T16:41:04Z, added_to_index=2024-04-26, tags=dropdown|online|UI related
+# https://github.com/light-and-ray/sd-webui-readme-browser.git
+# Refiner
+# stats: stars=158, created=2023-07-28T12:02:58Z, last_updated=2023-08-12T18:07:55Z, added_to_index=2023-07-30, tags=script|manipulations
+# https://github.com/wcde/sd-webui-refiner.git
+# Regional Prompter
+# stats: stars=1803, created=2023-03-19T14:46:35Z, last_updated=2025-11-28T14:29:03Z, added_to_index=2023-03-26, tags=manipulations
+# https://github.com/hako-mikan/sd-webui-regional-prompter.git
+# Replacer - fast inpaint
+# stats: stars=218, created=2023-11-06T10:09:24Z, last_updated=2024-12-29T12:40:51Z, added_to_index=2023-12-06, tags=tab|editing|animation|script
+# https://github.com/light-and-ray/sd-webui-replacer.git
+# ReSharpen
+# stats: stars=83, created=2023-11-14T02:39:02Z, last_updated=2024-09-02T04:05:43Z, added_to_index=2024-03-08, tags=manipulations
+# https://github.com/Haoming02/sd-webui-resharpen.git
+# Resynthesizer as masked content
+# stats: stars=2, created=2024-07-11T12:49:57Z, last_updated=2024-07-24T21:22:34Z, added_to_index=2024-07-17, tags=UI related|manipulations
+# https://github.com/light-and-ray/sd-webui-resynthesizer-masked-content.git
+# Riffusion
+# stats: stars=202, created=2022-12-16T02:34:34Z, last_updated=2023-06-05T17:10:00Z, added_to_index=2022-12-19, tags=tab
+# https://github.com/enlyth/sd-webui-riffusion.git
+# RPG-DiffusionMaster
+# stats: stars=54, created=2024-01-26T14:40:01Z, last_updated=2024-08-29T02:12:34Z, added_to_index=2024-02-07, tags=script|dropdown|prompting|online
+# https://github.com/zydxt/sd-webui-rpg-diffusionmaster
+# ru_RU Localization
+# stats: stars=4, created=2022-12-19T11:08:29Z, last_updated=2022-12-19T11:08:58Z, added_to_index=2022-11-20, tags=localization
+# https://github.com/ProfaneServitor/stable-diffusion-webui-localization-ru_RU
+# SadTalker
+# stats: stars=13670, created=2022-11-23T02:18:18Z, last_updated=2023-10-10T16:10:21Z, added_to_index=2023-07-07, tags=tab|animation
+# https://github.com/OpenTalker/SadTalker.git
+# Save Intermediate Images
+# stats: stars=114, created=2022-12-15T23:55:02Z, last_updated=2024-06-21T11:48:47Z, added_to_index=2022-12-22, tags=script
+# https://github.com/AlUlkesh/sd_save_intermediate_images.git
+# Scenario loader
+# stats: stars=43, created=2023-07-31T08:51:37Z, last_updated=2024-03-21T05:03:40Z, added_to_index=2023-09-09, tags=script|tab|dropdown|UI related|prompting|extras
+# https://github.com/Chaest/sd-webui-sc-loader.git
+# ScramblePrompts [m9]
+# stats: stars=6, created=2024-02-14T02:32:31Z, last_updated=2024-12-01T03:54:03Z, added_to_index=2024-07-01, tags=prompting
+# https://github.com/MarcusNyne/sd-scramble-prompts-m9.git
+# SD Delete Button
+# stats: stars=42, created=2023-03-11T22:54:48Z, last_updated=2023-08-31T20:07:19Z, added_to_index=2023-06-30, tags=UI related
+# https://github.com/AlUlkesh/sd_delete_button.git
+# SD Hub
+# stats: stars=29, created=2024-04-06T20:02:13Z, last_updated=2025-01-11T12:59:22Z, added_to_index=2024-12-25, tags=script|tab|online
+# https://github.com/gutris1/sd-hub.git
+# SD Image Editor
+# stats: stars=43, created=2024-04-03T03:56:20Z, last_updated=2024-04-07T21:40:03Z, added_to_index=2024-04-05, tags=tab|editing
+# https://github.com/sontungdo/sd-image-editor.git
+# SD Masonry Gallery
+# stats: stars=10, created=2023-07-21T03:10:46Z, last_updated=2024-11-18T18:10:16Z, added_to_index=2023-09-05, tags=script|tab|UI related|online
+# https://github.com/bit9labs/sd-masonry.git
+# SD Ratio Lock
+# stats: stars=16, created=2023-07-25T19:16:22Z, last_updated=2023-08-09T15:26:05Z, added_to_index=2023-08-09, tags=UI related
+# https://github.com/bit9labs/sd-ratio-lock.git
+# SD Simple Dimension Preset
+# stats: stars=3, created=2024-12-20T14:24:28Z, last_updated=2024-12-27T15:39:16Z, added_to_index=2024-12-25, tags=UI related
+# https://github.com/gutris1/sd-simple-dimension-preset.git
+# SD Web UI Modal Info
+# stats: stars=10, created=2023-11-04T03:45:33Z, last_updated=2023-11-13T15:24:49Z, added_to_index=2023-11-13, tags=UI related
+# https://github.com/luminouspear/sd-webui-modal-info.git
+# SD Web UI UX
+# stats: stars=45, created=2024-10-19T20:01:52Z, last_updated=2024-10-23T15:20:13Z, added_to_index=2024-10-23, tags=tab|UI related
+# https://github.com/anapnoe/sd-webui-ux.git
+# SD Webui Boomer
+# stats: stars=54, created=2023-09-01T03:03:08Z, last_updated=2024-09-03T02:29:05Z, added_to_index=2024-03-08, tags=UI related
+# https://github.com/Haoming02/sd-webui-boomer.git
+# SD Webui Image Comparison
+# stats: stars=64, created=2024-02-17T03:28:12Z, last_updated=2024-11-06T07:21:57Z, added_to_index=2024-03-08, tags=tab
+# https://github.com/Haoming02/sd-webui-image-comparison.git
+# SD Webui Tabs Extension
+# stats: stars=85, created=2023-11-01T04:03:47Z, last_updated=2024-11-16T08:01:57Z, added_to_index=2024-03-08, tags=UI related
+# https://github.com/Haoming02/sd-webui-tabs-extension.git
+# SD Webui Vectorscope CC
+# stats: stars=190, created=2023-06-20T02:11:54Z, last_updated=2025-12-30T07:28:05Z, added_to_index=2023-08-15, tags=script|manipulations
+# https://github.com/Haoming02/sd-webui-vectorscope-cc.git
+# sd-canvas-editor
+# stats: stars=157, created=2023-04-13T11:32:28Z, last_updated=2025-12-03T18:33:03Z, added_to_index=2023-04-13, tags=tab|online
+# https://github.com/jtydhr88/sd-canvas-editor.git
+# SD-CN-Animation
+# stats: stars=817, created=2023-03-17T13:35:21Z, last_updated=2026-01-11T21:56:22Z, added_to_index=2023-05-06, tags=tab|animation
+# https://github.com/volotat/SD-CN-Animation.git
+# sd-history-slider
+# stats: stars=19, created=2023-07-16T00:56:47Z, last_updated=2023-07-18T16:28:03Z, added_to_index=2023-07-18, tags=UI related
+# https://github.com/LucasMali/sd-history-slider
+# sd-model-preview-xd
+# stats: stars=79, created=2023-01-23T07:31:00Z, last_updated=2025-02-02T07:31:14Z, added_to_index=2023-05-12, tags=tab|UI related
+# https://github.com/CurtisDS/sd-model-preview-xd
+# SD-PPP
+# stats: stars=601, created=2024-03-29T13:26:05Z, last_updated=2025-01-11T08:09:55Z, added_to_index=2024-06-15, tags=script
+# https://github.com/zombieyang/sd-ppp.git
+# sd-queue
+# stats: stars=3, created=2023-09-29T15:27:00Z, last_updated=2024-07-21T04:38:09Z, added_to_index=2024-07-21, tags=script
+# https://github.com/nmygle/sd-queue.git
+# sd-wav2lip-uhq
+# stats: stars=1422, created=2023-08-03T12:37:16Z, last_updated=2024-01-22T19:04:29Z, added_to_index=2023-08-04, tags=tab|editing|animation|ads
+# https://github.com/numz/sd-wav2lip-uhq
+# SD-WebUI API Payload Display
+# stats: stars=197, created=2023-06-18T19:48:32Z, last_updated=2023-11-23T18:15:06Z, added_to_index=2023-11-23, tags=script
+# https://github.com/huchenlei/sd-webui-api-payload-display.git
+# sd-webui-animatediff
+# stats: stars=3415, created=2023-07-18T02:59:45Z, last_updated=2024-09-22T00:17:56Z, added_to_index=2023-07-20, tags=script|dropdown
+# https://github.com/continue-revolution/sd-webui-animatediff.git
+# sd-webui-auto-tweet.json
+# stats: stars=9, created=2023-08-07T03:11:02Z, last_updated=2023-08-16T07:27:15Z, added_to_index=2023-08-12, tags=script|tab|online
+# https://github.com/sinano1107/sd-webui-auto-tweet.git
+# sd-webui-bg-mask
+# stats: stars=40, created=2023-09-30T12:09:09Z, last_updated=2023-10-01T15:32:10Z, added_to_index=2023-09-30, tags=editing
+# https://github.com/Scholar01/sd-webui-bg-mask.git
+# sd-webui-bluescape
+# stats: stars=29, created=2023-06-01T22:38:11Z, last_updated=2023-12-04T19:36:06Z, added_to_index=2023-06-13, tags=tab|online
+# https://github.com/Bluescape/sd-webui-bluescape
+# sd-webui-breadcrumbs
+# stats: stars=28, created=2023-12-01T15:40:17Z, last_updated=2024-01-19T12:51:25Z, added_to_index=2023-12-02, tags=UI related
+# https://github.com/ThereforeGames/sd-webui-breadcrumbs.git
+# sd-webui-chatgpt
+# stats: stars=43, created=2023-08-11T04:22:17Z, last_updated=2025-03-19T04:42:55Z, added_to_index=2023-08-11, tags=tab|online
+# https://github.com/NON906/sd-webui-chatgpt.git
+# sd-webui-color-enhance
+# stats: stars=n/a, created=n/a, last_updated=n/a, added_to_index=2023-06-10, tags=editing|extras
+# https://git.mmaker.moe/mmaker/sd-webui-color-enhance.git
+# sd-webui-controlnet
+# stats: stars=17890, created=2023-02-12T16:26:27Z, last_updated=2024-07-25T20:52:52Z, added_to_index=2023-02-18, tags=manipulations
+# https://github.com/Mikubill/sd-webui-controlnet.git
+# sd-webui-creaprompt
+# stats: stars=69, created=2024-02-07T22:32:21Z, last_updated=2024-11-19T15:30:26Z, added_to_index=2024-02-09, tags=UI related|prompting
+# https://github.com/tritant/sd-webui-creaprompt.git
+# sd-webui-decadetw-auto-prompt-llm
+# stats: stars=57, created=2024-07-29T08:53:44Z, last_updated=2024-10-04T08:43:47Z, added_to_index=2024-08-09, tags=prompting
+# https://github.com/xlinx/sd-webui-decadetw-auto-prompt-llm.git
+# sd-webui-deoldify
+# stats: stars=693, created=2023-07-28T02:55:38Z, last_updated=2024-03-20T06:56:21Z, added_to_index=2023-08-04, tags=script|extras|tab|animation
+# https://github.com/SpenserCai/sd-webui-deoldify
+# sd-webui-depth-lib
+# stats: stars=52, created=2023-04-09T20:59:04Z, last_updated=2023-11-29T22:55:41Z, added_to_index=2023-09-07, tags=tab
+# https://github.com/wywywywy/sd-webui-depth-lib.git
+# sd-webui-discord-ex
+# stats: stars=25, created=2023-08-23T16:06:33Z, last_updated=2023-10-08T04:45:16Z, added_to_index=2023-08-24, tags=online|tab
+# https://github.com/SpenserCai/sd-webui-discord-ex.git
+# sd-webui-enable-checker
+# stats: stars=59, created=2023-03-06T13:58:32Z, last_updated=2025-08-27T03:19:20Z, added_to_index=2023-03-19, tags=script
+# https://github.com/shirayu/sd-webui-enable-checker.git
+# sd-webui-extended-style-saver
+# stats: stars=9, created=2023-11-09T15:41:50Z, last_updated=2024-01-07T05:45:31Z, added_to_index=2023-11-13, tags=script|UI related|prompting
+# https://github.com/harukei-tech/sd-webui-extended-style-saver.git
+# sd-webui-facefusion
+# stats: stars=102, created=2023-09-25T08:13:53Z, last_updated=2024-04-23T11:19:35Z, added_to_index=2023-11-01, tags=tab|editing
+# https://github.com/diffus-me/sd-webui-facefusion
+# sd-webui-live-portrait
+# stats: stars=58, created=2024-08-04T08:11:01Z, last_updated=2025-01-05T10:02:45Z, added_to_index=2024-09-17, tags=script|tab|editing
+# https://github.com/dimitribarbot/sd-webui-live-portrait.git
+# sd-webui-mov2mov
+# stats: stars=2189, created=2023-02-27T09:23:15Z, last_updated=2025-01-21T08:58:29Z, added_to_index=2023-09-24, tags=script|tab|animation
+# https://github.com/Scholar01/sd-webui-mov2mov.git
+# sd-webui-ocr
+# stats: stars=16, created=2023-12-28T01:36:57Z, last_updated=2024-01-04T02:13:18Z, added_to_index=2024-01-04, tags=tab|query
+# https://github.com/SpenserCai/sd-webui-ocr
+# sd-webui-oldsix-prompt
+# stats: stars=1950, created=2023-07-27T06:52:11Z, last_updated=2024-05-04T05:17:19Z, added_to_index=2023-07-30, tags=prompting
+# https://github.com/thisjam/sd-webui-oldsix-prompt.git
+# sd-webui-openpose-editor
+# stats: stars=775, created=2023-04-29T20:17:34Z, last_updated=2024-06-20T22:18:05Z, added_to_index=2023-06-07, tags=editing
+# https://github.com/huchenlei/sd-webui-openpose-editor.git
+# sd-webui-panorama-tools
+# stats: stars=43, created=2023-11-06T01:51:44Z, last_updated=2025-01-23T00:35:55Z, added_to_index=2023-11-06, tags=tab|editing|manipulations
+# https://github.com/Flyguygx/sd-webui-panorama-tools.git
+# sd-webui-prompt-all-in-one
+# stats: stars=3206, created=2023-05-08T12:23:21Z, last_updated=2025-11-26T12:12:09Z, added_to_index=2023-05-08, tags=UI related|prompting|online
+# https://github.com/Physton/sd-webui-prompt-all-in-one
+# sd-webui-prompt_history
+# stats: stars=107, created=2023-06-14T18:06:33Z, last_updated=2023-11-04T17:34:31Z, added_to_index=2023-06-14, tags=UI related|tab
+# https://github.com/namkazt/sd-webui-prompt-history
+# sd-webui-qrcode-toolkit
+# stats: stars=678, created=2023-07-02T00:12:37Z, last_updated=2023-07-20T01:53:20Z, added_to_index=2023-07-02, tags=tab|editing|online
+# https://github.com/antfu/sd-webui-qrcode-toolkit.git
+# sd-webui-quickrecents
+# stats: stars=6, created=2024-10-22T10:10:58Z, last_updated=2024-10-23T23:08:11Z, added_to_index=2024-10-24, tags=UI related
+# https://github.com/MINENEMA/sd-webui-quickrecents.git
+# sd-webui-rich-text
+# stats: stars=122, created=2023-09-26T05:54:52Z, last_updated=2023-10-10T20:07:50Z, added_to_index=2023-10-01, tags=tab|UI related|prompting|editing|manipulations|online
+# https://github.com/songweige/sd-webui-rich-text.git
+# sd-webui-roop
+# stats: stars=3516, created=2023-06-17T22:53:22Z, last_updated=2026-03-13T09:30:10Z, added_to_index=2023-06-09, tags=editing|manipulations
+# https://github.com/s0md3v/sd-webui-roop
+# sd-webui-segment-anything
+# stats: stars=3519, created=2023-04-10T13:52:55Z, last_updated=2024-02-23T20:25:02Z, added_to_index=2023-06-07, tags=script|dropdown
+# https://github.com/continue-revolution/sd-webui-segment-anything.git
+# sd-webui-tunnels
+# stats: stars=87, created=2023-02-09T13:18:45Z, last_updated=2023-05-10T12:08:31Z, added_to_index=2023-03-13, tags=script|online
+# https://github.com/Bing-su/sd-webui-tunnels.git
+# sd-webui-udav2
+# stats: stars=42, created=2024-06-27T06:43:47Z, last_updated=2024-10-21T18:12:49Z, added_to_index=2024-07-01, tags=tab|animation
+# https://github.com/MackinationsAi/sd-webui-udav2.git
+# seamless-tile-inpainting
+# stats: stars=39, created=2023-07-21T22:37:28Z, last_updated=2023-07-29T02:57:05Z, added_to_index=2023-07-27, tags=script
+# https://github.com/brick2face/seamless-tile-inpainting.git
+# seed travel
+# stats: stars=313, created=2022-09-18T19:09:05Z, last_updated=2023-06-30T07:03:07Z, added_to_index=2022-11-09, tags=animation
+# https://github.com/yownas/seed_travel.git
+# Semantic Guidance
+# stats: stars=69, created=2023-11-09T23:58:42Z, last_updated=2024-04-22T04:28:12Z, added_to_index=2023-11-13, tags=dropdown|manipulations
+# https://github.com/v0xie/sd-webui-semantic-guidance.git
+# shift-attention
+# stats: stars=166, created=2022-09-30T19:45:09Z, last_updated=2023-06-30T07:04:38Z, added_to_index=2022-11-09, tags=animation
+# https://github.com/yownas/shift-attention.git
+# Shutdown button
+# stats: stars=17, created=2023-07-15T11:44:07Z, last_updated=2024-09-16T21:18:36Z, added_to_index=2023-07-15, tags=script|UI related
+# https://github.com/EnsignMK/sd_shutdown_button.git
+# Simple Manga Maker
+# stats: stars=192, created=2023-08-14T22:23:46Z, last_updated=2025-01-10T12:24:16Z, added_to_index=2024-03-17, tags=tab|editing|online
+# https://github.com/new-sankaku/stable-diffusion-webui-simple-manga-maker.git
+# SimpleTaggerEditor
+# stats: stars=7, created=2024-02-25T12:12:50Z, last_updated=2024-03-12T04:00:52Z, added_to_index=2024-03-06, tags=tab|editing|extras
+# https://github.com/davidkingzyb/SimpleTaggerEditor.git
+# Smart Process
+# stats: stars=199, created=2022-11-11T20:34:48Z, last_updated=2024-07-19T18:22:56Z, added_to_index=2022-11-12, tags=tab|editing|training
+# https://github.com/d8ahazard/sd_smartprocess.git
+# Sonar
+# stats: stars=114, created=2022-11-10T08:47:25Z, last_updated=2023-10-17T06:38:02Z, added_to_index=2023-01-12, tags=manipulations
+# https://github.com/Kahsolt/stable-diffusion-webui-sonar.git
+# Stable Diffusion AWS Extension
+# stats: stars=160, created=2023-05-04T04:23:40Z, last_updated=2024-07-30T07:30:40Z, added_to_index=2023-06-01, tags=tab|training|online
+# https://github.com/awslabs/stable-diffusion-aws-extension.git
+# Stable Diffusion Database Manager
+# stats: stars=11, created=2023-08-27T19:33:09Z, last_updated=2024-10-19T16:49:08Z, added_to_index=2024-02-06, tags=script
+# https://github.com/nicholas-ooi/stable-diffusion-database-manager.git
+# Stable Diffusion PNGINFO Injection extension
+# stats: stars=11, created=2024-06-26T11:46:01Z, last_updated=2025-01-01T06:34:46Z, added_to_index=2024-08-07, tags=script|UI related
+# https://github.com/bluelovers/sd-webui-pnginfo-injection.git
+# Stable Diffusion Webui Civitai Helper
+# stats: stars=247, created=2023-07-28T19:44:31Z, last_updated=2026-01-13T00:01:32Z, added_to_index=2023-05-16, tags=tab|UI related|online
+# https://github.com/zixaphir/Stable-Diffusion-Webui-Civitai-Helper.git
+# Stable Horde Client
+# stats: stars=0, created=2024-10-23T20:40:16Z, last_updated=2024-10-23T21:43:07Z, added_to_index=2023-01-11, tags=tab|online
+# https://github.com/w-e-w/stable-diffusion-webui-stable-horde.git
+# Stable Horde Worker
+# stats: stars=62, created=2022-12-19T07:08:52Z, last_updated=2024-06-06T08:40:36Z, added_to_index=2023-01-10, tags=tab|online
+# https://github.com/sdwebui-w-horde/sd-webui-stable-horde-worker.git
+# stable-diffusion-webui-chat-gpt-prompts
+# stats: stars=3, created=2024-11-22T10:26:13Z, last_updated=2024-12-22T10:34:11Z, added_to_index=2024-12-22, tags=prompting|online
+# https://github.com/ilian6806/stable-diffusion-webui-chat-gpt-prompts
+# stable-diffusion-webui-rembg
+# stats: stars=1358, created=2023-03-12T15:32:44Z, last_updated=2023-12-30T13:04:03Z, added_to_index=2023-03-12, tags=script|extras
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui-rembg.git
+# stable-diffusion-webui-state
+# stats: stars=343, created=2023-03-19T13:45:28Z, last_updated=2025-12-28T21:05:43Z, added_to_index=2023-03-19, tags=script
+# https://github.com/ilian6806/stable-diffusion-webui-state.git
+# StableSR
+# stats: stars=1098, created=2023-05-20T11:49:37Z, last_updated=2024-08-06T04:42:44Z, added_to_index=2023-05-22, tags=manipulations
+# https://github.com/pkuliyi2015/sd-webui-stablesr.git
+# StableStudio Adapter
+# stats: stars=48, created=2023-05-21T17:22:23Z, last_updated=2023-05-24T16:51:42Z, added_to_index=2023-05-24, tags=script
+# https://github.com/jtydhr88/sd-webui-StableStudio.git
+# State Manager
+# stats: stars=62, created=2023-12-14T03:17:33Z, last_updated=2024-03-20T01:04:35Z, added_to_index=2023-12-15, tags=script|tab|UI related
+# https://github.com/SenshiSentou/sd-webui-state-manager.git
+# Steps Animation
+# stats: stars=142, created=2023-01-14T17:27:48Z, last_updated=2023-06-30T03:49:37Z, added_to_index=2023-01-21, tags=animation
+# https://github.com/vladmandic/sd-extension-steps-animation.git
+# stupid-nsfw-card-blur-a1111
+# stats: stars=2, created=2024-07-23T20:18:40Z, last_updated=2024-07-24T21:53:04Z, added_to_index=2024-07-24, tags=UI related
+# https://github.com/CurtisDS/stupid-nsfw-card-blur-a1111.git
+# Style Selector for SDXL 1.0
+# stats: stars=480, created=2023-07-27T21:42:01Z, last_updated=2024-01-17T21:41:01Z, added_to_index=2023-07-30, tags=prompting
+# https://github.com/ahgsql/StyleSelectorXL.git
+# Style variables
+# stats: stars=21, created=2023-11-18T02:09:56Z, last_updated=2024-12-06T14:09:35Z, added_to_index=2023-11-18, tags=prompting
+# https://github.com/SirVeggie/extension-style-vars
+# StylePile
+# stats: stars=581, created=2022-10-18T13:48:02Z, last_updated=2023-04-13T18:42:34Z, added_to_index=2022-11-24, tags=prompting
+# https://github.com/some9000/StylePile.git
+# Styles Editor
+# stats: stars=88, created=2023-05-28T11:19:38Z, last_updated=2023-12-07T04:14:43Z, added_to_index=2023-06-06, tags=tab|UI related|prompting
+# https://github.com/chrisgoringe/Styles-Editor.git
+# Stylez
+# stats: stars=125, created=2023-10-03T05:46:11Z, last_updated=2024-02-12T16:20:52Z, added_to_index=2023-11-06, tags=script|tab|UI related|prompting|online|query
+# https://github.com/javsezlol1/Stylez.git
+# SuperMerger
+# stats: stars=836, created=2023-01-18T13:20:58Z, last_updated=2025-11-27T15:45:36Z, added_to_index=2023-02-18, tags=tab|models
+# https://github.com/hako-mikan/sd-webui-supermerger.git
+# System Info
+# stats: stars=314, created=2023-01-14T16:40:39Z, last_updated=2026-02-19T07:31:16Z, added_to_index=2023-01-21, tags=script|tab
+# https://github.com/vladmandic/sd-extension-system-info.git
+# Temporal
+# stats: stars=31, created=2023-10-15T18:49:12Z, last_updated=2024-09-26T00:44:31Z, added_to_index=2023-11-04, tags=script|animation
+# https://github.com/Iniquitatis/sd-webui-temporal
+# TemporalKit
+# stats: stars=1964, created=2023-04-12T20:58:28Z, last_updated=2023-10-03T22:10:32Z, added_to_index=2023-06-22, tags=extras|animation
+# https://github.com/CiaraStrawberry/TemporalKit
+# TensorRT
+# stats: stars=1996, created=2023-10-10T02:59:19Z, last_updated=2024-03-13T17:21:16Z, added_to_index=2023-10-19, tags=tab|models
+# https://github.com/NVIDIA/Stable-Diffusion-WebUI-TensorRT
+# Test my prompt!
+# stats: stars=184, created=2022-11-06T21:08:19Z, last_updated=2024-06-03T03:05:39Z, added_to_index=2023-12-01, tags=script|prompting
+# https://github.com/Extraltodeus/test_my_prompt.git
+# text2prompt
+# stats: stars=169, created=2022-12-27T17:05:47Z, last_updated=2024-05-28T04:10:35Z, added_to_index=2023-02-11, tags=tab|prompting
+# https://github.com/toshiaki1729/stable-diffusion-webui-text2prompt.git
+# text2video
+# stats: stars=1326, created=2023-03-19T20:40:23Z, last_updated=2024-01-11T07:49:56Z, added_to_index=2023-03-19, tags=tab|animation
+# https://github.com/kabachuha/sd-webui-text2video.git
+# th_TH Localization
+# stats: stars=3, created=2022-10-25T09:43:49Z, last_updated=2022-10-25T10:11:47Z, added_to_index=2022-12-30, tags=localization
+# https://github.com/econDS/thai-localization-for-Automatic-stable-diffusion-webui
+# Thumbnailizer
+# stats: stars=23, created=2024-01-12T22:47:03Z, last_updated=2024-07-31T22:00:02Z, added_to_index=2024-01-14, tags=script|tab|UI related
+# https://github.com/MNeMoNiCuZ/sd-webui-thumbnailizer.git
+# TiledDiffusion with Tiled VAE
+# stats: stars=5008, created=2023-02-27T14:23:49Z, last_updated=2024-08-07T09:32:25Z, added_to_index=2023-03-08, tags=manipulations
+# https://github.com/pkuliyi2015/multidiffusion-upscaler-for-automatic1111.git
+# TIPO/DanTagGen Extension
+# stats: stars=302, created=2024-03-23T09:00:11Z, last_updated=2025-01-15T18:39:23Z, added_to_index=2024-09-29, tags=script|dropdown|prompting
+# https://github.com/KohakuBlueleaf/z-tipo-extension
+# Toggle light dark
+# stats: stars=3, created=2024-07-12T13:31:01Z, last_updated=2024-07-12T13:43:11Z, added_to_index=2024-07-17, tags=UI related
+# https://github.com/light-and-ray/sd-webui-toggle-dark-light.git
+# Token Downsampling
+# stats: stars=24, created=2024-03-08T21:43:59Z, last_updated=2024-03-14T05:23:25Z, added_to_index=2024-03-10, tags=script|manipulations
+# https://github.com/feffy380/sd-webui-token-downsampling.git
+# tokenizer
+# stats: stars=169, created=2022-11-05T09:42:06Z, last_updated=2022-12-10T12:58:31Z, added_to_index=2022-11-05, tags=tab|prompting
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui-tokenizer.git
+# Topaz Photo AI integration
+# stats: stars=11, created=2024-06-27T02:30:40Z, last_updated=2024-07-05T14:33:59Z, added_to_index=2024-07-01, tags=editing|script|extras
+# https://github.com/light-and-ray/sd-webui-topaz-photo-ai-integration.git
+# tr_TR Localization
+# stats: stars=1, created=2022-11-12T12:30:18Z, last_updated=2022-11-12T12:31:31Z, added_to_index=2022-11-12, tags=localization
+# https://github.com/camenduru/stable-diffusion-webui-localization-tr_TR
+# training-picker
+# stats: stars=109, created=2022-10-31T19:05:32Z, last_updated=2023-06-30T22:55:05Z, added_to_index=2022-11-06, tags=tab|training
+# https://github.com/Maurdekye/training-picker.git
+# TripoSR
+# stats: stars=14, created=2024-03-29T13:10:31Z, last_updated=2024-05-01T14:59:06Z, added_to_index=2024-04-24, tags=tab
+# https://github.com/AlbedoFire/sd-webui-triposr.git
+# TweakWeights [m9]
+# stats: stars=1, created=2024-02-14T21:37:49Z, last_updated=2024-12-01T04:37:24Z, added_to_index=2024-07-01, tags=prompting
+# https://github.com/MarcusNyne/sd-tweak-weights-m9.git
+# Txt/Img to 3D Model
+# stats: stars=274, created=2023-06-09T04:11:02Z, last_updated=2023-07-29T13:32:18Z, added_to_index=2023-06-09, tags=tab
+# https://github.com/jtydhr88/sd-webui-txt-img-to-3d-model.git
+# ua_UA Localization
+# stats: stars=6, created=2023-06-18T16:38:08Z, last_updated=2023-07-06T23:32:33Z, added_to_index=2023-06-18, tags=localization
+# https://github.com/razorback456/webui-localization-ua_UA
+# Ultimate SD Upscale
+# stats: stars=1770, created=2023-01-02T22:07:55Z, last_updated=2024-03-08T16:55:37Z, added_to_index=2023-01-10, tags=manipulations
+# https://github.com/Coyote-A/ultimate-upscale-for-automatic1111.git
+# Unprompted
+# stats: stars=808, created=2022-10-31T03:02:21Z, last_updated=2024-07-29T18:55:29Z, added_to_index=2022-11-04, tags=prompting|ads
+# https://github.com/ThereforeGames/unprompted.git
+# Untitled Merger
+# stats: stars=14, created=2024-04-29T03:17:19Z, last_updated=2025-01-15T08:55:37Z, added_to_index=2024-05-11, tags=tab|models
+# https://github.com/silveroxides/sd-webui-untitledmerger.git
+# Video in Extras tab
+# stats: stars=19, created=2024-01-15T14:00:27Z, last_updated=2024-09-22T22:00:25Z, added_to_index=2024-01-23, tags=tab|editing|animation|extras
+# https://github.com/light-and-ray/sd-webui-video-extras-tab.git
+# Video Loopback
+# stats: stars=326, created=2023-01-16T12:12:19Z, last_updated=2023-04-21T12:08:15Z, added_to_index=2023-02-13, tags=animation
+# https://github.com/fishslot/video_loopback_for_webui.git
+# Visualize Cross-Attention
+# stats: stars=115, created=2022-11-25T04:01:53Z, last_updated=2022-12-11T13:57:13Z, added_to_index=2022-11-25, tags=tab|science
+# https://github.com/benkyoujouzu/stable-diffusion-webui-visualize-cross-attention-extension.git
+# VRAM Estimator
+# stats: stars=116, created=2023-03-05T01:18:46Z, last_updated=2023-06-13T01:35:05Z, added_to_index=2023-03-05, tags=tab
+# https://github.com/space-nuko/a1111-stable-diffusion-webui-vram-estimator.git
+# Waifu2x Upscaler
+# stats: stars=4, created=2024-06-26T01:35:24Z, last_updated=2024-08-03T08:19:03Z, added_to_index=2024-07-01, tags=editing|extras
+# https://github.com/light-and-ray/sd-webui-waifu2x-upscaler.git
+# WD 1.4 Tagger
+# stats: stars=685, created=2023-06-04T15:33:34Z, last_updated=2023-11-04T11:58:30Z, added_to_index=2022-11-20, tags=tab|training
+# https://github.com/picobyte/stable-diffusion-webui-wd14-tagger.git
+# Web UI client queue
+# stats: stars=50, created=2023-02-25T11:53:03Z, last_updated=2024-01-24T05:23:22Z, added_to_index=2023-05-23, tags=script|UI related|prompting
+# https://github.com/Kryptortio/SDAtom-WebUi-client-queue-ext.git
+# Webpage close confirmation dialogue
+# stats: stars=36, created=2023-08-17T17:26:24Z, last_updated=2025-02-22T13:53:32Z, added_to_index=2023-08-17, tags=UI related
+# https://github.com/w-e-w/sdwebui-close-confirmation-dialogue.git
+# webui-foooxus-prompt-expansion
+# stats: stars=24, created=2024-05-26T10:36:40Z, last_updated=2024-06-09T11:00:14Z, added_to_index=2024-06-09, tags=prompting
+# https://github.com/power88/webui-fooocus-prompt-expansion.git
+# Weight Gradient
+# stats: stars=22, created=2023-04-24T17:25:11Z, last_updated=2023-05-21T01:06:18Z, added_to_index=2023-05-11, tags=prompting
+# https://github.com/DingoBite/weight_gradient
+# Wildcards
+# stats: stars=482, created=2022-10-22T10:51:13Z, last_updated=2024-08-03T12:25:22Z, added_to_index=2023-08-09, tags=prompting
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui-wildcards.git
+# Workflow
+# stats: stars=17, created=2023-08-24T09:46:24Z, last_updated=2024-02-24T10:46:33Z, added_to_index=2024-02-09, tags=script
+# https://github.com/Inzaniak/sd-webui-workflow
+# Yandere Inpainting as masked content
+# stats: stars=6, created=2024-07-01T15:43:12Z, last_updated=2024-07-26T21:08:27Z, added_to_index=2024-07-02, tags=UI related|manipulations
+# https://github.com/light-and-ray/sd-webui-yandere-inpaint-masked-content.git
+# zh_CN Localization
+# stats: stars=1628, created=2022-11-06T09:14:30Z, last_updated=2025-04-28T02:25:25Z, added_to_index=2022-11-06, tags=localization
+# https://github.com/dtlnor/stable-diffusion-webui-localization-zh_CN
+# zh_Hans Localization
+# stats: stars=478, created=2023-02-25T04:48:34Z, last_updated=2024-09-16T04:00:04Z, added_to_index=2023-03-13, tags=localization
+# https://github.com/hanamizuki-ai/stable-diffusion-webui-localization-zh_Hans.git
+# zh_Hant Localization
+# stats: stars=20, created=2023-08-07T20:29:00Z, last_updated=2025-11-24T10:21:15Z, added_to_index=2023-08-12, tags=localization
+# https://github.com/bluelovers/stable-diffusion-webui-localization-zh_Hant.git
+# zh_TW Localization
+# stats: stars=15, created=2023-04-18T23:44:55Z, last_updated=2023-12-14T06:05:36Z, added_to_index=2022-11-09, tags=localization
+# https://github.com/harukaxxxx/stable-diffusion-webui-localization-zh_TW.git
+# zoom-image
+# stats: stars=22, created=2023-07-14T23:30:37Z, last_updated=2024-06-22T14:24:50Z, added_to_index=2023-07-15, tags=script
+# https://github.com/viyiviyi/stable-diffusion-webui-zoomimage.git
+# µ Detection Detailer
+# stats: stars=70, created=2023-04-28T03:26:42Z, last_updated=2024-10-09T20:43:15Z, added_to_index=2023-11-25, tags=editing|manipulations
+# https://github.com/wkpark/uddetailer.git
