@@ -85,5 +85,5 @@ python3 launch.py ${COMMANDLINE_ARGS:-}
 # Run the Docker container
 # Replace <host_port> with the desired port on the host
 # Replace <container_port> with the port exposed by the application (default is usually 7860)
-# Replace <host_data_dir> with a large host path outside appdata if possible
-# docker run -d -p <host_port>:<container_port> -v <host_data_dir>:/data --name a1111-webui-aegisnir a1111-webui-aegisnir
+# Default recommended host data path: /mnt/user/ai/data/
+# docker run -d -p <host_port>:<container_port> -v /mnt/user/ai/data/:/data --name a1111-webui-aegisnir a1111-webui-aegisnir

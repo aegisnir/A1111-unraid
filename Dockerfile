@@ -80,7 +80,7 @@ ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121
 # by network design, reverse proxies, VPNs, access controls, and container
 # runtime settings rather than trying to rely on this image alone.
 # ------------------------------------------------------------------------------
-ENV COMMANDLINE_ARGS="--listen --port 7860"
+ENV COMMANDLINE_ARGS="--listen --port 7860 --data-dir /data"
 ENV WEBUI_DIR="/opt/stable-diffusion-webui"
 
 # ------------------------------------------------------------------------------
@@ -112,13 +112,13 @@ RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
    --extra-index-url "${TORCH_INDEX_URL}"
 
 # ------------------------------------------------------------------------------
-# Create a dedicated non-root user.
+# Create a dedicated non-root runtime user with Unraid-friendly UID/GID defaults.
 # Running as non-root can reduce impact in some failure scenarios.
 # It does not make the container "secure," but it can help reduce the blast
 # radius compared with running everything as root.
 # ------------------------------------------------------------------------------
-RUN getent group "${APP_GID}" || groupadd --gid "${APP_GID}" app \
- && useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash app
+RUN if ! getent group "${APP_GID}" >/dev/null; then groupadd --gid "${APP_GID}" sdwebui; fi \
+ && if ! id -u sdwebui >/dev/null 2>&1; then useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash sdwebui; fi
 
 # ------------------------------------------------------------------------------
 # Fetch A1111 source code
@@ -127,8 +127,7 @@ RUN getent group "${APP_GID}" || groupadd --gid "${APP_GID}" app \
 # is not available inside the image, so deeper forensics or history inspection
 # would need to happen outside this build context.
 # ------------------------------------------------------------------------------
-RUN useradd -m sdwebui \
-    && git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
+RUN git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
     && cd "${WEBUI_DIR}" \
     && git fetch --depth 1 origin "${WEBUI_REF}" \
     && git checkout "${WEBUI_REF}" \
@@ -138,10 +137,7 @@ RUN useradd -m sdwebui \
 # Copy entrypoint script (from this repository)
 # ------------------------------------------------------------------------------
 COPY start.sh /start.sh
-RUN if ! id -u sdwebui > /dev/null 2>&1; then \
-    groupadd -r sdwebui; \
-    useradd -r -g sdwebui sdwebui; \
-fi && chmod 0755 /start.sh && chown sdwebui:sdwebui /start.sh
+RUN chmod 0755 /start.sh && chown sdwebui:sdwebui /start.sh
 
 # ------------------------------------------------------------------------------
 # Networking
@@ -159,7 +155,7 @@ EXPOSE 7860
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD python3 -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 7860)); s.close()" || exit 1
 
-# Drop privileges at runtime.
+# Run the application as the dedicated non-root runtime user.
 # Runtime hardening should still be reviewed at the container runtime layer
 # (for example: read-only root filesystem, dropped capabilities, no-new-
 # privileges, explicit writable mounts, network exposure limits, etc.).

@@ -3,6 +3,9 @@
   <Name>A1111-WebUI-Aegisnir</Name>
   <Repository>aegisnir/a1111-unraid</Repository>
   <Registry>https://hub.docker.com/r/aegisnir/a1111-unraid</Registry>
+  <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.png</Icon>
+  <ExtraParams></ExtraParams>
+  <PostArgs></PostArgs>
   <Description>
     AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
 
@@ -15,19 +18,30 @@
   </Description>
   <Overview>
     This template passes Automatic1111 data storage through --data-dir.
-     - Models, outputs, extensions, caches, and other working data are stored in the mapped data share instead of the container filesystem.
-     - This allows you to preserve your models and outputs across container updates and easily manage them from the host.
-     - The data directory can grow very large very quickly, so I recommend storing it outside of appdata when possible. Appdata works if you prefer it, but be aware of how quickly it can fill your Docker storage area.
-    - If startup fails with a Torch GPU check error, you can temporarily add --skip-torch-cuda-test to COMMANDLINE_ARGS for troubleshooting. I do not recommend using that as a permanent default because it can mask real GPU passthrough issues.
+
+    - Models, outputs, extensions, caches, and other working data are stored in the mapped data share instead of the container filesystem.
+    - This allows you to preserve your models and outputs across container updates and manage them from the host more easily.
+    - The data directory can grow very large very quickly, so I recommend storing it outside of appdata when possible.
+    - Appdata works if you prefer it, but be aware of how quickly it can fill your Docker storage area.
+    - If startup fails with a Torch GPU check error, you can temporarily add --skip-torch-cuda-test to COMMANDLINE_ARGS for troubleshooting.
+    - I do not recommend using --skip-torch-cuda-test as a permanent default because it can mask real GPU passthrough issues.
   </Overview>
   <Category>AI:</Category>
   <WebUI>http://[IP]:[PORT:7860]</WebUI>
   <Network>bridge</Network>
   <Privileged>false</Privileged>
-  <Support>https://github.com/aegisnir/A1111-unraid</Support>
   <Project>https://github.com/AUTOMATIC1111/stable-diffusion-webui</Project>
+  <Support>https://github.com/aegisnir/A1111-unraid</Support>
+  <Changelog>https://github.com/aegisnir/A1111-unraid/blob/main/CHANGELOG.md</Changelog>
   <TemplateURL>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/template.xml</TemplateURL>
-  <Config Name="WebUI Port" Target="7860" Default="7860" Mode="tcp" Type="Port" Display="always" Required="true" Mask="false">Container port for the WebUI.</Config>
-  <Config Name="Automatic1111 Data Directory" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Type="Path" Display="always" Required="false" Mask="false">Host path for Automatic1111 --data-dir. Default is /mnt/user/ai/data/ so large models, outputs, caches, and extensions live outside appdata. Appdata works if you prefer it, but it may fill your Docker storage area faster than expected.</Config>
-  <Config Name="COMMANDLINE_ARGS" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Mode="" Type="Variable" Display="advanced" Required="false" Mask="false">Extra arguments passed to launch.py. Includes --data-dir /data by default so models, outputs, caches, and extensions live in the mapped data share instead of the container filesystem. If you hit a Torch GPU check error during troubleshooting, you can temporarily append --skip-torch-cuda-test.</Config>
+
+  <!--
+    Icon: Uses the repo's icon.png for a consistent Unraid look.
+    Changelog: Linked to the repo's CHANGELOG.md for update tracking.
+    Support: Points to the repo issues page for help.
+    TemplateURL: Always points to the latest template in main.
+  -->
+  <Config Name="WebUI Port" Target="7860" Default="7860" Mode="tcp" Type="Port" Display="always" Required="true" Mask="false">Container port exposed by the AUTOMATIC1111 WebUI.</Config>
+  <Config Name="Automatic1111 Data Directory" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">Host path mapped to Automatic1111 --data-dir. Default is /mnt/user/ai/data/ so large models, outputs, caches, and extensions live outside appdata.</Config>
+  <Config Name="Command Line Arguments" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Mode="" Type="Variable" Display="advanced" Required="false" Mask="false">Extra arguments passed to launch.py. The default includes --data-dir /data. If you hit a Torch GPU check error during troubleshooting, you can temporarily append --skip-torch-cuda-test.</Config>
 </Container>
