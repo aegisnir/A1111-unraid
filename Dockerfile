@@ -116,19 +116,21 @@ RUN getent group "${APP_GID}" || groupadd --gid "${APP_GID}" app \
 # is not available inside the image, so deeper forensics or history inspection
 # would need to happen outside this build context.
 # ------------------------------------------------------------------------------
-WORKDIR /opt
-RUN git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
- && cd "${WEBUI_DIR}" \
- && git fetch --depth 1 origin "${WEBUI_REF}" \
- && git checkout "${WEBUI_REF}" \
- && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
+RUN useradd -m sdwebui \
+    && git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
+    && cd "${WEBUI_DIR}" \
+    && git fetch --depth 1 origin "${WEBUI_REF}" \
+    && git checkout "${WEBUI_REF}" \
+    && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
 
 # ------------------------------------------------------------------------------
 # Copy entrypoint script (from this repository)
 # ------------------------------------------------------------------------------
 COPY start.sh /start.sh
-RUN chmod 0755 /start.sh \
- && chown app:app /start.sh
+RUN if ! id -u sdwebui > /dev/null 2>&1; then \
+    groupadd -r sdwebui; \
+    useradd -r -g sdwebui sdwebui; \
+fi && chmod 0755 /start.sh && chown sdwebui:sdwebui /start.sh
 
 # ------------------------------------------------------------------------------
 # Networking
@@ -150,6 +152,6 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
 # Runtime hardening should still be reviewed at the container runtime layer
 # (for example: read-only root filesystem, dropped capabilities, no-new-
 # privileges, explicit writable mounts, network exposure limits, etc.).
-USER app:app
+USER sdwebui:sdwebui
 
 ENTRYPOINT ["/start.sh"]

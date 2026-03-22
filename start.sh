@@ -21,6 +21,12 @@
 set -euo pipefail
 
 WEBUI_DIR="/opt/stable-diffusion-webui"
+LOCAL_WEBUI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/WebUI"
+
+if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
+  echo "Container WebUI directory not found; falling back to local workspace path: ${LOCAL_WEBUI_DIR}" >&2
+  WEBUI_DIR="${LOCAL_WEBUI_DIR}"
+fi
 
 # Basic sanity checks to make failures easier to diagnose.
 # These are here mostly to fail fast with clearer messages instead of producing
@@ -66,4 +72,18 @@ fi
 #   supplied switch because that can become brittle and may create a false sense
 #   of safety. Users should review the flags they pass and decide what is
 #   appropriate for their own environment.
+# - Recommended Unraid usage is to include: --data-dir /data
+#   and map `/data` to a host path with plenty of space.
 python3 launch.py ${COMMANDLINE_ARGS:-}
+
+# Instructions to build and run the Docker container for AUTOMATIC1111.
+# These commands should be run in the directory containing the Dockerfile.
+
+# Build the Docker image
+# docker build -t a1111-webui-aegisnir .
+
+# Run the Docker container
+# Replace <host_port> with the desired port on the host
+# Replace <container_port> with the port exposed by the application (default is usually 7860)
+# Replace <host_data_dir> with a large host path outside appdata if possible
+# docker run -d -p <host_port>:<container_port> -v <host_data_dir>:/data --name a1111-webui-aegisnir a1111-webui-aegisnir

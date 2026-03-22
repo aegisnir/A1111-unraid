@@ -47,9 +47,37 @@ If that fails, I would troubleshoot the host NVIDIA setup before troubleshooting
 
 The default is:
 
-- `--listen --port 7860`
+- `--listen --port 7860 --data-dir /data`
 
 If you change this, keep in mind that some flags can affect the security posture of the container. I recommend being especially careful with anything that increases exposure or enables public sharing behavior.
+
+### `--data-dir`
+
+I recommend using Automatic1111's `--data-dir` so the large, fast-growing working set lives on a host path you choose.
+
+Recommended container path:
+
+- `/data`
+
+Recommended Unraid behavior:
+
+- default host path: `/mnt/user/ai/data/`
+- prefer a path outside `appdata` if possible
+
+Why I recommend that:
+
+- this directory can grow very large very quickly
+- it may contain models, outputs, extensions, caches, and other data
+- if you store it in `appdata`, it may fill that area much faster than expected
+- if your Docker-related storage is limited, this can become painful in a hurry
+
+You can absolutely use `appdata` if that fits your setup better. I just would not make it my default recommendation.
+
+For this repo/template, the default host path is:
+
+- `/mnt/user/ai/data/`
+
+That gives the data directory a more sensible starting point on Unraid without pushing users into `appdata` by default.
 
 ## Hardening ideas for Unraid
 
@@ -74,12 +102,9 @@ If you use `--read-only`, expect to provide explicit writable mounts for things 
 
 ## Storage and permissions
 
-If you use a read-only root filesystem, these are the main paths I would expect to need writable storage:
+If you use `--data-dir /data`, most of the large writable content should live under `/data` instead of being scattered under the application directory.
 
-- `/opt/stable-diffusion-webui/models`
-- `/opt/stable-diffusion-webui/outputs`
-- `/opt/stable-diffusion-webui/extensions`
-- `/opt/stable-diffusion-webui/logs`
+That is one of the main reasons I prefer the `--data-dir` approach for Unraid.
 
 This image is currently set up with Unraid-friendly defaults:
 - UID `99`

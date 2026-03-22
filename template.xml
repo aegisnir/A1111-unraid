@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>A1111-WebUI-Aegisnir</Name>
+  <Repository>aegisnir/a1111-unraid</Repository>
+  <Registry>https://hub.docker.com/r/aegisnir/a1111-unraid</Registry>
+  <Description>
+    AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
+
+    DATA DIRECTORY WARNING:
+    The path used with --data-dir grows very large very quickly because it can hold models, outputs, extensions, caches, and other working data.
+    I recommend storing it outside of appdata when possible.
+    You can still place it inside appdata if you want the convenience, but it may consume space very quickly and can fill the location you use for Docker-related storage.
+
+    The default host path is set to /mnt/user/ai/data/ so the large working set lives outside appdata by default.
+  </Description>
+  <Overview>
+    This template passes Automatic1111 data storage through --data-dir.
+     - Models, outputs, extensions, caches, and other working data are stored in the mapped data share instead of the container filesystem.
+     - This allows you to preserve your models and outputs across container updates and easily manage them from the host.
+     - The data directory can grow very large very quickly, so I recommend storing it outside of appdata when possible. Appdata works if you prefer it, but be aware of how quickly it can fill your Docker storage area.
+  </Overview>
+  <Category>AI:</Category>
+  <WebUI>http://[IP]:[PORT:7860]</WebUI>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/aegisnir/A1111-unraid</Support>
+  <Project>https://github.com/AUTOMATIC1111/stable-diffusion-webui</Project>
+  <TemplateURL>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/template.xml</TemplateURL>
+  <Config Name="WebUI Port" Target="7860" Default="7860" Mode="tcp" Type="Port" Display="always" Required="true" Mask="false">Container port for the WebUI.</Config>
+  <Config Name="Automatic1111 Data Directory" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Type="Path" Display="always" Required="false" Mask="false">Host path for Automatic1111 --data-dir. Default is /mnt/user/ai/data/ so large models, outputs, caches, and extensions live outside appdata. Appdata works if you prefer it, but it may fill your Docker storage area faster than expected.</Config>
+  <Config Name="COMMANDLINE_ARGS" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Mode="" Type="Variable" Display="advanced" Required="false" Mask="false">Extra arguments passed to launch.py. Includes --data-dir /data by default so models, outputs, caches, and extensions live in the mapped data share instead of the container filesystem.</Config>
+</Container>
