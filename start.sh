@@ -1,12 +1,3 @@
-# Set HOME for the non-root user to /data for consistent config/cache locations
-export HOME=/data
-
-# Use persistent pip cache in /data for faster rebuilds
-export PIP_CACHE_DIR=/data/pip-cache
-if [[ "$(id -u)" == "0" ]]; then
-  echo "ERROR: Refusing to run as root. Please use a non-root user (UID 99 recommended for Unraid)." >&2
-  exit 1
-fi
 #!/usr/bin/env bash
 #
 # start.sh - Container entrypoint for AUTOMATIC1111 Stable Diffusion WebUI
@@ -31,6 +22,17 @@ fi
 #
 
 set -euo pipefail
+
+# Set HOME for the non-root user to /data for consistent config/cache locations
+export HOME=/data
+
+# Use persistent pip cache in /data for faster rebuilds
+export PIP_CACHE_DIR=/data/pip-cache
+
+if [[ "$(id -u)" == "0" ]]; then
+  echo "ERROR: Refusing to run as root. Please use a non-root user (UID 99 recommended for Unraid)." >&2
+  exit 1
+fi
 
 WEBUI_DIR="/opt/stable-diffusion-webui"
 LOCAL_WEBUI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/WebUI"
