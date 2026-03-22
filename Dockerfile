@@ -113,12 +113,18 @@ RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
 
 # ------------------------------------------------------------------------------
 # Create a dedicated non-root runtime user with Unraid-friendly UID/GID defaults.
-# Running as non-root can reduce impact in some failure scenarios.
-# It does not make the container "secure," but it can help reduce the blast
-# radius compared with running everything as root.
-# ------------------------------------------------------------------------------
-RUN if ! getent group "${APP_GID}" >/dev/null; then groupadd --gid "${APP_GID}" sdwebui; fi \
- && if ! id -u sdwebui >/dev/null 2>&1; then useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash sdwebui; fi
+# This logic ensures the group and user are always named 'sdwebui', even if the UID/GID already exist with other names (Unraid compatibility).
+RUN set -eux; \
+  if getent group "${APP_GID}" > /dev/null; then \
+    groupmod -n sdwebui "$(getent group "${APP_GID}" | cut -d: -f1)"; \
+  else \
+    groupadd --gid "${APP_GID}" sdwebui; \
+  fi; \
+  if id -u sdwebui > /dev/null 2>&1; then \
+    usermod -u "${APP_UID}" -g "${APP_GID}" sdwebui; \
+  else \
+    useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash sdwebui; \
+  fi
 
 # ------------------------------------------------------------------------------
 # Fetch A1111 source code
