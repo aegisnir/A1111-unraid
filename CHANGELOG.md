@@ -7,6 +7,22 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Console color palette:
+	- added ANSI color output to `start.sh` and `entrypoint.sh` for terminal sessions (plain in log files via `[[ -t 2 ]]` guard)
+	- color scheme: **violet** (`\e[95m`) for informational/safe-to-ignore messages; **orange** (`\e[93m`) for caution/warnings; **scarlet** (`\e[91m`) for critical errors; **silver** (`\e[37m`) for structural chrome (borders, labels, dim text)
+	- applied consistently: ERROR lines → scarlet+bold label; WARNING lines → orange; auth/ready/venv notices → violet; borders, free-space, UMASK → silver
+	- `print_launch_notice` banner and all inline annotation boxes (`[NOTE]`, `[KNOWN WARNING]`, `[GPU MEMORY ERROR]`, `[GPU NOT DETECTED]`, `[READY]`) are fully color-coded
+	- `entrypoint.sh` uses the same palette for its ownership/permission repair notices
+- Console output improvements:
+	- added pre-launch banner (`print_launch_notice`) showing: model checkpoint count, first-run bootstrap notice, known-harmless warnings table, and access URL reminder
+	- added inline output monitor (`monitor_webui_output`) that annotates known noisy lines in real time:
+		- `timm.models.layers` FutureWarning → `[NOTE] ↑ Harmless upstream deprecation. Safe to ignore.`
+		- `TypedStorage is deprecated` → `[NOTE] ↑ Harmless internal PyTorch notice. Safe to ignore.`
+		- `No checkpoints found` → `[KNOWN WARNING]` box with fix instructions
+		- `CUDA out of memory` → `[GPU MEMORY ERROR]` box with tuning tips
+		- `torch.cuda.is_available() = False` / `Torch is not able to use GPU` → `[GPU NOT DETECTED]` box with host-side check steps
+		- `Running on local URL` → `[READY]` box confirming WebUI is accepting connections
+	- WebUI is now launched via a named pipe with signal forwarding so Docker `stop`/`kill` reaches the Python process cleanly while monitoring is active
 - Self-healing startup:
 	- added `entrypoint.sh` as a root-level container entrypoint that automatically corrects `/data` ownership before dropping to the unprivileged app user (`sdwebui` / UID 99)
 	- uses the standard "init as root, drop privileges" pattern (same as postgres, nginx, redis)

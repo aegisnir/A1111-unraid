@@ -21,6 +21,15 @@
 
 set -euo pipefail
 
+# ── Color palette ────────────────────────────────────────────────────────────
+# Mirror start.sh color conventions. Only emit sequences to a terminal.
+if [[ -t 2 ]]; then
+  C_RESET=$'\e[0m'; C_BOLD=$'\e[1m'
+  C_SILVER=$'\e[37m'; C_VIOLET=$'\e[95m'; C_ORANGE=$'\e[93m'; C_SCARLET=$'\e[91m'
+else
+  C_RESET='' C_BOLD='' C_SILVER='' C_VIOLET='' C_ORANGE='' C_SCARLET=''
+fi
+
 DATA_DIR="/data"
 APP_USER="sdwebui"
 EXPECTED_UID=99
@@ -29,8 +38,8 @@ EXPECTED_GID=100
 if [[ -d "${DATA_DIR}" ]]; then
   data_owner_uid="$(stat -c '%u' "${DATA_DIR}")"
   if [[ "${data_owner_uid}" != "${EXPECTED_UID}" ]]; then
-    echo "[entrypoint] /data is owned by uid=${data_owner_uid}, expected uid=${EXPECTED_UID}." >&2
-    echo "[entrypoint] Correcting ownership and permissions under /data..." >&2
+    echo "${C_ORANGE}[entrypoint] /data is owned by uid=${data_owner_uid}, expected uid=${EXPECTED_UID}.${C_RESET}" >&2
+    echo "${C_ORANGE}[entrypoint] Correcting ownership and permissions under /data...${C_RESET}" >&2
     # Fix ownership on top-level dir first so the app user can write immediately.
     chown "${EXPECTED_UID}:${EXPECTED_GID}" "${DATA_DIR}"
     chmod 775 "${DATA_DIR}"
@@ -43,16 +52,16 @@ if [[ -d "${DATA_DIR}" ]]; then
     # This only runs in the degraded-ownership path, never on a healthy startup.
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
-    echo "[entrypoint] /data ownership and permissions corrected. Continuing startup." >&2
+    echo "${C_VIOLET}[entrypoint] /data ownership and permissions corrected. Continuing startup.${C_RESET}" >&2
   elif [[ ! -w "${DATA_DIR}" || ! -x "${DATA_DIR}" ]]; then
     # Ownership is correct but the top-level mode was stomped (e.g. chmod 000 or chmod 700
     # on the host while the directory was already owned by uid 99).
-    echo "[entrypoint] /data is owned by the correct user but is not writable/traversable." >&2
-    echo "[entrypoint] Restoring mode 775 and fixing permission modes under /data..." >&2
+    echo "${C_ORANGE}[entrypoint] /data is owned by the correct user but is not writable/traversable.${C_RESET}" >&2
+    echo "${C_ORANGE}[entrypoint] Restoring mode 775 and fixing permission modes under /data...${C_RESET}" >&2
     chmod 775 "${DATA_DIR}"
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
-    echo "[entrypoint] /data permissions restored. Continuing startup." >&2
+    echo "${C_VIOLET}[entrypoint] /data permissions restored. Continuing startup.${C_RESET}" >&2
   fi
 fi
 

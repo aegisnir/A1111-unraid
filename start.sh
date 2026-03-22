@@ -23,6 +23,19 @@
 
 set -euo pipefail
 
+# ── Color palette ────────────────────────────────────────────────────────────
+# Violet  → informational / safe-to-ignore messages
+# Orange  → caution / warnings that need attention but are not fatal
+# Scarlet → critical errors requiring user action
+# Silver  → structural chrome (borders, labels, dim text)
+# Only emit color sequences when stderr is a terminal; stay plain in log files.
+if [[ -t 2 ]]; then
+  C_RESET=$'\e[0m'; C_BOLD=$'\e[1m'; C_SILVER=$'\e[37m'
+  C_VIOLET=$'\e[95m'; C_ORANGE=$'\e[93m'; C_SCARLET=$'\e[91m'
+else
+  C_RESET='' C_BOLD='' C_SILVER='' C_VIOLET='' C_ORANGE='' C_SCARLET=''
+fi
+
 # Set HOME for the non-root user to /data for consistent config/cache locations
 export HOME=/data
 
@@ -34,7 +47,7 @@ export TMPDIR=/data/tmp
 export PIP_CACHE_DIR=/data/pip-cache
 
 if [[ "$(id -u)" == "0" ]]; then
-  echo "ERROR: Refusing to run as root. Please use a non-root user (UID 99 recommended for Unraid)." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} Refusing to run as root. Please use a non-root user (UID 99 recommended for Unraid).${C_RESET}" >&2
   exit 1
 fi
 
@@ -60,15 +73,15 @@ export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
 
 if [[ -n "${UMASK}" ]]; then
   if [[ ! "${UMASK}" =~ ^[0-7]{3,4}$ ]]; then
-    echo "ERROR: UMASK must be a 3- or 4-digit octal value (for example 027 or 0027)." >&2
+    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} UMASK must be a 3- or 4-digit octal value (for example 027 or 0027).${C_RESET}" >&2
     exit 1
   fi
   umask "${UMASK}"
-  echo "Using UMASK=${UMASK}" >&2
+  echo "${C_SILVER}Using UMASK=${UMASK}${C_RESET}" >&2
 fi
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
-  echo "Container WebUI directory not found; falling back to local workspace path: ${LOCAL_WEBUI_DIR}" >&2
+  echo "${C_ORANGE}Container WebUI directory not found; falling back to local workspace path: ${LOCAL_WEBUI_DIR}${C_RESET}" >&2
   WEBUI_DIR="${LOCAL_WEBUI_DIR}"
 fi
 
@@ -76,41 +89,41 @@ fi
 # These are here mostly to fail fast with clearer messages instead of producing
 # a less helpful Python or file-not-found error later in startup.
 if [[ ! -d "${WEBUI_DIR}" ]]; then
-  echo "ERROR: Expected WebUI directory not found: ${WEBUI_DIR}" >&2
-  echo "       The image build may have failed or WEBUI_DIR may be incorrect." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} Expected WebUI directory not found: ${WEBUI_DIR}${C_RESET}" >&2
+  echo "${C_SCARLET}       The image build may have failed or WEBUI_DIR may be incorrect.${C_RESET}" >&2
   exit 1
 fi
 
 if [[ ! -f "${WEBUI_DIR}/launch.py" ]]; then
-  echo "ERROR: launch.py not found in: ${WEBUI_DIR}" >&2
-  echo "       The repository contents may be incomplete or not checked out as expected." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} launch.py not found in: ${WEBUI_DIR}${C_RESET}" >&2
+  echo "${C_SCARLET}       The repository contents may be incomplete or not checked out as expected.${C_RESET}" >&2
   exit 1
 fi
 
 if ! command -v python3 >/dev/null 2>&1; then
-  echo "ERROR: python3 is not available in PATH." >&2
-  echo "       The base image or dependency installation may be incomplete." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} python3 is not available in PATH.${C_RESET}" >&2
+  echo "${C_SCARLET}       The base image or dependency installation may be incomplete.${C_RESET}" >&2
   exit 1
 fi
 
 if [[ ! -d "/data" ]]; then
-  echo "ERROR: Expected mapped data directory not found at /data" >&2
-  echo "       Map /data to a writable host path before starting the container." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} Expected mapped data directory not found at /data${C_RESET}" >&2
+  echo "${C_SCARLET}       Map /data to a writable host path before starting the container.${C_RESET}" >&2
   exit 1
 fi
 
 if [[ ! -w "/data" ]]; then
-  echo "ERROR: /data exists but is not writable by the current user (uid=$(id -u))." >&2
-  echo "       The container entrypoint attempted to correct this automatically but could not." >&2
-  echo "       This can happen with NFS root squash, unusual host permissions, or SELinux policies." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} /data exists but is not writable by the current user (uid=$(id -u)).${C_RESET}" >&2
+  echo "${C_SCARLET}       The container entrypoint attempted to correct this automatically but could not.${C_RESET}" >&2
+  echo "${C_SCARLET}       This can happen with NFS root squash, unusual host permissions, or SELinux policies.${C_RESET}" >&2
   echo "" >&2
-  echo "       To fix manually, run the following on the Unraid host (as root) and then restart" >&2
-  echo "       the container:" >&2
+  echo "${C_ORANGE}       To fix manually, run the following on the Unraid host (as root) and then restart${C_RESET}" >&2
+  echo "${C_ORANGE}       the container:${C_RESET}" >&2
   echo "" >&2
-  echo "         chown nobody:users /mnt/user/ai/data" >&2
-  echo "         chmod 775 /mnt/user/ai/data" >&2
+  echo "${C_SILVER}         chown nobody:users /mnt/user/ai/data${C_RESET}" >&2
+  echo "${C_SILVER}         chmod 775 /mnt/user/ai/data${C_RESET}" >&2
   echo "" >&2
-  echo "       Adjust the path above if your Unraid share path is different." >&2
+  echo "${C_ORANGE}       Adjust the path above if your Unraid share path is different.${C_RESET}" >&2
   exit 1
 fi
 
@@ -130,72 +143,72 @@ mkdir -p /data/outputs
 
 available_kb="$(df -Pk /data | awk 'NR==2 {print $4}')"
 if [[ -z "${available_kb}" || ! "${available_kb}" =~ ^[0-9]+$ ]]; then
-  echo "ERROR: Unable to determine free space for /data." >&2
-  echo "       Verify that /data is mounted and writable before starting the container." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} Unable to determine free space for /data.${C_RESET}" >&2
+  echo "${C_SCARLET}       Verify that /data is mounted and writable before starting the container.${C_RESET}" >&2
   exit 1
 fi
 
 if [[ -e "${WEBUI_DIR}/config_states" && ! -L "${WEBUI_DIR}/config_states" ]]; then
-  echo "ERROR: ${WEBUI_DIR}/config_states exists and is not a symlink." >&2
-  echo "       On a read-only container filesystem, start.sh cannot replace it at runtime." >&2
-  echo "       Rebuild the image without that path, or remove it before enabling --read-only." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} ${WEBUI_DIR}/config_states exists and is not a symlink.${C_RESET}" >&2
+  echo "${C_SCARLET}       On a read-only container filesystem, start.sh cannot replace it at runtime.${C_RESET}" >&2
+  echo "${C_ORANGE}       Rebuild the image without that path, or remove it before enabling --read-only.${C_RESET}" >&2
   exit 1
 fi
 
 if [[ -L "${WEBUI_DIR}/config_states" ]]; then
   existing_target="$(readlink "${WEBUI_DIR}/config_states")"
   if [[ "${existing_target}" != "${RUNTIME_CONFIG_STATES_DIR}" ]]; then
-    echo "ERROR: ${WEBUI_DIR}/config_states points to ${existing_target}, expected ${RUNTIME_CONFIG_STATES_DIR}." >&2
-    echo "       Rebuild the image so the config_states symlink matches the persistent runtime path." >&2
+    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} ${WEBUI_DIR}/config_states points to ${existing_target}, expected ${RUNTIME_CONFIG_STATES_DIR}.${C_RESET}" >&2
+    echo "${C_ORANGE}       Rebuild the image so the config_states symlink matches the persistent runtime path.${C_RESET}" >&2
     exit 1
   fi
 else
-  echo "ERROR: ${WEBUI_DIR}/config_states symlink is missing." >&2
-  echo "       This image now expects that symlink to be created at build time so startup works with --read-only." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} ${WEBUI_DIR}/config_states symlink is missing.${C_RESET}" >&2
+  echo "${C_ORANGE}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
   exit 1
 fi
 
 available_mb="$(( available_kb / 1024 ))"
-echo "Detected free space in /data: ${available_mb} MiB"
+echo "${C_SILVER}Detected free space in /data: ${available_mb} MiB${C_RESET}"
 
 required_kb="$(( MIN_BOOTSTRAP_FREE_MB * 1024 ))"
 if [[ ! -f "${BOOTSTRAP_STAMP}" && "${available_kb}" -lt "${required_kb}" ]]; then
-  echo "ERROR: Not enough free space in /data for first-run dependency bootstrap." >&2
-  echo "       Available: ${available_mb} MiB" >&2
-  echo "       Recommended minimum: ${MIN_BOOTSTRAP_FREE_MB} MiB" >&2
-  echo "       Torch, torchvision, xformers, and pip temp files can require several GB on first startup." >&2
-  echo "       Free additional space in the mapped /data path, or set MIN_BOOTSTRAP_FREE_MB if you intentionally want a different threshold." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} Not enough free space in /data for first-run dependency bootstrap.${C_RESET}" >&2
+  echo "${C_SCARLET}       Available: ${available_mb} MiB${C_RESET}" >&2
+  echo "${C_SCARLET}       Recommended minimum: ${MIN_BOOTSTRAP_FREE_MB} MiB${C_RESET}" >&2
+  echo "${C_ORANGE}       Torch, torchvision, xformers, and pip temp files can require several GB on first startup.${C_RESET}" >&2
+  echo "${C_ORANGE}       Free additional space in the mapped /data path, or set MIN_BOOTSTRAP_FREE_MB if you intentionally want a different threshold.${C_RESET}" >&2
   exit 1
 fi
 
 if [[ -e "${WEBUI_DIR}/repositories" && ! -L "${WEBUI_DIR}/repositories" ]]; then
-  echo "ERROR: ${WEBUI_DIR}/repositories exists and is not a symlink." >&2
-  echo "       On a read-only container filesystem, start.sh cannot replace it at runtime." >&2
-  echo "       Rebuild the image with the symlink baked in, or remove that path before enabling --read-only." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} ${WEBUI_DIR}/repositories exists and is not a symlink.${C_RESET}" >&2
+  echo "${C_SCARLET}       On a read-only container filesystem, start.sh cannot replace it at runtime.${C_RESET}" >&2
+  echo "${C_ORANGE}       Rebuild the image with the symlink baked in, or remove that path before enabling --read-only.${C_RESET}" >&2
   exit 1
 fi
 
 if [[ -L "${WEBUI_DIR}/repositories" ]]; then
   existing_target="$(readlink "${WEBUI_DIR}/repositories")"
   if [[ "${existing_target}" != "${RUNTIME_REPOS_DIR}" ]]; then
-    echo "ERROR: ${WEBUI_DIR}/repositories points to ${existing_target}, expected ${RUNTIME_REPOS_DIR}." >&2
-    echo "       Rebuild the image so the repositories symlink matches the persistent runtime path." >&2
+    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} ${WEBUI_DIR}/repositories points to ${existing_target}, expected ${RUNTIME_REPOS_DIR}.${C_RESET}" >&2
+    echo "${C_ORANGE}       Rebuild the image so the repositories symlink matches the persistent runtime path.${C_RESET}" >&2
     exit 1
   fi
 else
-  echo "ERROR: ${WEBUI_DIR}/repositories symlink is missing." >&2
-  echo "       This image now expects that symlink to be created at build time so startup works with --read-only." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} ${WEBUI_DIR}/repositories symlink is missing.${C_RESET}" >&2
+  echo "${C_ORANGE}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
   exit 1
 fi
 
 if [[ ! -x "${VENV_PYTHON}" ]]; then
-  echo "Creating persistent Python virtual environment in ${VENV_DIR}" >&2
+  echo "${C_VIOLET}Creating persistent Python virtual environment in ${VENV_DIR}${C_RESET}" >&2
   python3 -m venv "${VENV_DIR}"
 fi
 
 if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
-  echo "Installing first-start Python dependencies (this may take a while)..." >&2
-  echo "Bootstrap dependency targets: torch=${TORCH_VERSION}, torchvision=${TORCHVISION_VERSION}, xformers=${XFORMERS_VERSION}" >&2
+  echo "${C_ORANGE}Installing first-start Python dependencies (this may take a while)...${C_RESET}" >&2
+  echo "${C_SILVER}Bootstrap dependency targets: torch=${TORCH_VERSION}, torchvision=${TORCHVISION_VERSION}, xformers=${XFORMERS_VERSION}${C_RESET}" >&2
   # Upgrade pip to latest version
   "${VENV_PYTHON}" -m pip install --upgrade pip
   # Pin setuptools for compatibility, upgrade wheel
@@ -285,8 +298,8 @@ if errors:
   sys.exit(1)
 PY
 then
-  echo "ERROR: Installed dependency versions do not match the configured bootstrap pins." >&2
-  echo "       Remove ${VENV_DIR} and retry so the container can rebuild a clean environment." >&2
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} Installed dependency versions do not match the configured bootstrap pins.${C_RESET}" >&2
+  echo "${C_ORANGE}       Remove ${VENV_DIR} and retry so the container can rebuild a clean environment.${C_RESET}" >&2
   exit 1
 fi
 
@@ -294,35 +307,35 @@ AUTH_ARGS=()
 USING_WEBUI_AUTH_FILE=0
 
 if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth([=[:space:]]|$) ]]; then
-  echo "WebUI authentication is being managed via COMMANDLINE_ARGS." >&2
+  echo "${C_VIOLET}WebUI authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
 elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth-path([=[:space:]]|$) ]]; then
-  echo "WebUI authentication file is being managed via COMMANDLINE_ARGS." >&2
+  echo "${C_VIOLET}WebUI authentication file is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
 elif [[ -n "${WEBUI_AUTH_FILE}" ]]; then
   if [[ ! -f "${WEBUI_AUTH_FILE}" ]]; then
-    echo "ERROR: WEBUI_AUTH_FILE is set but the file does not exist: ${WEBUI_AUTH_FILE}" >&2
+    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but the file does not exist: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
     exit 1
   fi
   if [[ ! -s "${WEBUI_AUTH_FILE}" ]]; then
-    echo "ERROR: WEBUI_AUTH_FILE is set but the file is empty: ${WEBUI_AUTH_FILE}" >&2
+    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but the file is empty: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
     exit 1
   fi
   AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_FILE}")
   USING_WEBUI_AUTH_FILE=1
-  echo "WebUI authentication file is enabled via WEBUI_AUTH_FILE." >&2
+  echo "${C_VIOLET}WebUI authentication file is enabled via WEBUI_AUTH_FILE.${C_RESET}" >&2
 else
   if [[ "${WEBUI_PASSWORD}" == "changeme-now" ]]; then
-    echo "ERROR: WEBUI_PASSWORD is still set to the insecure default value." >&2
-    echo "       Set WEBUI_PASSWORD to a unique password before starting the container." >&2
-    echo "       Alternatively, manage authentication explicitly with --gradio-auth, --gradio-auth-path, or WEBUI_AUTH_FILE." >&2
+    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_PASSWORD is still set to the insecure default value.${C_RESET}" >&2
+    echo "${C_ORANGE}       Set WEBUI_PASSWORD to a unique password before starting the container.${C_RESET}" >&2
+    echo "${C_ORANGE}       Alternatively, manage authentication explicitly with --gradio-auth, --gradio-auth-path, or WEBUI_AUTH_FILE.${C_RESET}" >&2
     exit 1
   fi
   AUTH_ARGS+=("--gradio-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
-  echo "WebUI login is enabled by default. Username: ${WEBUI_USERNAME}" >&2
+  echo "${C_VIOLET}WebUI login is enabled by default. Username: ${WEBUI_USERNAME}${C_RESET}" >&2
 fi
 
 if [[ "${USING_WEBUI_AUTH_FILE}" == "1" ]]; then
   if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-    echo "API authentication is being managed via COMMANDLINE_ARGS." >&2
+    echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
   elif [[ "${API_AUTH_FILE_MODE}" == "mirror-webui-file" ]]; then
     api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
 import sys
@@ -344,15 +357,15 @@ print(','.join(entries))
 PY
 )"
     if [[ -z "${api_auth_value}" ]]; then
-      echo "ERROR: WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}" >&2
+      echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
       exit 1
     fi
     AUTH_ARGS+=("--api-auth" "${api_auth_value}")
-    echo "API authentication is mirrored from WEBUI_AUTH_FILE." >&2
+    echo "${C_VIOLET}API authentication is mirrored from WEBUI_AUTH_FILE.${C_RESET}" >&2
   elif [[ "${API_AUTH_FILE_MODE}" == "disabled" ]]; then
-    echo "API auth mirroring from WEBUI_AUTH_FILE disabled via API_AUTH_FILE_MODE=disabled." >&2
+    echo "${C_SILVER}API auth mirroring from WEBUI_AUTH_FILE disabled via API_AUTH_FILE_MODE=disabled.${C_RESET}" >&2
   else
-    echo "WARNING: Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to mirror-webui-file." >&2
+    echo "${C_ORANGE}[WARNING] Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to mirror-webui-file." >&2
     api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
 import sys
 from pathlib import Path
@@ -373,52 +386,169 @@ print(','.join(entries))
 PY
 )"
     if [[ -z "${api_auth_value}" ]]; then
-      echo "ERROR: WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}" >&2
+      echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
       exit 1
     fi
     AUTH_ARGS+=("--api-auth" "${api_auth_value}")
-    echo "API authentication is mirrored from WEBUI_AUTH_FILE." >&2
+    echo "${C_VIOLET}API authentication is mirrored from WEBUI_AUTH_FILE.${C_RESET}" >&2
   fi
 elif [[ "${API_AUTH_MODE}" == "mirror-webui" ]]; then
   if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-    echo "API authentication is being managed via COMMANDLINE_ARGS." >&2
+    echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
   else
     AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
   fi
 elif [[ "${API_AUTH_MODE}" == "disabled" ]]; then
-  echo "API authentication mirroring disabled via API_AUTH_MODE=disabled." >&2
+  echo "${C_SILVER}API authentication mirroring disabled via API_AUTH_MODE=disabled.${C_RESET}" >&2
 else
-  echo "WARNING: Unrecognized API_AUTH_MODE=${API_AUTH_MODE}. Expected mirror-webui or disabled. Falling back to mirror-webui." >&2
+  echo "${C_ORANGE}[WARNING] Unrecognized API_AUTH_MODE=${API_AUTH_MODE}. Expected mirror-webui or disabled. Falling back to mirror-webui.${C_RESET}" >&2
   if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-    echo "API authentication is being managed via COMMANDLINE_ARGS." >&2
+    echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
   else
     AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
   fi
 fi
 
-# Optional: print a minimal startup banner (avoids echoing all args verbatim).
-# This is intentionally conservative to reduce the chance of logging sensitive values
-# if users pass secrets via COMMANDLINE_ARGS.
-#
-# Recommendation:
-# Avoid placing secrets in COMMANDLINE_ARGS if at all possible. Command-line
-# arguments are often easier to leak through logs, diagnostics, process lists,
-# screenshots, or copy/paste mistakes than dedicated secret-management methods.
-if [[ -n "${COMMANDLINE_ARGS:-}" ]]; then
-  echo "Starting WebUI (COMMANDLINE_ARGS set)."
-else
-  echo "Starting WebUI (no COMMANDLINE_ARGS provided)."
-fi
+# ─────────────────────────────────────────────────────────────────────────────
+# Startup output helpers
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Launch AUTOMATIC1111.
-# - If COMMANDLINE_ARGS is unset, pass nothing.
-# - If set, arguments are expanded as-is.
-# - This script intentionally avoids trying to sanitize or validate every user-
-#   supplied switch because that can become brittle and may create a false sense
-#   of safety. Users should review the flags they pass and decide what is
-#   appropriate for their own environment.
-# - Recommended Unraid usage is to include: --data-dir /data
-#   and map `/data` to a host path with plenty of space.
+# print_launch_notice: print a friendly pre-launch summary so users know what
+# to expect before WebUI output starts scrolling. Covers first-run scenarios,
+# missing models, and a table of known harmless warnings.
+print_launch_notice() {
+  local model_count=0
+  if [[ -d "/data/models/Stable-diffusion" ]]; then
+    model_count="$(find /data/models/Stable-diffusion -maxdepth 1 \( -name '*.safetensors' -o -name '*.ckpt' \) 2>/dev/null | wc -l | tr -d ' ')"
+  fi
+
+  local S="${C_SILVER}" V="${C_VIOLET}" O="${C_ORANGE}" R="${C_RESET}" B="${C_BOLD}"
+
+  echo ""
+  echo "${S}┌─────────────────────────────────────────────────────────────────────┐${R}"
+  echo "${S}│${R}  ${B}${V}AUTOMATIC1111 Stable Diffusion WebUI${R}${S}                               │${R}"
+  echo "${S}└─────────────────────────────────────────────────────────────────────┘${R}"
+  echo ""
+
+  if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
+    echo "  ${O}${B}► FIRST RUN:${R}${O} Installing Python dependencies under /data/venv.${R}"
+    echo "  ${O}  This can take several minutes. Subsequent starts will be much faster.${R}"
+    echo ""
+  fi
+
+  if [[ "${model_count}" -eq 0 ]]; then
+    echo "  ${O}⚠  No model checkpoints found in /data/models/Stable-diffusion/${R}"
+    echo "  ${O}   You will see a 'No checkpoints found' warning below — this is expected${R}"
+    echo "  ${O}   until you add a model. The WebUI will still start.${R}"
+    echo "  ${O}   Fix: add a .safetensors or .ckpt file to:${R}"
+    echo "  ${O}          /data/models/Stable-diffusion/${R}"
+    echo "  ${O}        then restart the container or use Settings → Refresh in the UI.${R}"
+  else
+    echo "  ${V}✓  Found ${model_count} checkpoint(s) in /data/models/Stable-diffusion/${R}"
+  fi
+
+  echo ""
+  echo "  ${S}Known harmless messages you may see in the log below:${R}"
+  echo "  ${S}▸ 'FutureWarning: Importing from timm.models.layers'${R}"
+  echo "    ${V}→ Upstream library deprecation notice. Safe to ignore.${R}"
+  echo "  ${S}▸ 'UserWarning: TypedStorage is deprecated'${R}"
+  echo "    ${V}→ Internal PyTorch notice. Safe to ignore.${R}"
+  echo "  ${S}▸ 'Stable diffusion model failed to load' (only when no checkpoint exists)${R}"
+  echo "    ${O}→ Expected until a model is placed in /data/models/Stable-diffusion/.${R}"
+  echo ""
+  echo "  ${V}Inline notes marked [NOTE] or [KNOWN WARNING] are added by this container${R}"
+  echo "  ${V}and are not part of the upstream WebUI output.${R}"
+  echo ""
+  echo "  ${V}WebUI will be available at: ${B}http://<your-unraid-ip>:7860${R}"
+  echo "  ${S}(Use your Unraid hostname or IP and the port you mapped in the template)${R}"
+  echo ""
+  echo "${S}─────────────────────────────────────────────────────────────────────────${R}"
+  echo ""
+}
+
+# monitor_webui_output: pass all WebUI stdout/stderr through unchanged, and
+# emit inline notes after recognised noisy lines so users are not alarmed.
+# Runs in a subshell reading from the WebUI output pipe.
+monitor_webui_output() {
+  local _saw_timm=0 _saw_storage=0 _saw_checkpoint=0
+
+  while IFS= read -r line; do
+    printf '%s\n' "${line}"
+
+    # timm FutureWarning — appears on every start, always harmless
+    if [[ $_saw_timm -eq 0 && "${line}" == *"Importing from timm.models.layers is deprecated"* ]]; then
+      _saw_timm=1
+      echo "  ${C_VIOLET}[NOTE] ↑ Harmless upstream deprecation warning from the timm library. Safe to ignore.${C_RESET}"
+    fi
+
+    # PyTorch TypedStorage deprecation — common internal notice, harmless
+    if [[ $_saw_storage -eq 0 && "${line}" == *"TypedStorage is deprecated"* ]]; then
+      _saw_storage=1
+      echo "  ${C_VIOLET}[NOTE] ↑ Harmless internal PyTorch deprecation notice. Safe to ignore.${C_RESET}"
+    fi
+
+    # No checkpoints found — needs action if user intends to generate images
+    if [[ $_saw_checkpoint -eq 0 && "${line}" == *"No checkpoints found"* ]]; then
+      _saw_checkpoint=1
+      echo ""
+      echo "  ${C_ORANGE}┌─ ${C_BOLD}[KNOWN WARNING]${C_RESET}${C_ORANGE} ───────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_ORANGE}│  No model checkpoint was found. This is expected on a fresh install${C_RESET}"
+      echo "  ${C_ORANGE}│  or if /data/models/ was cleared. The WebUI will still start.${C_RESET}"
+      echo "  ${C_ORANGE}│${C_RESET}"
+      echo "  ${C_ORANGE}│  Fix: add a .safetensors or .ckpt file to:${C_RESET}"
+      echo "  ${C_ORANGE}│         /data/models/Stable-diffusion/${C_RESET}"
+      echo "  ${C_ORANGE}│  then restart the container, or use Settings → Refresh in the UI.${C_RESET}"
+      echo "  ${C_ORANGE}└─────────────────────────────────────────────────────────────────────${C_RESET}"
+      echo ""
+    fi
+
+    # CUDA out of memory — actionable GPU issue
+    if [[ "${line}" == *"CUDA out of memory"* ]]; then
+      echo ""
+      echo "  ${C_SCARLET}┌─ ${C_BOLD}[GPU MEMORY ERROR]${C_RESET}${C_SCARLET} ────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_SCARLET}│  Your GPU ran out of VRAM during this operation.${C_RESET}"
+      echo "  ${C_SCARLET}│  Tips:${C_RESET}"
+      echo "  ${C_SCARLET}│    • Reduce image resolution or batch size${C_RESET}"
+      echo "  ${C_SCARLET}│    • Enable xformers (--xformers in COMMANDLINE_ARGS)${C_RESET}"
+      echo "  ${C_SCARLET}│    • Try a smaller or lower-precision model${C_RESET}"
+      echo "  ${C_SCARLET}└─────────────────────────────────────────────────────────────────────${C_RESET}"
+      echo ""
+    fi
+
+    # GPU not visible to PyTorch — likely missing --runtime=nvidia or NVIDIA plugin issue
+    if [[ "${line}" == *"torch.cuda.is_available() = False"* || "${line}" == *"Torch is not able to use GPU"* ]]; then
+      echo ""
+      echo "  ${C_SCARLET}┌─ ${C_BOLD}[GPU NOT DETECTED]${C_RESET}${C_SCARLET} ────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_SCARLET}│  PyTorch cannot see a CUDA-capable GPU.${C_RESET}"
+      echo "  ${C_SCARLET}│  Check:${C_RESET}"
+      echo "  ${C_SCARLET}│    • --runtime=nvidia is present in Extra Parameters in the template${C_RESET}"
+      echo "  ${C_SCARLET}│    • The Unraid NVIDIA plugin is installed and working${C_RESET}"
+      echo "  ${C_SCARLET}│    • Run on the host to verify:${C_RESET}"
+      echo "  ${C_SCARLET}│        docker run --rm --gpus all nvidia/cuda:12.9.1-runtime-ubuntu22.04 nvidia-smi${C_RESET}"
+      echo "  ${C_SCARLET}└─────────────────────────────────────────────────────────────────────${C_RESET}"
+      echo ""
+    fi
+
+    # WebUI ready signal — Gradio prints this when the server is accepting connections
+    if [[ "${line}" == *"Running on local URL"* ]]; then
+      echo ""
+      echo "  ${C_VIOLET}┌─ ${C_BOLD}[READY]${C_RESET}${C_VIOLET} ───────────────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_VIOLET}│  WebUI is ready. Access it at the URL shown above.${C_RESET}"
+      echo "  ${C_VIOLET}│  Login username: ${C_BOLD}${WEBUI_USERNAME}${C_RESET}"
+      echo "  ${C_VIOLET}└─────────────────────────────────────────────────────────────────────${C_RESET}"
+      echo ""
+    fi
+
+  done
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Build final COMMANDLINE_ARGS with auth flags appended, then launch.
+#
+# Recommendation: avoid placing secrets in COMMANDLINE_ARGS when possible.
+# Command-line arguments can appear in logs, process lists, or screenshots
+# more easily than dedicated secret-management methods.
+# ─────────────────────────────────────────────────────────────────────────────
 if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
   quoted_auth_args=()
   for arg in "${AUTH_ARGS[@]}"; do
@@ -427,16 +557,41 @@ if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
   export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} ${quoted_auth_args[*]}"
 fi
 
-"${VENV_PYTHON}" launch.py
+if [[ -n "${COMMANDLINE_ARGS:-}" ]]; then
+  echo "${C_SILVER}Starting WebUI (COMMANDLINE_ARGS set).${C_RESET}"
+else
+  echo "${C_SILVER}Starting WebUI (no COMMANDLINE_ARGS provided).${C_RESET}"
+fi
 
-# Instructions to build and run the Docker container for AUTOMATIC1111.
-# These commands should be run in the directory containing the Dockerfile.
+print_launch_notice
 
-# Build the Docker image
-# docker build -t a1111-webui-aegisnir .
+# Launch AUTOMATIC1111 with inline output monitoring.
+# A named pipe routes all WebUI output through monitor_webui_output while
+# signal forwarding ensures Docker stop/kill reaches the Python process cleanly.
+_LOG_PIPE="$(mktemp -u /tmp/a1111-monitor.XXXXXX)"
+mkfifo "${_LOG_PIPE}"
 
-# Run the Docker container
-# Replace <host_port> with the desired port on the host
-# Replace <container_port> with the port exposed by the application (default is usually 7860)
-# Default recommended host data path: /mnt/user/ai/data/
-# docker run -d -p <host_port>:<container_port> -v /mnt/user/ai/data/:/data --name a1111-webui-aegisnir a1111-webui-aegisnir
+_WEBUI_PID=""
+
+_cleanup_monitor() { rm -f "${_LOG_PIPE}"; }
+_forward_signal()  { [[ -n "${_WEBUI_PID}" ]] && kill -TERM "${_WEBUI_PID}" 2>/dev/null || true; }
+
+trap '_cleanup_monitor' EXIT
+trap '_forward_signal' TERM INT
+
+# Start the output monitor first (reader must open the pipe before writer).
+monitor_webui_output < "${_LOG_PIPE}" &
+_MONITOR_PID=$!
+
+# Launch the WebUI writing to the named pipe.
+"${VENV_PYTHON}" launch.py > "${_LOG_PIPE}" 2>&1 &
+_WEBUI_PID=$!
+
+# Wait for the WebUI to exit and capture its exit code.
+_WEBUI_EXIT=0
+wait "${_WEBUI_PID}" || _WEBUI_EXIT=$?
+
+# Let the monitor drain any remaining output before we exit.
+wait "${_MONITOR_PID}" 2>/dev/null || true
+
+exit "${_WEBUI_EXIT}"
