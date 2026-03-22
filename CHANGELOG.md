@@ -7,6 +7,9 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Fixes:
+	- included `webui-auth.txt` and `extensions-bootstrap.txt` in the built image so first-run seeding works as documented
+	- fixes startup failure where `WEBUI_AUTH_FILE` could not be auto-seeded because the sample file was missing from the image
 - Security audit and documentation hardening:
 	- updated `scripts/security-check.sh` `check_auth_guardrails` to test current auth-file changeme guard instead of the removed `WEBUI_PASSWORD` variable (previous check always failed after auth refactor)
 	- updated `SECURITY.md` checklist to reference `changeme` auth-file guard instead of stale `changeme-now` WEBUI_PASSWORD reference; updated verification grep command to match

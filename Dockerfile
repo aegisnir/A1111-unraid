@@ -151,7 +151,10 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
 # ------------------------------------------------------------------------------
 COPY entrypoint.sh /entrypoint.sh
 COPY start.sh /start.sh
+COPY webui-auth.txt /webui-auth.txt
+COPY extensions-bootstrap.txt /extensions-bootstrap.txt
 RUN chmod 0755 /entrypoint.sh /start.sh \
+ && chmod 0644 /webui-auth.txt /extensions-bootstrap.txt \
  && chown root:root /entrypoint.sh \
  && chown sdwebui:sdwebui /start.sh
 
