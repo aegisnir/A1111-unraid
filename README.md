@@ -1,24 +1,28 @@
+
 # ⚠️⚠️⚠️ WORK IN PROGRESS ⚠️⚠️⚠️
 
 Do not use this yet unless the work-in-progress notice is removed.
 
-This is a personal hobby project. It is heavily AI-assisted, and it is also a learning experience for me. I care a lot about security and I am trying to make thoughtful choices, but I am not a programmer or a security expert, so mistakes and weak assumptions are possible. If you notice something I could do better, I am open to constructive feedback and recommendations.
-
----
-
 # Stable Diffusion WebUI (AUTOMATIC1111) for Unraid
 
+This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, reasonably lightweight, and more security-conscious than a throwaway personal build.
 
-This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. My goal is to keep it practical, reasonably lightweight, and more thoughtful about security than a throwaway personal build.
+This is a personal hobby project. It is heavily AI-assisted, and it is also a learning experience for me. I care a lot about security and I am trying to make thoughtful choices, but I am not a programmer or security expert, so mistakes and weak assumptions are possible. If you notice something I could do better, I welcome constructive feedback.
 
 **Important:** As of March 2026, new installs require the `dev` branch of AUTOMATIC1111 due to a missing dependency repository. The main branch will fail to start. See below for updated instructions.
 
 > ⚠️ Public internet exposure is **not** the intended use case.
 > If you expose this beyond a trusted network, the risk profile changes significantly and you should make those decisions carefully for your own environment.
 
+## Performance and Security Notes
+
+- For best performance, use SSD storage for your `/data` directory. This speeds up model loading, image generation, and cache operations.
+- Keep your Unraid host OS and NVIDIA drivers up to date for maximum compatibility, performance, and security.
+- Only install extensions and models from trusted sources. Third-party code can compromise the security of your system.
+
 ## Quick start
 
-These are the defaults I would personally start with on a trusted LAN.
+These are the defaults I would start with on a trusted LAN.
 
 1. Clone the AUTOMATIC1111 repository and switch to the `dev` branch:
 	```bash
@@ -28,13 +32,13 @@ These are the defaults I would personally start with on a trusted LAN.
 	git pull
 	```
 2. Build the image on your Unraid host with the tag `a1111-webui-aegisnir:latest`.
-2. Use **Bridge** networking.
-3. Map container port `7860` to a host port of your choice.
-4. Make sure NVIDIA GPU access works on the Unraid host.
-5. Create the container from the included Unraid template.
-6. Access the WebUI from a trusted device on your LAN or through a VPN.
+3. Use **Bridge** networking.
+4. Map container port `7860` to a host port of your choice.
+5. Make sure NVIDIA GPU access works on the Unraid host.
+6. Create the container from the included Unraid template.
+7. Access the WebUI from a trusted device on your LAN or through a VPN.
 
-On the very first startup, the container now creates a Python virtual environment under `/data/venv` and installs the heavyweight core Python dependencies there (such as torch and torchvision). That first launch can take a while.
+On first startup, the container creates a Python virtual environment under `/data/venv` and installs the heavyweight core Python dependencies there, including `torch` and `torchvision`. That initial launch can take a while.
 
 The included `template.xml` is set up for a locally built image:
 
@@ -57,7 +61,7 @@ On the Unraid host, a quick way to confirm Docker can see the GPU is:
 docker run --rm --gpus all nvidia/cuda:12.9.1-runtime-ubuntu22.04 nvidia-smi
 ```
 
-If that fails, I would troubleshoot the host NVIDIA setup before troubleshooting this container.
+If that fails, troubleshoot the host NVIDIA setup before troubleshooting this container.
 
 The included Unraid template also sets this runtime flag by default:
 
@@ -65,10 +69,9 @@ The included Unraid template also sets this runtime flag by default:
 --runtime=nvidia
 ```
 
-That gives the container access to the NVIDIA runtime on hosts where the NVIDIA Container Toolkit / Unraid integration is set up correctly.
+That gives the container access to the NVIDIA runtime when the NVIDIA Container Toolkit / Unraid integration is set up correctly on the host.
 
 ## Configuration
-
 
 ### `COMMANDLINE_ARGS`
 
@@ -78,13 +81,13 @@ That gives the container access to the NVIDIA runtime on hosts where the NVIDIA 
 
 - `--listen --port 7860 --data-dir /data --xformers`
 
-The `--xformers` flag enables memory-efficient attention and faster image generation on supported GPUs (such as NVIDIA 4090). This is now enabled by default for best performance. If you experience issues, you can remove `--xformers` from the arguments.
+The `--xformers` flag enables memory-efficient attention and faster image generation on supported GPUs such as the NVIDIA 4090. It is enabled by default for better performance. If you run into issues, you can remove `--xformers` from the arguments.
 
-If you change these arguments, keep in mind that some flags can affect the security posture of the container. Be especially careful with anything that increases exposure or enables public sharing behavior.
+If you change these arguments, keep in mind that some flags can weaken the container's security posture. Be especially careful with anything that increases exposure or enables public sharing behavior.
 
 ### `--data-dir`
 
-I recommend using Automatic1111's `--data-dir` so the large, fast-growing working set lives on a host path you choose.
+I recommend using AUTOMATIC1111's `--data-dir` so the large, fast-growing working set lives on a host path you choose.
 
 Recommended container path:
 
@@ -102,7 +105,7 @@ Why I recommend that:
 - if you store it in `appdata`, it may fill that area much faster than expected
 - if your Docker-related storage is limited, this can become painful in a hurry
 
-You can absolutely use `appdata` if that fits your setup better. I just would not make it my default recommendation.
+You can absolutely use `appdata` if that fits your setup better. I just would not make it the default recommendation here.
 
 For this repo/template, the default host path is:
 
@@ -120,6 +123,31 @@ It also stores the runtime-cloned AUTOMATIC1111 support repositories at:
 
 That means you do not need to redownload the heavy Python packages every time you recreate the container, as long as you keep the same host data path.
 
+## Storage and permissions
+
+If you use `--data-dir /data`, most of the large writable content should live under `/data` instead of being scattered under the application directory.
+
+That is one of the main reasons I prefer the `--data-dir` approach for Unraid.
+
+This image is currently set up with Unraid-friendly defaults:
+
+- UID `99`
+- GID `100`
+
+Make sure your mapped host paths are writable by that UID/GID strategy, or adjust the container settings to match your environment.
+
+### File Permissions and umask
+
+By default, this container does not set a restrictive `umask`, so files in `/data` remain accessible from outside the container. This is intentional and makes host-side access easier.
+
+**If you want stricter file permissions:**
+Add `umask 0027` near the top of `start.sh` (after the root check). This makes files and directories created in `/data` non-world-readable and non-world-writable. For example:
+
+```bash
+umask 0027
+```
+
+This results in files with permissions like `rw-r-----` and directories with `rwxr-x---`.
 
 ## Security Hardening Defaults
 
@@ -140,26 +168,14 @@ This container now uses the following security options by default (see Unraid te
 - `--cap-drop=ALL`: Removes all Linux capabilities not required by the base image, reducing attack surface.
 - `--pids-limit=512`: Contains runaway process spawning.
 
-If you use `--read-only`, expect to provide explicit writable mounts for things like models, outputs, and extensions (e.g., `/data`).
+If you use `--read-only`, expect to provide explicit writable mounts for anything that needs to persist, such as models, outputs, and extensions under `/data`.
 
 ### Additional Security Measures
 
 - The container will refuse to start as root (UID 0) for safety.
 - All SUID/SGID bits are removed from binaries at build time to prevent privilege escalation via legacy system tools.
 
-## Storage and permissions
-
-If you use `--data-dir /data`, most of the large writable content should live under `/data` instead of being scattered under the application directory.
-
-That is one of the main reasons I prefer the `--data-dir` approach for Unraid.
-
-This image is currently set up with Unraid-friendly defaults:
-- UID `99`
-- GID `100`
-
-Make sure your mapped host paths are writable by that UID/GID strategy, or adjust the container settings to match your environment.
-
-## A few important notes
+## Operational notes
 
 - Anyone who can reach the WebUI port may be able to interact with it.
 - Host networking, public exposure, and relaxed runtime settings all change the risk profile.
@@ -179,7 +195,7 @@ Make sure your mapped host paths are writable by that UID/GID strategy, or adjus
 - Confirm the container still has `--runtime=nvidia` in Extra Parameters.
 - Confirm Unraid is providing GPU access to the container.
 - Confirm the host NVIDIA driver/plugin is working.
-- If Automatic1111 fails with a message like `Torch is not able to use GPU`, you can temporarily add `--skip-torch-cuda-test` to `COMMANDLINE_ARGS` for troubleshooting. I do not recommend making that your long-term default, because it can hide a real GPU passthrough problem.
+- If AUTOMATIC1111 fails with a message like `Torch is not able to use GPU`, you can temporarily add `--skip-torch-cuda-test` to `COMMANDLINE_ARGS` for troubleshooting. I do not recommend making that your long-term default, because it can hide a real GPU passthrough problem.
 - If dependency installation fails on first startup, remove `/data/venv` and retry after updating the image so the bootstrap can rebuild a clean environment.
 
 If you are using the template defaults, that means removing:
@@ -195,10 +211,9 @@ If you are using the template defaults, that means removing:
 - Check whether the application is still listening on the configured port.
 - If you changed the port, make sure the healthcheck assumptions still match the runtime behavior.
 
-
 ## Using the dev branch
 
-Due to the removal of the original Stable Diffusion repository, you **must** use the `dev` branch of AUTOMATIC1111 for new installs. The `dev` branch includes a fix to use a maintained fork for required dependencies. If you use the `main` branch, the container will fail to start.
+Due to the removal of the original Stable Diffusion repository, you **must** use the `dev` branch of AUTOMATIC1111 for new installs. The `dev` branch includes a fix that points to a maintained fork for required dependencies. If you use the `main` branch, the container will fail to start.
 
 To update an existing install:
 

@@ -1,3 +1,8 @@
+# Set HOME for the non-root user to /data for consistent config/cache locations
+export HOME=/data
+
+# Use persistent pip cache in /data for faster rebuilds
+export PIP_CACHE_DIR=/data/pip-cache
 if [[ "$(id -u)" == "0" ]]; then
   echo "ERROR: Refusing to run as root. Please use a non-root user (UID 99 recommended for Unraid)." >&2
   exit 1
@@ -91,16 +96,16 @@ if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
   # Upgrade pip to latest version
   "${VENV_PYTHON}" -m pip install --upgrade pip
   # Pin setuptools for compatibility, upgrade wheel
-  "${VENV_PYTHON}" -m pip install --upgrade "setuptools<70" wheel
+  "${VENV_PYTHON}" -m pip install --prefer-binary --upgrade "setuptools<70" wheel
   # Core dependencies
-  "${VENV_PYTHON}" -m pip install --upgrade packaging requests regex tqdm ftfy
+  "${VENV_PYTHON}" -m pip install --prefer-binary --upgrade packaging requests regex tqdm ftfy
   # Torch and torchvision
-  "${VENV_PYTHON}" -m pip install \
+  "${VENV_PYTHON}" -m pip install --prefer-binary \
     torch==2.1.2 \
     torchvision==0.16.2 \
     --extra-index-url "${TORCH_INDEX_URL}"
   # Try to install xformers (optional, non-fatal if it fails)
-  if ! "${VENV_PYTHON}" -m pip install xformers; then
+  if ! "${VENV_PYTHON}" -m pip install --prefer-binary xformers; then
     echo "[WARNING] xformers install failed. WebUI will run without it."
   fi
   touch "${BOOTSTRAP_STAMP}"
