@@ -27,6 +27,7 @@ These are the defaults I would personally start with on a trusted LAN.
 The included `template.xml` is set up for a locally built image:
 
 - Repository: `a1111-webui-aegisnir:latest`
+- Extra Parameters: `--runtime=nvidia`
 
 It is not currently configured to pull a published image from Docker Hub.
 
@@ -45,6 +46,14 @@ docker run --rm --gpus all nvidia/cuda:12.9.1-runtime-ubuntu22.04 nvidia-smi
 ```
 
 If that fails, I would troubleshoot the host NVIDIA setup before troubleshooting this container.
+
+The included Unraid template also sets this runtime flag by default:
+
+```bash
+--runtime=nvidia
+```
+
+That gives the container access to the NVIDIA runtime on hosts where the NVIDIA Container Toolkit / Unraid integration is set up correctly.
 
 ## Configuration
 
@@ -135,6 +144,7 @@ Make sure your mapped host paths are writable by that UID/GID strategy, or adjus
 
 ### The GPU is not being used
 - Re-run the GPU sanity check above.
+- Confirm the container still has `--runtime=nvidia` in Extra Parameters.
 - Confirm Unraid is providing GPU access to the container.
 - Confirm the host NVIDIA driver/plugin is working.
 - If Automatic1111 fails with a message like `Torch is not able to use GPU`, you can temporarily add `--skip-torch-cuda-test` to `COMMANDLINE_ARGS` for troubleshooting. I do not recommend making that your long-term default, because it can hide a real GPU passthrough problem.

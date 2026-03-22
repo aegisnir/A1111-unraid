@@ -4,7 +4,7 @@
   <Repository>a1111-webui-aegisnir:latest</Repository>
   <Registry></Registry>
   <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.svg</Icon>
-  <ExtraParams></ExtraParams>
+  <ExtraParams>--runtime=nvidia</ExtraParams>
   <PostArgs></PostArgs>
   <Description>
     AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
@@ -20,8 +20,9 @@
     The default host path is set to /mnt/user/ai/data/ so the large working set lives outside appdata by default.
   </Description>
   <Overview>
-    This template expects a locally built Docker image named a1111-webui-aegisnir:latest.
-    It does not pull from Docker Hub unless you change the Repository field to a published image.
+  This template expects a locally built Docker image named a1111-webui-aegisnir:latest.
+  It does not pull from Docker Hub unless you change the Repository field to a published image.
+  The default Extra Parameters include --runtime=nvidia so Docker can expose the NVIDIA runtime inside the container.
 
     This template passes Automatic1111 data storage through --data-dir.
 
