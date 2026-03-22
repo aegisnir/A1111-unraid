@@ -181,6 +181,9 @@ import importlib
 import os
 import sys
 
+def normalize_version(version: str) -> str:
+  return version.split("+", 1)[0]
+
 expected = {
   "torch": os.environ["TORCH_VERSION"],
   "torchvision": os.environ["TORCHVISION_VERSION"],
@@ -195,7 +198,7 @@ for name, expected_version in expected.items():
     module = importlib.import_module(name)
     installed_version = getattr(module, "__version__", "unknown")
     installed[name] = installed_version
-    if installed_version != expected_version:
+    if normalize_version(installed_version) != normalize_version(expected_version):
       errors.append(f"{name}: expected {expected_version}, found {installed_version}")
   except Exception as exc:
     errors.append(f"{name}: not importable ({exc.__class__.__name__})")
