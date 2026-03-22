@@ -75,6 +75,32 @@ That gives the container access to the NVIDIA runtime when the NVIDIA Container 
 
 ## Configuration
 
+### Authentication defaults
+
+This container now enables the AUTOMATIC1111 login page by default.
+
+Default login configuration:
+
+- username: `admin`
+- password: `changeme-now`
+
+The container will refuse to start while the password is still set to `changeme-now`. Treat that value as a placeholder only and replace it in the container configuration before first normal startup.
+
+Set your real login values in the container configuration with:
+
+- `WEBUI_USERNAME`
+- `WEBUI_PASSWORD`
+
+The container also mirrors those credentials to `--api-auth` by default so the API is not left unauthenticated while the UI is protected.
+
+If you want to manage authentication manually, you can still pass your own auth flags in `COMMANDLINE_ARGS`:
+
+- `--gradio-auth username:password`
+- `--gradio-auth-path /path/to/auth-file`
+- `--api-auth username:password`
+
+If you provide your own auth flags in `COMMANDLINE_ARGS`, the container will not add duplicate auth arguments.
+
 ### `COMMANDLINE_ARGS`
 
 `COMMANDLINE_ARGS` is passed directly to `launch.py`.
@@ -88,6 +114,30 @@ The `--xformers` flag enables memory-efficient attention and faster image genera
 To make troubleshooting easier, the startup logs now report both the target bootstrap versions and the installed versions for `torch`, `torchvision`, and `xformers` during first-run setup.
 
 If you change these arguments, keep in mind that some flags can weaken the container's security posture. Be especially careful with anything that increases exposure or enables public sharing behavior.
+
+### HTTPS / TLS options
+
+By default, AUTOMATIC1111 serves over HTTP, not HTTPS.
+
+AUTOMATIC1111 does support direct TLS flags:
+
+- `--tls-certfile /path/to/cert.pem`
+- `--tls-keyfile /path/to/key.pem`
+
+That means HTTPS can be enabled directly in the application, but doing it safely by default inside this container has tradeoffs:
+
+- you need to provide certificates and keys securely
+- certificate renewal is easier to manage outside the app
+- reverse proxies usually handle TLS, redirects, and hostname routing better than the WebUI itself
+
+My recommended approach for most Unraid users is:
+
+1. Keep the container on a trusted local network.
+2. Leave the container itself on HTTP internally.
+3. Put HTTPS in front of it with a reverse proxy such as Nginx Proxy Manager, Traefik, Caddy, or another TLS-terminating proxy.
+4. Restrict exposure with a VPN, access controls, or both if you need remote access.
+
+If you want direct HTTPS from AUTOMATIC1111 itself, you can do it by mounting certificate files into the container and adding the TLS flags to `COMMANDLINE_ARGS`. I do not currently recommend making that the default in this repo because certificate management is highly environment-specific and easy to get wrong.
 
 ### `--data-dir`
 

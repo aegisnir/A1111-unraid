@@ -26,6 +26,12 @@
     You can still place it inside appdata if you want the convenience, but it may consume space very quickly and can fill the location you use for Docker-related storage.
 
     The default host path is set to /mnt/user/ai/data/ so the large working set lives outside appdata by default.
+
+    <b>Authentication defaults:</b>
+    This container enables the AUTOMATIC1111 login page by default unless you explicitly override auth flags in COMMANDLINE_ARGS.
+    Default WebUI username: <b>admin</b>
+    Default WebUI password placeholder: <b>changeme-now</b>
+    The container will refuse to start until you replace that password or explicitly manage auth via COMMANDLINE_ARGS.
   </Description>
   <Overview>
   This template expects a locally built Docker image named a1111-webui-aegisnir:latest.
@@ -38,8 +44,9 @@
     - This allows you to preserve your models and outputs across container updates and manage them from the host more easily.
     - The data directory can grow very large very quickly, so I recommend storing it outside of appdata when possible.
     - Appdata works if you prefer it, but be aware of how quickly it can fill your Docker storage area.
-  - If startup fails with a Torch GPU check error, you can temporarily add --skip-torch-cuda-test to COMMANDLINE_ARGS for troubleshooting.
-  - If first-start dependency installation fails, remove /data/venv and retry after rebuilding the image so the bootstrap can recreate a clean environment.
+    - If startup fails with a Torch GPU check error, you can temporarily add --skip-torch-cuda-test to COMMANDLINE_ARGS for troubleshooting.
+    - If first-start dependency installation fails, remove /data/venv and retry after rebuilding the image so the bootstrap can recreate a clean environment.
+    - WebUI login is enabled by default unless you explicitly set your own --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS.
   </Overview>
   <Category>AI:</Category>
   <WebUI>http://[IP]:[PORT:7860]</WebUI>
@@ -58,7 +65,10 @@
     Support: Points to the repo issues page for help.
     TemplateURL: Always points to the latest template in main.
   -->
-    <Config Name="WebUI" Type="Port" Target="7860" Default="7860" Mode="tcp" Display="always" Required="true" Mask="false" Description="Port exposed by the AUTOMATIC1111 WebUI (default: 7860)."/>
-    <Config Name="Data Directory" Type="Path" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Display="always" Required="true" Mask="false" Description="Host path mapped to --data-dir. Default: /mnt/user/ai/data/ (outside appdata)."/>
+  <Config Name="WebUI" Type="Port" Target="7860" Default="7860" Mode="tcp" Display="always" Required="true" Mask="false" Description="Port exposed by the AUTOMATIC1111 WebUI (default: 7860)."/>
+  <Config Name="Data Directory" Type="Path" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Display="always" Required="true" Mask="false" Description="Host path mapped to --data-dir. Default: /mnt/user/ai/data/ (outside appdata)."/>
+  <Config Name="WebUI Username" Type="Variable" Target="WEBUI_USERNAME" Default="admin" Display="always" Required="true" Mask="false" Description="Default username for the AUTOMATIC1111 login page. Change this from the default before exposing the container to other users."/>
+  <Config Name="WebUI Password" Type="Variable" Target="WEBUI_PASSWORD" Default="changeme-now" Display="always" Required="true" Mask="true" Description="Password for the AUTOMATIC1111 login page. The container will refuse to start until you replace the default placeholder value."/>
+  <Config Name="API Auth Mode" Type="Variable" Target="API_AUTH_MODE" Default="mirror-webui" Display="advanced" Required="false" Mask="false" Description="Controls API authentication. 'mirror-webui' reuses WEBUI_USERNAME/WEBUI_PASSWORD for --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS."/>
   <Config Name="Extra Args" Type="Variable" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data --xformers" Display="advanced" Required="false" Mask="false" Description="Extra arguments for launch.py. Default includes --data-dir /data and --xformers for improved performance on supported GPUs. For GPU errors, try adding --skip-torch-cuda-test temporarily."/>
 </Container>

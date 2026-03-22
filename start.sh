@@ -49,6 +49,9 @@ MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"
 TORCH_VERSION="${TORCH_VERSION:-2.7.0}"
 TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
 XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.30}"
+WEBUI_USERNAME="${WEBUI_USERNAME:-admin}"
+WEBUI_PASSWORD="${WEBUI_PASSWORD:-changeme-now}"
+API_AUTH_MODE="${API_AUTH_MODE:-mirror-webui}"
 export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
@@ -211,6 +214,46 @@ then
   exit 1
 fi
 
+AUTH_ARGS=()
+GRADIO_AUTH_MANAGED_EXTERNALLY=0
+API_AUTH_MANAGED_EXTERNALLY=0
+
+if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth([=[:space:]]|$) ]]; then
+  GRADIO_AUTH_MANAGED_EXTERNALLY=1
+  echo "WebUI authentication is being managed via COMMANDLINE_ARGS." >&2
+elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth-path([=[:space:]]|$) ]]; then
+  GRADIO_AUTH_MANAGED_EXTERNALLY=1
+  echo "WebUI authentication file is being managed via COMMANDLINE_ARGS." >&2
+else
+  if [[ "${WEBUI_PASSWORD}" == "changeme-now" ]]; then
+    echo "ERROR: WEBUI_PASSWORD is still set to the insecure default value." >&2
+    echo "       Set WEBUI_PASSWORD to a unique password before starting the container." >&2
+    echo "       Alternatively, manage authentication explicitly with --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS." >&2
+    exit 1
+  fi
+  AUTH_ARGS+=("--gradio-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
+  echo "WebUI login is enabled by default. Username: ${WEBUI_USERNAME}" >&2
+fi
+
+if [[ "${API_AUTH_MODE}" == "mirror-webui" ]]; then
+  if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
+    API_AUTH_MANAGED_EXTERNALLY=1
+    echo "API authentication is being managed via COMMANDLINE_ARGS." >&2
+  else
+    AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
+  fi
+elif [[ "${API_AUTH_MODE}" == "disabled" ]]; then
+  echo "API authentication mirroring disabled via API_AUTH_MODE=disabled." >&2
+else
+  echo "WARNING: Unrecognized API_AUTH_MODE=${API_AUTH_MODE}. Expected mirror-webui or disabled. Falling back to mirror-webui." >&2
+  if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
+    API_AUTH_MANAGED_EXTERNALLY=1
+    echo "API authentication is being managed via COMMANDLINE_ARGS." >&2
+  else
+    AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
+  fi
+fi
+
 # Optional: print a minimal startup banner (avoids echoing all args verbatim).
 # This is intentionally conservative to reduce the chance of logging sensitive values
 # if users pass secrets via COMMANDLINE_ARGS.
@@ -234,7 +277,7 @@ fi
 #   appropriate for their own environment.
 # - Recommended Unraid usage is to include: --data-dir /data
 #   and map `/data` to a host path with plenty of space.
-"${VENV_PYTHON}" launch.py ${COMMANDLINE_ARGS:-}
+"${VENV_PYTHON}" launch.py ${COMMANDLINE_ARGS:-} "${AUTH_ARGS[@]}"
 
 # Instructions to build and run the Docker container for AUTOMATIC1111.
 # These commands should be run in the directory containing the Dockerfile.
