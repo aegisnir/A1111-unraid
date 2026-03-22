@@ -106,7 +106,7 @@ RUN apt-get update \
 # It does not make the container "secure," but it can help reduce the blast
 # radius compared with running everything as root.
 # ------------------------------------------------------------------------------
-RUN groupadd --gid "${APP_GID}" app \
+RUN getent group "${APP_GID}" || groupadd --gid "${APP_GID}" app \
  && useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash app
 
 # ------------------------------------------------------------------------------
@@ -121,7 +121,7 @@ RUN git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.
  && cd "${WEBUI_DIR}" \
  && git fetch --depth 1 origin "${WEBUI_REF}" \
  && git checkout "${WEBUI_REF}" \
- && chown -R app:app "${WEBUI_DIR}"
+ && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
 
 # ------------------------------------------------------------------------------
 # Copy entrypoint script (from this repository)
