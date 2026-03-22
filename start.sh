@@ -52,7 +52,9 @@ TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
 XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.30}"
 WEBUI_USERNAME="${WEBUI_USERNAME:-admin}"
 WEBUI_PASSWORD="${WEBUI_PASSWORD:-changeme-now}"
+WEBUI_AUTH_FILE="${WEBUI_AUTH_FILE:-}"
 API_AUTH_MODE="${API_AUTH_MODE:-mirror-webui}"
+API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-mirror-webui-file}"
 export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
@@ -240,29 +242,96 @@ then
 fi
 
 AUTH_ARGS=()
-GRADIO_AUTH_MANAGED_EXTERNALLY=0
-API_AUTH_MANAGED_EXTERNALLY=0
+USING_WEBUI_AUTH_FILE=0
 
 if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth([=[:space:]]|$) ]]; then
-  GRADIO_AUTH_MANAGED_EXTERNALLY=1
   echo "WebUI authentication is being managed via COMMANDLINE_ARGS." >&2
 elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth-path([=[:space:]]|$) ]]; then
-  GRADIO_AUTH_MANAGED_EXTERNALLY=1
   echo "WebUI authentication file is being managed via COMMANDLINE_ARGS." >&2
+elif [[ -n "${WEBUI_AUTH_FILE}" ]]; then
+  if [[ ! -f "${WEBUI_AUTH_FILE}" ]]; then
+    echo "ERROR: WEBUI_AUTH_FILE is set but the file does not exist: ${WEBUI_AUTH_FILE}" >&2
+    exit 1
+  fi
+  if [[ ! -s "${WEBUI_AUTH_FILE}" ]]; then
+    echo "ERROR: WEBUI_AUTH_FILE is set but the file is empty: ${WEBUI_AUTH_FILE}" >&2
+    exit 1
+  fi
+  AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_FILE}")
+  USING_WEBUI_AUTH_FILE=1
+  echo "WebUI authentication file is enabled via WEBUI_AUTH_FILE." >&2
 else
   if [[ "${WEBUI_PASSWORD}" == "changeme-now" ]]; then
     echo "ERROR: WEBUI_PASSWORD is still set to the insecure default value." >&2
     echo "       Set WEBUI_PASSWORD to a unique password before starting the container." >&2
-    echo "       Alternatively, manage authentication explicitly with --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS." >&2
+    echo "       Alternatively, manage authentication explicitly with --gradio-auth, --gradio-auth-path, or WEBUI_AUTH_FILE." >&2
     exit 1
   fi
   AUTH_ARGS+=("--gradio-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
   echo "WebUI login is enabled by default. Username: ${WEBUI_USERNAME}" >&2
 fi
 
-if [[ "${API_AUTH_MODE}" == "mirror-webui" ]]; then
+if [[ "${USING_WEBUI_AUTH_FILE}" == "1" ]]; then
   if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-    API_AUTH_MANAGED_EXTERNALLY=1
+    echo "API authentication is being managed via COMMANDLINE_ARGS." >&2
+  elif [[ "${API_AUTH_FILE_MODE}" == "mirror-webui-file" ]]; then
+    api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+entries = []
+
+for raw_line in path.read_text(encoding='utf-8').splitlines():
+    line = raw_line.strip()
+    if not line or line.startswith('#'):
+        continue
+    for cred in line.split(','):
+        cred = cred.strip()
+        if cred:
+            entries.append(cred)
+
+print(','.join(entries))
+PY
+)"
+    if [[ -z "${api_auth_value}" ]]; then
+      echo "ERROR: WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}" >&2
+      exit 1
+    fi
+    AUTH_ARGS+=("--api-auth" "${api_auth_value}")
+    echo "API authentication is mirrored from WEBUI_AUTH_FILE." >&2
+  elif [[ "${API_AUTH_FILE_MODE}" == "disabled" ]]; then
+    echo "API auth mirroring from WEBUI_AUTH_FILE disabled via API_AUTH_FILE_MODE=disabled." >&2
+  else
+    echo "WARNING: Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to mirror-webui-file." >&2
+    api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+entries = []
+
+for raw_line in path.read_text(encoding='utf-8').splitlines():
+    line = raw_line.strip()
+    if not line or line.startswith('#'):
+        continue
+    for cred in line.split(','):
+        cred = cred.strip()
+        if cred:
+            entries.append(cred)
+
+print(','.join(entries))
+PY
+)"
+    if [[ -z "${api_auth_value}" ]]; then
+      echo "ERROR: WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}" >&2
+      exit 1
+    fi
+    AUTH_ARGS+=("--api-auth" "${api_auth_value}")
+    echo "API authentication is mirrored from WEBUI_AUTH_FILE." >&2
+  fi
+elif [[ "${API_AUTH_MODE}" == "mirror-webui" ]]; then
+  if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
     echo "API authentication is being managed via COMMANDLINE_ARGS." >&2
   else
     AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
@@ -272,7 +341,6 @@ elif [[ "${API_AUTH_MODE}" == "disabled" ]]; then
 else
   echo "WARNING: Unrecognized API_AUTH_MODE=${API_AUTH_MODE}. Expected mirror-webui or disabled. Falling back to mirror-webui." >&2
   if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-    API_AUTH_MANAGED_EXTERNALLY=1
     echo "API authentication is being managed via COMMANDLINE_ARGS." >&2
   else
     AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")

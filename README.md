@@ -38,6 +38,8 @@ These are the defaults I would start with on a trusted LAN.
 6. Create the container from the included Unraid template.
 7. Access the WebUI from a trusted device on your LAN or through a VPN.
 
+By default, this container now includes `--no-download-sd-model` so it does **not** silently pull the default Stable Diffusion 1.5 checkpoint on first startup. In practice, you should place your own checkpoint(s) under `/data/models/Stable-diffusion` or intentionally override that behavior in `COMMANDLINE_ARGS` if you really want automatic model download.
+
 On first startup, the container creates a Python virtual environment under `/data/venv` and installs the heavyweight core Python dependencies there, including `torch` and `torchvision`. That initial launch can take a while.
 
 The bootstrap currently pins `torch`, `torchvision`, and `xformers` as a tested set so the startup environment stays consistent. These values are meant to track the current expectations of the upstream `AUTOMATIC1111` `dev` branch rather than floating to whatever pip resolves that day. If you decide to change them, treat them as a tested group rather than bumping one package at a time.
@@ -93,6 +95,31 @@ Set your real login values in the container configuration with:
 
 The container also mirrors those credentials to `--api-auth` by default so the API is not left unauthenticated while the UI is protected.
 
+If you prefer not to store credentials directly in template variables, mount an auth file and set:
+
+- `WEBUI_AUTH_FILE`
+
+The file format matches AUTOMATIC1111's auth-file format:
+
+- one credential per line as `username:password`
+- or multiple comma-delimited entries on one line
+
+Example:
+
+```text
+admin:correct horse battery staple
+viewer:another-password
+```
+
+When `WEBUI_AUTH_FILE` is set, it takes precedence over `WEBUI_USERNAME` and `WEBUI_PASSWORD` unless you explicitly provide your own `--gradio-auth` or `--gradio-auth-path` in `COMMANDLINE_ARGS`.
+
+By default, the container also mirrors auth-file credentials into API auth. You can control that with:
+
+- `API_AUTH_FILE_MODE=mirror-webui-file`
+- `API_AUTH_FILE_MODE=disabled`
+
+Important security note: upstream AUTOMATIC1111 parses auth from command-line flags internally. This repo masks those values from the startup log, but command-line style auth should still be treated as sensitive and avoided in screenshots, copied logs, or shared diagnostics.
+
 If you want to manage authentication manually, you can still pass your own auth flags in `COMMANDLINE_ARGS`:
 
 - `--gradio-auth username:password`
@@ -107,9 +134,11 @@ If you provide your own auth flags in `COMMANDLINE_ARGS`, the container will not
 
 **Default:**
 
-- `--listen --port 7860 --data-dir /data --xformers`
+- `--listen --port 7860 --data-dir /data --xformers --no-download-sd-model`
 
 The `--xformers` flag enables memory-efficient attention and faster image generation on supported GPUs such as the NVIDIA 4090. It is enabled by default for better performance. If you run into issues, you can remove `--xformers` from the arguments.
+
+The `--no-download-sd-model` flag is enabled by default so first startup does not automatically download a multi-gigabyte checkpoint into your data directory. That makes container behavior more predictable on Unraid and avoids unexpected bandwidth and storage use.
 
 To make troubleshooting easier, the startup logs now report both the target bootstrap versions and the installed versions for `torch`, `torchvision`, and `xformers` during first-run setup.
 
@@ -243,6 +272,7 @@ If you use `--read-only`, expect to provide explicit writable mounts for anythin
 - Confirm the port mapping is correct.
 - Confirm the container is still running.
 - On first launch, allow extra time for the Python environment bootstrap under `/data/venv`.
+- Make sure you have provided a model checkpoint under `/data/models/Stable-diffusion` if you keep the default `--no-download-sd-model` behavior enabled.
 
 ### The GPU is not being used
 - Re-run the GPU sanity check above.

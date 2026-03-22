@@ -32,6 +32,7 @@
     Default WebUI username: <b>admin</b>
     Default WebUI password placeholder: <b>changeme-now</b>
     The container will refuse to start until you replace that password or explicitly manage auth via COMMANDLINE_ARGS.
+  You can also mount an auth file and set <b>WEBUI_AUTH_FILE</b> to avoid storing credentials directly in template variables.
   </Description>
   <Overview>
   This template expects a locally built Docker image named a1111-webui-aegisnir:latest.
@@ -69,6 +70,8 @@
   <Config Name="Data Directory" Type="Path" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Display="always" Required="true" Mask="false" Description="Host path mapped to --data-dir. Default: /mnt/user/ai/data/ (outside appdata)."/>
   <Config Name="WebUI Username" Type="Variable" Target="WEBUI_USERNAME" Default="admin" Display="always" Required="true" Mask="false" Description="Default username for the AUTOMATIC1111 login page. Change this from the default before exposing the container to other users."/>
   <Config Name="WebUI Password" Type="Variable" Target="WEBUI_PASSWORD" Default="changeme-now" Display="always" Required="true" Mask="true" Description="Password for the AUTOMATIC1111 login page. The container will refuse to start until you replace the default placeholder value."/>
-  <Config Name="API Auth Mode" Type="Variable" Target="API_AUTH_MODE" Default="mirror-webui" Display="advanced" Required="false" Mask="false" Description="Controls API authentication. 'mirror-webui' reuses WEBUI_USERNAME/WEBUI_PASSWORD for --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS."/>
-  <Config Name="Extra Args" Type="Variable" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data --xformers" Display="advanced" Required="false" Mask="false" Description="Extra arguments for launch.py. Default includes --data-dir /data and --xformers for improved performance on supported GPUs. For GPU errors, try adding --skip-torch-cuda-test temporarily."/>
+  <Config Name="WebUI Auth File" Type="Variable" Target="WEBUI_AUTH_FILE" Default="" Display="advanced" Required="false" Mask="false" Description="Optional path inside the container to an AUTOMATIC1111 auth file. If set, this takes precedence over WEBUI_USERNAME/WEBUI_PASSWORD unless you explicitly pass --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS."/>
+  <Config Name="API Auth Mode" Type="Variable" Target="API_AUTH_MODE" Default="mirror-webui" Display="advanced" Required="false" Mask="false" Description="Controls API authentication. 'mirror-webui' reuses WEBUI_USERNAME/WEBUI_PASSWORD for --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS. Avoid sharing logs that may include custom auth arguments."/>
+  <Config Name="API Auth File Mode" Type="Variable" Target="API_AUTH_FILE_MODE" Default="mirror-webui-file" Display="advanced" Required="false" Mask="false" Description="Controls API authentication when WEBUI_AUTH_FILE is set. 'mirror-webui-file' mirrors the auth file into --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS."/>
+  <Config Name="Extra Args" Type="Variable" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data --xformers --no-download-sd-model" Display="advanced" Required="false" Mask="false" Description="Extra arguments for launch.py. Default includes --data-dir /data, --xformers, and --no-download-sd-model so the container does not silently download a large default checkpoint. Provide your own model under /data/models/Stable-diffusion or override this if you intentionally want automatic download behavior. For GPU errors, try adding --skip-torch-cuda-test temporarily."/>
 </Container>
