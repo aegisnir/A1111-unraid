@@ -237,6 +237,13 @@ This results in files with permissions like `rw-r-----` and directories with `rw
 
 ## Security Hardening Defaults
 
+For a reusable pass/fail regression gate, see the checklist in `SECURITY.md` under "Security baseline regression checklist".
+To run the automated baseline checks directly, use:
+
+```bash
+./scripts/security-check.sh
+```
+
 This container now uses the following security options by default (see Unraid template or Extra Parameters):
 
 ```bash

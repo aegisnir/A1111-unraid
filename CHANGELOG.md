@@ -7,6 +7,11 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Security review workflow:
+	- added a reusable "Security baseline regression checklist" section to `SECURITY.md` with pass/fail gates for runtime hardening defaults, privilege-drop model, auth guardrails, and docs consistency
+	- added quick verification commands for template flags, startup scripts, auth behavior, bash syntax, and XML parsing
+	- added a README pointer to the checklist so it can be used as a standard pre-release/pre-merge safety check
+	- added `scripts/security-check.sh` as a one-command automated runner for the checklist checks (runtime flags, privilege model, auth guardrails, bash syntax, and XML parse)
 - Startup permission-repair fallback:
 	- `entrypoint.sh` no longer aborts immediately if host policy blocks `chown` or `chmod` on `/data`
 	- when automatic repair is denied (`Operation not permitted`), entrypoint now prints a clear host-filesystem warning and continues into `start.sh`
