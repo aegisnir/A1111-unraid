@@ -24,19 +24,16 @@ This is a personal hobby project. It is heavily AI-assisted, and it is also a le
 
 These are the defaults I would start with on a trusted LAN.
 
-1. Clone the AUTOMATIC1111 repository and switch to the `dev` branch:
-	```bash
-	git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
-	cd stable-diffusion-webui
-	git switch dev
-	git pull
-	```
-2. Build the image on your Unraid host with the tag `a1111-webui-aegisnir:latest`.
+1. Install the template from the Unraid CA app flow (or import `template.xml`).
+2. Confirm the image repository is set to `ghcr.io/aegisnir/a1111-webui-aegisnir:latest` unless you intentionally use your own image.
 3. Use **Bridge** networking.
 4. Map container port `7860` to a host port of your choice.
 5. Make sure NVIDIA GPU access works on the Unraid host.
-6. Create the container from the included Unraid template.
-7. Access the WebUI from a trusted device on your LAN or through a VPN.
+6. Set required template variables (especially replacing the default password placeholder).
+7. Start the container and access the WebUI from a trusted device on your LAN or through a VPN.
+
+If you build your own image, the Dockerfile tracks upstream `AUTOMATIC1111` `dev` by default via `WEBUI_REF=dev`.
+`WEBUI_REF` is a build-time setting for image maintainers, not a runtime template variable for CA end users.
 
 By default, this container now includes `--no-download-sd-model` so it does **not** silently pull the default Stable Diffusion 1.5 checkpoint on first startup. In practice, you should place your own checkpoint(s) under `/data/models/Stable-diffusion` or intentionally override that behavior in `COMMANDLINE_ARGS` if you really want automatic model download.
 
@@ -44,12 +41,10 @@ On first startup, the container creates a Python virtual environment under `/dat
 
 The bootstrap currently pins `torch`, `torchvision`, and `xformers` as a tested set so the startup environment stays consistent. These values are meant to track the current expectations of the upstream `AUTOMATIC1111` `dev` branch rather than floating to whatever pip resolves that day. If you decide to change them, treat them as a tested group rather than bumping one package at a time.
 
-The included `template.xml` is set up for a locally built image:
+The included `template.xml` is set up for a published image by default:
 
-- Repository: `a1111-webui-aegisnir:latest`
+- Repository: `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`
 - Extra Parameters: `--runtime=nvidia`
-
-It is not currently configured to pull a published image from Docker Hub.
 
 Once the container is running, the WebUI is typically available at:
 
@@ -221,14 +216,11 @@ Make sure your mapped host paths are writable by that UID/GID strategy, or adjus
 
 ### File Permissions and umask
 
-By default, this container does not set a restrictive `umask`, so files in `/data` remain accessible from outside the container. This is intentional and makes host-side access easier.
+By default, this container does not set a restrictive `UMASK`, so files in `/data` remain easier to access from outside the container.
 
-**If you want stricter file permissions:**
-Add `umask 0027` near the top of `start.sh` (after the root check). This makes files and directories created in `/data` non-world-readable and non-world-writable. For example:
+If you want stricter file permissions for security, set the template variable `UMASK` in Unraid (advanced view), for example:
 
-```bash
-umask 0027
-```
+- `UMASK=0027`
 
 This results in files with permissions like `rw-r-----` and directories with `rwxr-x---`.
 

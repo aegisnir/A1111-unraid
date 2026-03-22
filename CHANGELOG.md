@@ -12,6 +12,8 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- made `/repositories` handling compatible with read-only container filesystems
 	- redirected pip temp/cache usage into `/data`
 	- added a `/data` free-space preflight and startup diagnostic
+	- added optional `UMASK` support via template variable (not enforced by default)
+	- hardened auth arg injection quoting to better handle spaces/special characters
 - Dependency management:
 	- aligned bootstrap dependency targets with upstream `AUTOMATIC1111` `dev` expectations
 	- pinned `torch`, `torchvision`, and `xformers` as an explicit tested set
@@ -22,11 +24,15 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- mirrored credentials to API auth by default
 	- added template variables for `WEBUI_USERNAME`, `WEBUI_PASSWORD`, and `API_AUTH_MODE`
 	- blocked startup when the placeholder password is unchanged unless auth is managed explicitly
+	- made startup auth log redaction patch read-only-safe by patching in memory
 - Documentation/template updates:
 	- refreshed `README.md` structure and security guidance
 	- documented authentication defaults and HTTPS/TLS options
 	- updated `template.xml` to reflect current hardening and auth behavior
 	- synchronized current defaults across docs, template, and scripts
+	- added third-party licensing notices (`THIRD_PARTY_NOTICES.md`, AGPL copy)
+	- switched template default repository to a published image for CA-style installs
+	- updated quick start guidance to CA/template-first workflow
 
 ## Notes
 

@@ -55,7 +55,17 @@ WEBUI_PASSWORD="${WEBUI_PASSWORD:-changeme-now}"
 WEBUI_AUTH_FILE="${WEBUI_AUTH_FILE:-}"
 API_AUTH_MODE="${API_AUTH_MODE:-mirror-webui}"
 API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-mirror-webui-file}"
+UMASK="${UMASK:-}"
 export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
+
+if [[ -n "${UMASK}" ]]; then
+  if [[ ! "${UMASK}" =~ ^[0-7]{3,4}$ ]]; then
+    echo "ERROR: UMASK must be a 3- or 4-digit octal value (for example 027 or 0027)." >&2
+    exit 1
+  fi
+  umask "${UMASK}"
+  echo "Using UMASK=${UMASK}" >&2
+fi
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
   echo "Container WebUI directory not found; falling back to local workspace path: ${LOCAL_WEBUI_DIR}" >&2
@@ -371,7 +381,11 @@ fi
 # - Recommended Unraid usage is to include: --data-dir /data
 #   and map `/data` to a host path with plenty of space.
 if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
-  export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} ${AUTH_ARGS[*]}"
+  quoted_auth_args=()
+  for arg in "${AUTH_ARGS[@]}"; do
+    quoted_auth_args+=("$(printf '%q' "${arg}")")
+  done
+  export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} ${quoted_auth_args[*]}"
 fi
 
 "${VENV_PYTHON}" launch.py

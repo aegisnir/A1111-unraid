@@ -6,7 +6,7 @@
 #   - Keep the runtime image reasonably small (avoid dev toolchains where possible)
 #   - Run as a non-root user where practical
 #   - Pin the CUDA base image by digest for reproducibility
-#   - Allow controlled pinning of upstream WebUI code (WEBUI_REF)
+#   - Track upstream WebUI from a configurable ref (WEBUI_REF, default: dev)
 #
 # This project is maintained as a personal, AI-assisted hobby project.
 # These comments try to explain the reasoning behind the current choices,
@@ -38,14 +38,14 @@
 #
 # 4) Supply chain & updates:
 #    - The CUDA base image is pinned by digest to reduce unexpected upstream change.
-#    - The WebUI source can be pinned via WEBUI_REF for more controlled builds.
-#      If you track a moving branch (e.g., "master"), behavior and risk may change
-#      over time.
+#    - The WebUI source tracks a configurable ref via WEBUI_REF (default: dev).
+#      The default behavior follows a moving upstream branch, so behavior can
+#      change over time when you rebuild.
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # Base image: NVIDIA CUDA runtime (Ubuntu 22.04), pinned by digest.
-# Digest confirmed on Docker Hub layer details. https://hub.docker.com/layers/nvidia/cuda/12.9.1-runtime-ubuntu22.04/images/sha256-6553b9635f35d992cf0473f55d1e998935a2dd1e2e604d3cbfb2bf295a8faa79/
+# Update this digest intentionally whenever you choose to refresh the base image.
 # ------------------------------------------------------------------------------
 FROM nvidia/cuda:12.9.1-runtime-ubuntu22.04@sha256:d90541b92124899904e0860a4ac1955606b3bc45ad6cc9dab16567fd1111e326
 
@@ -58,7 +58,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 
 
-# Pin the WebUI to a branch/tag/commit. For new installs, the dev branch is required due to upstream dependency changes.
+# Select the WebUI ref to clone. Default is the moving dev branch.
+# For new installs, dev is required due to upstream dependency changes.
 #
 # Security note:
 # Avoid passing secrets through build arguments. Industry guidance generally
@@ -133,7 +134,7 @@ RUN set -eux; \
 # is not available inside the image, so deeper forensics or history inspection
 # would need to happen outside this build context.
 # ------------------------------------------------------------------------------
-RUN git clone --branch dev --single-branch https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
+RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
   && rm -rf "${WEBUI_DIR}/repositories" \
   && ln -s /data/repositories "${WEBUI_DIR}/repositories" \
   && rm -rf "${WEBUI_DIR}/config_states" \
@@ -145,6 +146,10 @@ RUN git clone --branch dev --single-branch https://github.com/AUTOMATIC1111/stab
 # ------------------------------------------------------------------------------
 COPY start.sh /start.sh
 RUN chmod 0755 /start.sh && chown sdwebui:sdwebui /start.sh
+
+# Include license and third-party notices in the image for distribution clarity.
+COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/doc/a1111-webui-aegisnir/
+COPY LICENSES/AGPL-3.0.txt /usr/share/doc/a1111-webui-aegisnir/LICENSES/AGPL-3.0.txt
 
 # ------------------------------------------------------------------------------
 # Networking
