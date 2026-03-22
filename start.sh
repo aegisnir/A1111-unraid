@@ -22,6 +22,11 @@ set -euo pipefail
 
 WEBUI_DIR="/opt/stable-diffusion-webui"
 LOCAL_WEBUI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/WebUI"
+VENV_DIR="${A1111_VENV_DIR:-/data/venv}"
+VENV_PYTHON="${VENV_DIR}/bin/python"
+BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"
+TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}"
+CLIP_PACKAGE="${CLIP_PACKAGE:-https://github.com/openai/CLIP/archive/d50d76daa670286dd6cacf3bcd80b5e4823fc8e1.zip}"
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
   echo "Container WebUI directory not found; falling back to local workspace path: ${LOCAL_WEBUI_DIR}" >&2
@@ -49,7 +54,31 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ ! -d "/data" ]]; then
+  echo "ERROR: Expected mapped data directory not found at /data" >&2
+  echo "       Map /data to a writable host path before starting the container." >&2
+  exit 1
+fi
+
 cd "${WEBUI_DIR}"
+
+mkdir -p "${VENV_DIR}"
+
+if [[ ! -x "${VENV_PYTHON}" ]]; then
+  echo "Creating persistent Python virtual environment in ${VENV_DIR}" >&2
+  python3 -m venv "${VENV_DIR}"
+fi
+
+if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
+  echo "Installing first-start Python dependencies (this may take a while)..." >&2
+  "${VENV_PYTHON}" -m pip install --upgrade pip setuptools wheel
+  "${VENV_PYTHON}" -m pip install \
+    torch==2.1.2 \
+    torchvision==0.16.2 \
+    --extra-index-url "${TORCH_INDEX_URL}"
+  "${VENV_PYTHON}" -m pip install "${CLIP_PACKAGE}"
+  touch "${BOOTSTRAP_STAMP}"
+fi
 
 # Optional: print a minimal startup banner (avoids echoing all args verbatim).
 # This is intentionally conservative to reduce the chance of logging sensitive values
@@ -74,7 +103,7 @@ fi
 #   appropriate for their own environment.
 # - Recommended Unraid usage is to include: --data-dir /data
 #   and map `/data` to a host path with plenty of space.
-python3 launch.py ${COMMANDLINE_ARGS:-}
+"${VENV_PYTHON}" launch.py ${COMMANDLINE_ARGS:-}
 
 # Instructions to build and run the Docker container for AUTOMATIC1111.
 # These commands should be run in the directory containing the Dockerfile.

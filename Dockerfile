@@ -71,6 +71,7 @@ ARG WEBUI_REF=master
 ARG APP_UID=99
 ARG APP_GID=100
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121
+ARG CLIP_PACKAGE=https://github.com/openai/CLIP/archive/d50d76daa670286dd6cacf3bcd80b5e4823fc8e1.zip
 
 # ------------------------------------------------------------------------------
 # Runtime defaults
@@ -82,6 +83,9 @@ ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121
 # ------------------------------------------------------------------------------
 ENV COMMANDLINE_ARGS="--listen --port 7860 --data-dir /data"
 ENV WEBUI_DIR="/opt/stable-diffusion-webui"
+ENV A1111_VENV_DIR="/data/venv"
+ENV TORCH_INDEX_URL="${TORCH_INDEX_URL}"
+ENV CLIP_PACKAGE="${CLIP_PACKAGE}"
 
 # ------------------------------------------------------------------------------
 # Install minimal runtime dependencies.
@@ -102,15 +106,10 @@ RUN apt-get update \
       libxext6 \
  && rm -rf /var/lib/apt/lists/*
 
-# Preinstall the PyTorch stack expected by the pinned AUTOMATIC1111 version.
-# Doing this at build time avoids a very large first-start download in the
-# container runtime, which is especially helpful on Unraid where long-running
-# init downloads can look like a broken or hung container.
-RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
- && python3 -m pip install --no-cache-dir \
-   torch==2.1.2 \
-   torchvision==0.16.2 \
-   --extra-index-url "${TORCH_INDEX_URL}"
+# Keep the base image lean and install heavyweight Python dependencies on first
+# startup into a persistent virtual environment under /data.
+# This avoids long image builds and lets Unraid users persist the downloaded
+# Python stack across container recreation when /data is mapped.
 
 # ------------------------------------------------------------------------------
 # Create a dedicated non-root runtime user with Unraid-friendly UID/GID defaults.

@@ -24,6 +24,8 @@ These are the defaults I would personally start with on a trusted LAN.
 5. Create the container from the included Unraid template.
 6. Access the WebUI from a trusted device on your LAN or through a VPN.
 
+On the very first startup, the container now creates a Python virtual environment under `/data/venv` and installs heavyweight Python dependencies there (such as torch and CLIP). That first launch can take a while.
+
 The included `template.xml` is set up for a locally built image:
 
 - Repository: `a1111-webui-aegisnir:latest`
@@ -95,6 +97,12 @@ For this repo/template, the default host path is:
 
 That gives the data directory a more sensible starting point on Unraid without pushing users into `appdata` by default.
 
+The `/data` mapping now also stores the persistent Python environment used by the container at:
+
+- `/data/venv`
+
+That means you do not need to redownload the heavy Python packages every time you recreate the container, as long as you keep the same host data path.
+
 ## Hardening ideas for Unraid
 
 These are optional, but they are common ways to reduce container blast radius:
@@ -141,6 +149,7 @@ Make sure your mapped host paths are writable by that UID/GID strategy, or adjus
 - Check the container logs.
 - Confirm the port mapping is correct.
 - Confirm the container is still running.
+- On first launch, allow extra time for the Python environment bootstrap under `/data/venv`.
 
 ### The GPU is not being used
 - Re-run the GPU sanity check above.
