@@ -93,6 +93,7 @@ RUN apt-get update \
       ca-certificates \
       git \
       python3 \
+  python3-setuptools \
       python3-venv \
       python3-pip \
       libglib2.0-0 \
