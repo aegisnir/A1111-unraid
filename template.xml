@@ -4,7 +4,7 @@
   <Repository>a1111-webui-aegisnir:local</Repository>
   <Registry></Registry>
   <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.png</Icon>
-  <ExtraParams>--runtime=nvidia --read-only --tmpfs /tmp:rw,noexec,nosuid,size=2g --security-opt no-new-privileges:true --cap-drop=ALL --pids-limit=512</ExtraParams>
+  <ExtraParams>--runtime=nvidia --read-only --tmpfs /tmp:rw,noexec,nosuid,size=2g --security-opt no-new-privileges:true --cap-drop=ALL --pids-limit=2048</ExtraParams>
   <PostArgs></PostArgs>
   <Description>
     AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
@@ -19,7 +19,9 @@
     - <b>--tmpfs /tmp:rw,noexec,nosuid,size=2g</b>: Provides a safe, writable /tmp.
     - <b>--security-opt no-new-privileges:true</b>: Prevents processes from gaining new privileges.
     - <b>--cap-drop=ALL</b>: Drops all Linux capabilities except those required by the base image.
-    - <b>--pids-limit=512</b>: Limits the number of processes to contain runaway spawning.
+    - <b>--pids-limit=2048</b>: A practical default to contain runaway process spawning without being overly restrictive.
+
+    To change PID limit in Unraid: edit this container, switch to advanced view, adjust <b>--pids-limit=&lt;value&gt;</b> in Extra Parameters, and apply.
 
     <b>DATA DIRECTORY WARNING:</b>
     The path used with --data-dir grows very large very quickly because it can hold models, outputs, extensions, caches, and other working data.

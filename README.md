@@ -233,7 +233,7 @@ This container now uses the following security options by default (see Unraid te
 --tmpfs /tmp:rw,noexec,nosuid,size=2g
 --security-opt no-new-privileges:true
 --cap-drop=ALL
---pids-limit=512
+--pids-limit=2048
 ```
 
 **What these do:**
@@ -241,7 +241,21 @@ This container now uses the following security options by default (see Unraid te
 - `--tmpfs /tmp:...`: Provides a safe, writable /tmp for runtime needs.
 - `no-new-privileges:true`: Prevents processes from gaining new privileges, reducing escalation risk.
 - `--cap-drop=ALL`: Removes all Linux capabilities not required by the base image, reducing attack surface.
-- `--pids-limit=512`: Contains runaway process spawning.
+- `--pids-limit=2048`: A practical default to contain runaway process spawning without being overly restrictive.
+
+PID limit defaults to `2048` in this template and can be tuned per host in Unraid.
+
+To change it in Unraid (works across versions):
+
+1. Open the container in Unraid and switch to advanced view.
+2. In Extra Parameters, add `--pids-limit=<value>`.
+3. Apply the update.
+
+Examples:
+
+- `--pids-limit=512`
+- `--pids-limit=1024`
+- `--pids-limit=2048`
 
 If you use `--read-only`, expect to provide explicit writable mounts for anything that needs to persist, such as models, outputs, and extensions under `/data`.
 
