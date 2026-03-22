@@ -80,12 +80,24 @@ cd "${WEBUI_DIR}"
 mkdir -p "${VENV_DIR}"
 mkdir -p "${RUNTIME_REPOS_DIR}"
 
-if [[ -d "${WEBUI_DIR}/repositories" && ! -L "${WEBUI_DIR}/repositories" ]]; then
-  rm -rf "${WEBUI_DIR}/repositories"
+if [[ -e "${WEBUI_DIR}/repositories" && ! -L "${WEBUI_DIR}/repositories" ]]; then
+  echo "ERROR: ${WEBUI_DIR}/repositories exists and is not a symlink." >&2
+  echo "       On a read-only container filesystem, start.sh cannot replace it at runtime." >&2
+  echo "       Rebuild the image with the symlink baked in, or remove that path before enabling --read-only." >&2
+  exit 1
 fi
 
-if [[ ! -L "${WEBUI_DIR}/repositories" ]]; then
-  ln -s "${RUNTIME_REPOS_DIR}" "${WEBUI_DIR}/repositories"
+if [[ -L "${WEBUI_DIR}/repositories" ]]; then
+  existing_target="$(readlink "${WEBUI_DIR}/repositories")"
+  if [[ "${existing_target}" != "${RUNTIME_REPOS_DIR}" ]]; then
+    echo "ERROR: ${WEBUI_DIR}/repositories points to ${existing_target}, expected ${RUNTIME_REPOS_DIR}." >&2
+    echo "       Rebuild the image so the repositories symlink matches the persistent runtime path." >&2
+    exit 1
+  fi
+else
+  echo "ERROR: ${WEBUI_DIR}/repositories symlink is missing." >&2
+  echo "       This image now expects that symlink to be created at build time so startup works with --read-only." >&2
+  exit 1
 fi
 
 if [[ ! -x "${VENV_PYTHON}" ]]; then
