@@ -285,7 +285,7 @@ If you use `--read-only`, expect to provide explicit writable mounts for anythin
 ## Troubleshooting
 
 ### The WebUI does not load
-- Check the container logs.
+- Check the container logs — the container now prints a pre-launch summary and annotates known harmless warnings inline, so look past those to find real errors.
 - Confirm the port mapping is correct.
 - Confirm the container is still running.
 - On first launch, allow extra time for the Python environment bootstrap under `/data/venv`.
