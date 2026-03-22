@@ -81,7 +81,7 @@ ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128
 # by network design, reverse proxies, VPNs, access controls, and container
 # runtime settings rather than trying to rely on this image alone.
 # ------------------------------------------------------------------------------
-ENV COMMANDLINE_ARGS="--listen --port 7860 --data-dir /data --xformers --no-download-sd-model"
+ENV COMMANDLINE_ARGS="--listen --port 7860 --data-dir /data --xformers --no-download-sd-model --enable-insecure-extension-access"
 ENV WEBUI_DIR="/opt/stable-diffusion-webui"
 ENV A1111_VENV_DIR="/data/venv"
 ENV TORCH_INDEX_URL="${TORCH_INDEX_URL}"

@@ -13,6 +13,8 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- added warning when users pass `--api-auth` without enabling `--api`
 	- updated README/template docs to clarify API-off-by-default behavior and when `API_AUTH_MODE` / `API_AUTH_FILE_MODE` apply
 	- documented extension-access tradeoff: omitting `--enable-insecure-extension-access` does not block existing extension runtime; it mainly limits install/update/management from the WebUI
+	- enabled `--enable-insecure-extension-access` by default in template and Dockerfile fallback args for this personal project workflow
+	- added explicit README risk callouts for insecure extension access and documented what `--allow-code` enables vs what leaving it unset prevents
 - Security review workflow:
 	- added a reusable "Security baseline regression checklist" section to `SECURITY.md` with pass/fail gates for runtime hardening defaults, privilege-drop model, auth guardrails, and docs consistency
 	- added quick verification commands for template flags, startup scripts, auth behavior, bash syntax, and XML parsing

@@ -142,7 +142,7 @@ If `--api-auth` is provided without `--api`, startup logs now warn that API auth
 
 **Default:**
 
-- `--listen --port 7860 --data-dir /data --xformers --no-download-sd-model`
+- `--listen --port 7860 --data-dir /data --xformers --no-download-sd-model --enable-insecure-extension-access`
 
 API is intentionally not part of the default args. Add `--api` only when you explicitly need API access in your environment.
 
@@ -157,8 +157,14 @@ To make troubleshooting easier, the startup logs now report both the target boot
 If you change these arguments, keep in mind that some flags can weaken the container's security posture. Be especially careful with anything that increases exposure or enables public sharing behavior.
 
 Extension note:
-- Leaving `--enable-insecure-extension-access` unset will not prevent existing installed extensions from loading.
-- It mainly blocks extension install/update/management actions from the WebUI itself; manual extension management on disk still works.
+- This project now enables `--enable-insecure-extension-access` by default for convenience in a personal/home-lab workflow.
+- Risk: extension install/update from the UI can execute untrusted code paths and increases supply-chain risk.
+- If you want a safer posture, remove that flag and manage extensions manually on disk.
+
+What `--allow-code` does:
+- It permits custom script/code execution paths exposed through the WebUI (for example, user-provided script logic in enabled script features).
+- This can be useful for advanced local workflows, but it meaningfully increases remote code execution risk if the UI is exposed or credentials are weak.
+- Keeping `--allow-code` unset blocks those code-execution features and reduces attack surface.
 
 ### HTTPS / TLS options
 
