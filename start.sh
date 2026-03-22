@@ -26,7 +26,6 @@ VENV_DIR="${A1111_VENV_DIR:-/data/venv}"
 VENV_PYTHON="${VENV_DIR}/bin/python"
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}"
-CLIP_PACKAGE="${CLIP_PACKAGE:-https://github.com/openai/CLIP/archive/d50d76daa670286dd6cacf3bcd80b5e4823fc8e1.zip}"
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
   echo "Container WebUI directory not found; falling back to local workspace path: ${LOCAL_WEBUI_DIR}" >&2
@@ -77,7 +76,6 @@ if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
     torch==2.1.2 \
     torchvision==0.16.2 \
     --extra-index-url "${TORCH_INDEX_URL}"
-  "${VENV_PYTHON}" -m pip install --no-build-isolation "${CLIP_PACKAGE}"
   touch "${BOOTSTRAP_STAMP}"
 fi
 
