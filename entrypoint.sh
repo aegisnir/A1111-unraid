@@ -39,7 +39,25 @@ warn_repair_blocked() {
   echo "${C_ORANGE}[entrypoint] Continuing startup so start.sh can print the final remediation steps.${C_RESET}" >&2
 }
 
+fatal_priv_drop_blocked() {
+  echo "${C_SCARLET}[entrypoint] Cannot drop privileges to uid=${EXPECTED_UID}:gid=${EXPECTED_GID}.${C_RESET}" >&2
+  echo "${C_SCARLET}[entrypoint] This container runtime is blocking user/group switching (setuid/setgid).${C_RESET}" >&2
+  echo "" >&2
+  echo "${C_ORANGE}[entrypoint] Host-side actions to resolve:${C_RESET}" >&2
+  echo "${C_SILVER}  1) Ensure the container is not forced into a mode that strips setuid/setgid transitions.${C_RESET}" >&2
+  echo "${C_SILVER}  2) Verify /data is writable by UID 99 on the host:${C_RESET}" >&2
+  echo "${C_SILVER}       chown nobody:users /mnt/user/ai/data${C_RESET}" >&2
+  echo "${C_SILVER}       chmod 775 /mnt/user/ai/data${C_RESET}" >&2
+  echo "${C_SILVER}  3) Restart the container after applying the host fixes.${C_RESET}" >&2
+  exit 1
+}
+
 exec_as_app_user() {
+  # Probe first so we can print a clear remediation message rather than failing
+  # with a terse setpriv error when the runtime forbids setuid/setgid operations.
+  if ! setpriv --reuid="${EXPECTED_UID}" --regid="${EXPECTED_GID}" --clear-groups true >/dev/null 2>&1; then
+    fatal_priv_drop_blocked
+  fi
   exec setpriv --reuid="${EXPECTED_UID}" --regid="${EXPECTED_GID}" --clear-groups /start.sh
 }
 
