@@ -173,6 +173,44 @@ PY
   touch "${BOOTSTRAP_STAMP}"
 fi
 
+if ! TORCH_VERSION="${TORCH_VERSION}" TORCHVISION_VERSION="${TORCHVISION_VERSION}" XFORMERS_VERSION="${XFORMERS_VERSION}" "${VENV_PYTHON}" - <<'PY'
+import importlib
+import os
+import sys
+
+expected = {
+  "torch": os.environ["TORCH_VERSION"],
+  "torchvision": os.environ["TORCHVISION_VERSION"],
+  "xformers": os.environ["XFORMERS_VERSION"],
+}
+
+installed = {}
+errors = []
+
+for name, expected_version in expected.items():
+  try:
+    module = importlib.import_module(name)
+    installed_version = getattr(module, "__version__", "unknown")
+    installed[name] = installed_version
+    if installed_version != expected_version:
+      errors.append(f"{name}: expected {expected_version}, found {installed_version}")
+  except Exception as exc:
+    errors.append(f"{name}: not importable ({exc.__class__.__name__})")
+
+print("Dependency sanity check: " + ", ".join(f"{name}={installed.get(name, 'missing')}" for name in expected))
+
+if errors:
+  print("Dependency version mismatch detected:", file=sys.stderr)
+  for error in errors:
+    print(f" - {error}", file=sys.stderr)
+  sys.exit(1)
+PY
+then
+  echo "ERROR: Installed dependency versions do not match the configured bootstrap pins." >&2
+  echo "       Remove ${VENV_DIR} and retry so the container can rebuild a clean environment." >&2
+  exit 1
+fi
+
 # Optional: print a minimal startup banner (avoids echoing all args verbatim).
 # This is intentionally conservative to reduce the chance of logging sensitive values
 # if users pass secrets via COMMANDLINE_ARGS.
