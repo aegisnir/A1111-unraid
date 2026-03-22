@@ -7,6 +7,10 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Startup permission-repair fallback:
+	- `entrypoint.sh` no longer aborts immediately if host policy blocks `chown` or `chmod` on `/data`
+	- when automatic repair is denied (`Operation not permitted`), entrypoint now prints a clear host-filesystem warning and continues into `start.sh`
+	- the container now fails through the existing `start.sh` remediation path instead of crashing early on the raw `chmod` error
 - Console color palette:
 	- added ANSI color output to `start.sh` and `entrypoint.sh` for terminal sessions (plain in log files via `[[ -t 2 ]]` guard)
 	- color scheme: **violet** (`\e[95m`) for informational/safe-to-ignore messages; **orange** (`\e[93m`) for caution/warnings; **scarlet** (`\e[91m`) for critical errors; **silver** (`\e[37m`) for structural chrome (borders, labels, dim text)

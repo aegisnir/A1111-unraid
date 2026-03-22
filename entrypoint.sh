@@ -35,14 +35,25 @@ APP_USER="sdwebui"
 EXPECTED_UID=99
 EXPECTED_GID=100
 
+warn_repair_blocked() {
+  echo "${C_SCARLET}[entrypoint] Automatic /data repair was blocked by the host filesystem or mount policy.${C_RESET}" >&2
+  echo "${C_ORANGE}[entrypoint] Continuing startup so start.sh can print the final remediation steps.${C_RESET}" >&2
+}
+
 if [[ -d "${DATA_DIR}" ]]; then
   data_owner_uid="$(stat -c '%u' "${DATA_DIR}")"
   if [[ "${data_owner_uid}" != "${EXPECTED_UID}" ]]; then
     echo "${C_ORANGE}[entrypoint] /data is owned by uid=${data_owner_uid}, expected uid=${EXPECTED_UID}.${C_RESET}" >&2
     echo "${C_ORANGE}[entrypoint] Correcting ownership and permissions under /data...${C_RESET}" >&2
     # Fix ownership on top-level dir first so the app user can write immediately.
-    chown "${EXPECTED_UID}:${EXPECTED_GID}" "${DATA_DIR}"
-    chmod 775 "${DATA_DIR}"
+    if ! chown "${EXPECTED_UID}:${EXPECTED_GID}" "${DATA_DIR}"; then
+      warn_repair_blocked
+      exec runuser -u "${APP_USER}" -- /start.sh
+    fi
+    if ! chmod 775 "${DATA_DIR}"; then
+      warn_repair_blocked
+      exec runuser -u "${APP_USER}" -- /start.sh
+    fi
     # Correct ownership on all children that ended up under wrong ownership.
     # find limits the walk to only misowned entries so this is fast on a healthy volume.
     find "${DATA_DIR}" ! -user "${EXPECTED_UID}" -exec chown "${EXPECTED_UID}:${EXPECTED_GID}" {} + 2>/dev/null || true
@@ -58,7 +69,10 @@ if [[ -d "${DATA_DIR}" ]]; then
     # on the host while the directory was already owned by uid 99).
     echo "${C_ORANGE}[entrypoint] /data is owned by the correct user but is not writable/traversable.${C_RESET}" >&2
     echo "${C_ORANGE}[entrypoint] Restoring mode 775 and fixing permission modes under /data...${C_RESET}" >&2
-    chmod 775 "${DATA_DIR}"
+    if ! chmod 775 "${DATA_DIR}"; then
+      warn_repair_blocked
+      exec runuser -u "${APP_USER}" -- /start.sh
+    fi
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
     echo "${C_VIOLET}[entrypoint] /data permissions restored. Continuing startup.${C_RESET}" >&2
