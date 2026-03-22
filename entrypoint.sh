@@ -34,14 +34,34 @@ DATA_DIR="/data"
 EXPECTED_UID=99
 EXPECTED_GID=100
 
+print_runtime_diagnostics() {
+  local no_new_privs="unknown"
+  local seccomp_mode="unknown"
+  local cap_eff="unknown"
+
+  if [[ -r /proc/self/status ]]; then
+    no_new_privs="$(awk '/^NoNewPrivs:/ {print $2}' /proc/self/status 2>/dev/null || true)"
+    seccomp_mode="$(awk '/^Seccomp:/ {print $2}' /proc/self/status 2>/dev/null || true)"
+    cap_eff="$(awk '/^CapEff:/ {print $2}' /proc/self/status 2>/dev/null || true)"
+    no_new_privs="${no_new_privs:-unknown}"
+    seccomp_mode="${seccomp_mode:-unknown}"
+    cap_eff="${cap_eff:-unknown}"
+  fi
+
+  echo "${C_SILVER}[entrypoint] Runtime diagnostics: uid=$(id -u) gid=$(id -g) NoNewPrivs=${no_new_privs} Seccomp=${seccomp_mode} CapEff=${cap_eff}${C_RESET}" >&2
+  echo "${C_ORANGE}[entrypoint] Likely causes: rootless/userns remap, no-new-privileges policy, NFS root-squash, or share ACL/mount restrictions.${C_RESET}" >&2
+}
+
 warn_repair_blocked() {
   echo "${C_SCARLET}[entrypoint] Automatic /data repair was blocked by the host filesystem or mount policy.${C_RESET}" >&2
   echo "${C_ORANGE}[entrypoint] Continuing startup so start.sh can print the final remediation steps.${C_RESET}" >&2
+  print_runtime_diagnostics
 }
 
 fatal_priv_drop_blocked() {
   echo "${C_SCARLET}[entrypoint] Cannot drop privileges to uid=${EXPECTED_UID}:gid=${EXPECTED_GID}.${C_RESET}" >&2
   echo "${C_SCARLET}[entrypoint] This container runtime is blocking user/group switching (setuid/setgid).${C_RESET}" >&2
+  print_runtime_diagnostics
   echo "" >&2
   echo "${C_ORANGE}[entrypoint] Host-side actions to resolve:${C_RESET}" >&2
   echo "${C_SILVER}  1) Ensure the container is not forced into a mode that strips setuid/setgid transitions.${C_RESET}" >&2

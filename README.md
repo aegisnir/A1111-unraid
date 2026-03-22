@@ -314,6 +314,17 @@ If you are using the template defaults, that means removing:
 - If `/data` ended up owned by root (e.g. after deleting and Docker recreating the host directory), the container now self-heals this automatically — see the section below.
 - If using `--read-only`, make sure required writable paths are explicitly mounted.
 
+### Error: `Operation not permitted` in entrypoint (`chmod`, `runuser`, or `setpriv`)
+- If logs show messages like `chmod: changing permissions of '/data': Operation not permitted`, `runuser: cannot set groups`, or `setpriv: setresuid failed`, the host/runtime is denying metadata or UID/GID transitions.
+- The container now prints a short runtime diagnostic line with `NoNewPrivs`, `Seccomp`, and `CapEff` values to help identify this class of restriction quickly.
+- Typical causes: rootless/user-namespace remap behavior, no-new-privileges hardening, NFS root-squash exports, or share ACL/mount policy restrictions.
+- Fix on host first, then restart:
+
+```bash
+chown nobody:users /mnt/user/ai/data
+chmod 775 /mnt/user/ai/data
+```
+
 ### The container fails to start after deleting `/data`
 
 If you delete the host data directory (default: `/mnt/user/ai/data/`), Docker may recreate it owned by `root` on next start.
