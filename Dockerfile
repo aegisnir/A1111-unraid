@@ -8,6 +8,11 @@
 #   - Pin the CUDA base image by digest for reproducibility
 #   - Allow controlled pinning of upstream WebUI code (WEBUI_REF)
 #
+# This project is maintained as a personal, AI-assisted hobby project.
+# These comments try to explain the reasoning behind the current choices,
+# but they should not be read as a guarantee that the result is fully hardened
+# or appropriate for every environment.
+#
 # General Docker build guidance (reference):
 # https://docs.docker.com/build/building/best-practices/
 
@@ -54,6 +59,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Pin the WebUI to a branch/tag/commit. For more controlled builds,
 # consider using a specific commit SHA and updating intentionally.
+#
+# Security note:
+# Avoid passing secrets through build arguments. Industry guidance generally
+# treats build args as poor places for sensitive values because they may show up
+# in build metadata, layer history, logs, or external attestations depending on
+# how and where the image is built.
 ARG WEBUI_REF=master
 
 # Unraid-friendly defaults (nobody/users). Adjust if you use a different strategy.
@@ -64,6 +75,9 @@ ARG APP_GID=100
 # Runtime defaults
 # NOTE: --listen binds to all interfaces. On a trusted LAN this is often OK,
 # but exposing this service beyond a trusted network may not be as safe as intended.
+# If a user wants stronger exposure controls, those should usually be enforced
+# by network design, reverse proxies, VPNs, access controls, and container
+# runtime settings rather than trying to rely on this image alone.
 # ------------------------------------------------------------------------------
 ENV COMMANDLINE_ARGS="--listen --port 7860"
 ENV WEBUI_DIR="/opt/stable-diffusion-webui"
@@ -89,12 +103,18 @@ RUN apt-get update \
 # ------------------------------------------------------------------------------
 # Create a dedicated non-root user.
 # Running as non-root can reduce impact in some failure scenarios.
+# It does not make the container "secure," but it can help reduce the blast
+# radius compared with running everything as root.
 # ------------------------------------------------------------------------------
 RUN groupadd --gid "${APP_GID}" app \
  && useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash app
 
 # ------------------------------------------------------------------------------
 # Fetch A1111 source code
+# A shallow clone keeps the image build lighter and faster, which is useful for
+# hobbyist maintenance and routine rebuilds. The tradeoff is that full history
+# is not available inside the image, so deeper forensics or history inspection
+# would need to happen outside this build context.
 # ------------------------------------------------------------------------------
 WORKDIR /opt
 RUN git clone --depth 1 https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
@@ -119,11 +139,17 @@ EXPOSE 7860
 # Healthcheck
 # Checks if something is listening on localhost:7860.
 # This is a lightweight signal, not a full correctness check.
+# In other words, it can help detect obvious startup failures, but it should not
+# be treated as proof that the application is healthy, safe, authenticated, or
+# functioning correctly for every request path.
 # ------------------------------------------------------------------------------
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD python3 -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 7860)); s.close()" || exit 1
 
-# Drop privileges at runtime
+# Drop privileges at runtime.
+# Runtime hardening should still be reviewed at the container runtime layer
+# (for example: read-only root filesystem, dropped capabilities, no-new-
+# privileges, explicit writable mounts, network exposure limits, etc.).
 USER app:app
 
 ENTRYPOINT ["/start.sh"]

@@ -7,6 +7,10 @@
 #   environment variables. This script includes basic sanity checks and clearer
 #   error messages to help with troubleshooting.
 #
+# This project is maintained as a personal, AI-assisted learning project.
+# The checks below are intended to catch obvious problems early, but they should
+# not be read as proof that the runtime is secure, correct, or production-ready.
+#
 # Notes:
 #   - This script does not attempt to configure networking, authentication,
 #     or reverse proxy behavior. Those are deployment concerns and may vary by environment.
@@ -19,6 +23,8 @@ set -euo pipefail
 WEBUI_DIR="/opt/stable-diffusion-webui"
 
 # Basic sanity checks to make failures easier to diagnose.
+# These are here mostly to fail fast with clearer messages instead of producing
+# a less helpful Python or file-not-found error later in startup.
 if [[ ! -d "${WEBUI_DIR}" ]]; then
   echo "ERROR: Expected WebUI directory not found: ${WEBUI_DIR}" >&2
   echo "       The image build may have failed or WEBUI_DIR may be incorrect." >&2
@@ -41,7 +47,12 @@ cd "${WEBUI_DIR}"
 
 # Optional: print a minimal startup banner (avoids echoing all args verbatim).
 # This is intentionally conservative to reduce the chance of logging sensitive values
-# if users pass secrets via COMMANDLINE_ARGS (not recommended).
+# if users pass secrets via COMMANDLINE_ARGS.
+#
+# Recommendation:
+# Avoid placing secrets in COMMANDLINE_ARGS if at all possible. Command-line
+# arguments are often easier to leak through logs, diagnostics, process lists,
+# screenshots, or copy/paste mistakes than dedicated secret-management methods.
 if [[ -n "${COMMANDLINE_ARGS:-}" ]]; then
   echo "Starting WebUI (COMMANDLINE_ARGS set)."
 else
@@ -51,4 +62,8 @@ fi
 # Launch AUTOMATIC1111.
 # - If COMMANDLINE_ARGS is unset, pass nothing.
 # - If set, arguments are expanded as-is.
+# - This script intentionally avoids trying to sanitize or validate every user-
+#   supplied switch because that can become brittle and may create a false sense
+#   of safety. Users should review the flags they pass and decide what is
+#   appropriate for their own environment.
 python3 launch.py ${COMMANDLINE_ARGS:-}

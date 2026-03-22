@@ -1,0 +1,79 @@
+# Versioning
+
+This document explains, in simple terms, how I currently think about updates and release labels for this repository.
+
+This is a personal hobby project, it is heavily AI-assisted, and it is also a learning experience for me. I am figuring things out as I go, so I do not want this document to sound more polished, official, or confident than the project really is.
+
+Security is a major concern of mine, and I try to make choices that are as safe and thoughtful as I can with my current knowledge. At the same time, I am not a security expert and I am not a programmer, so mistakes, weak assumptions, and blind spots are all possible.
+
+If you notice something I could do better, I am open to constructive criticism, feedback, and recommendations.
+
+---
+
+## Update approach
+
+At a high level, this repository generally follows upstream AUTOMATIC1111 development from `master`.
+
+In practice, that means:
+- upstream changes may be adopted over time
+- releases may happen irregularly
+- some updates may be small, while others may include larger upstream changes
+
+If you choose to use something from this repo, I recommend reviewing changes for yourself and deciding whether a given update fits your own setup, goals, and comfort level.
+
+---
+
+## Tags
+
+The simplest tag I expect to use is:
+
+- `latest` — the most recently published version from this repository
+
+I may use additional release labels later if they feel useful, but I do not want to maintain a complicated tagging system unless there is a real reason for it.
+
+---
+
+## Optional version labels
+
+If I end up using explicit release labels, they will likely be simple labels such as:
+
+- `v1`
+- `v2`
+- `v3`
+
+These labels would only be there to help refer to a specific published state. They should not be read as a promise of formal support, extended maintenance, or comprehensive testing.
+
+---
+
+## Upstream reference
+
+Where practical, I may note the upstream AUTOMATIC1111 commit or source state used for a given release.
+
+That is meant to improve clarity. It should not be taken as a guarantee of full reproducibility.
+
+---
+
+## What this project does not promise
+
+Things this project does not promise:
+- a fixed release schedule
+- active validation of every upstream change before publication
+- long-term support for older releases
+- compatibility with every host, driver, or workflow
+
+I am sharing this because it may be useful to someone else, but anyone using it should validate it for their own environment, threat model, and risk tolerance.
+
+---
+
+## A note on tone and expectations
+
+I want this project to be approachable, personal, and honest.
+
+I also want to be transparent that:
+- this project includes a lot of AI-assisted "vibe coding"
+- I am learning as I go
+- security is something I care deeply about, but I may still get things wrong
+- mistakes, weak assumptions, or awkward decisions are possible
+- feedback is welcome, especially if it helps me do things in a safer or more thoughtful way
+
+Please do not expect a perfect result here. If this project becomes more structured later, I can expand this document then. For now, I would rather keep it simple, humble, and honest.
