@@ -101,6 +101,10 @@ The `/data` mapping now also stores the persistent Python environment used by th
 
 - `/data/venv`
 
+It also stores the runtime-cloned AUTOMATIC1111 support repositories at:
+
+- `/data/repositories`
+
 That means you do not need to redownload the heavy Python packages every time you recreate the container, as long as you keep the same host data path.
 
 ## Hardening ideas for Unraid

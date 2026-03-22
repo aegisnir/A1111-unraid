@@ -26,6 +26,7 @@ VENV_DIR="${A1111_VENV_DIR:-/data/venv}"
 VENV_PYTHON="${VENV_DIR}/bin/python"
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}"
+RUNTIME_REPOS_DIR="/data/repositories"
 export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
@@ -63,6 +64,15 @@ fi
 cd "${WEBUI_DIR}"
 
 mkdir -p "${VENV_DIR}"
+mkdir -p "${RUNTIME_REPOS_DIR}"
+
+if [[ -d "${WEBUI_DIR}/repositories" && ! -L "${WEBUI_DIR}/repositories" ]]; then
+  rm -rf "${WEBUI_DIR}/repositories"
+fi
+
+if [[ ! -L "${WEBUI_DIR}/repositories" ]]; then
+  ln -s "${RUNTIME_REPOS_DIR}" "${WEBUI_DIR}/repositories"
+fi
 
 if [[ ! -x "${VENV_PYTHON}" ]]; then
   echo "Creating persistent Python virtual environment in ${VENV_DIR}" >&2
