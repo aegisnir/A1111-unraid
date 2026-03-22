@@ -1,0 +1,13 @@
+# Default WebUI auth file template
+# This file is auto-seeded to /data/auth/webui-auth.txt on first launch if missing.
+#
+# IMPORTANT:
+# - Startup blocks if any credential uses password 'changeme'.
+# - Replace the default password before normal use.
+#
+# Format:
+# - one credential per line as username:password
+# - or multiple comma-separated credentials on one line
+# - blank lines and lines starting with # are ignored
+
+admin:changeme

@@ -91,10 +91,18 @@ check_startup_privilege_model() {
 }
 
 check_auth_guardrails() {
-  if grep -q 'WEBUI_PASSWORD="\${WEBUI_PASSWORD:-changeme-now}"' start.sh && grep -q 'WEBUI_PASSWORD is still set to the insecure default value' start.sh; then
-    pass "Placeholder WEBUI password is blocked at startup"
+  # Auth is now file-based only. Check that the auth-file changeme guard is present.
+  if grep -q '"changeme"' start.sh && grep -q 'CRITICAL' start.sh && grep -q 'changeme' start.sh; then
+    pass "Auth-file changeme password is blocked at startup"
   else
-    fail "Placeholder WEBUI password guardrail missing"
+    fail "Auth-file changeme guard missing from start.sh"
+  fi
+
+  # Check that the auth-file is seeded on first launch from the sample file.
+  if grep -q 'WEBUI_AUTH_SAMPLE_FILE' start.sh && grep -q 'cp.*WEBUI_AUTH_SAMPLE_FILE.*WEBUI_AUTH_FILE' start.sh; then
+    pass "Auth-file first-launch seeding is present"
+  else
+    fail "Auth-file first-launch seeding missing"
   fi
 
   if grep -q 'WEBUI_AUTH_FILE' start.sh && grep -q 'WEBUI_AUTH_FILE' README.md; then

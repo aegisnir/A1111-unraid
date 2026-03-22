@@ -63,13 +63,12 @@ MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"
 TORCH_VERSION="${TORCH_VERSION:-2.7.0}"
 TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
 XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.30}"
-WEBUI_USERNAME="${WEBUI_USERNAME:-admin}"
-WEBUI_PASSWORD="${WEBUI_PASSWORD:-changeme-now}"
-WEBUI_AUTH_FILE="${WEBUI_AUTH_FILE:-}"
-API_AUTH_MODE="${API_AUTH_MODE:-mirror-webui}"
+WEBUI_AUTH_FILE_DEFAULT="/data/auth/webui-auth.txt"
+WEBUI_AUTH_FILE="${WEBUI_AUTH_FILE:-${WEBUI_AUTH_FILE_DEFAULT}}"
 API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-mirror-webui-file}"
 UMASK="${UMASK:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WEBUI_AUTH_SAMPLE_FILE="${SCRIPT_DIR}/webui-auth.txt"
 EXTENSIONS_BOOTSTRAP_FILE="${EXTENSIONS_BOOTSTRAP_FILE:-/data/extensions-bootstrap.txt}"
 EXTENSIONS_BOOTSTRAP_FORCE="${EXTENSIONS_BOOTSTRAP_FORCE:-false}"
 EXTENSIONS_DIR_DEFAULT="/data/extensions"
@@ -147,6 +146,7 @@ mkdir -p /data/models/Stable-diffusion
 mkdir -p /data/models/VAE
 mkdir -p /data/models/Lora
 mkdir -p /data/outputs
+mkdir -p /data/auth
 
 available_kb="$(df -Pk /data | awk 'NR==2 {print $4}')"
 if [[ -z "${available_kb}" || ! "${available_kb}" =~ ^[0-9]+$ ]]; then
@@ -313,31 +313,72 @@ fi
 AUTH_ARGS=()
 USING_WEBUI_AUTH_FILE=0
 
+extract_auth_file_csv() {
+  local auth_file_path="$1"
+  python3 - <<'PY' "${auth_file_path}"
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+entries = []
+
+for raw_line in path.read_text(encoding='utf-8').splitlines():
+    line = raw_line.strip()
+    if not line or line.startswith('#'):
+        continue
+    for cred in line.split(','):
+        cred = cred.strip()
+        if cred:
+            entries.append(cred)
+
+print(','.join(entries))
+PY
+}
+
 if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth([=[:space:]]|$) ]]; then
   echo "${C_VIOLET}WebUI authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
 elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth-path([=[:space:]]|$) ]]; then
   echo "${C_VIOLET}WebUI authentication file is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
-elif [[ -n "${WEBUI_AUTH_FILE}" ]]; then
+else
+  if [[ ! -f "${WEBUI_AUTH_FILE}" && -f "${WEBUI_AUTH_SAMPLE_FILE}" ]]; then
+    cp "${WEBUI_AUTH_SAMPLE_FILE}" "${WEBUI_AUTH_FILE}"
+    chmod 600 "${WEBUI_AUTH_FILE}" 2>/dev/null || true
+    echo "${C_ORANGE}Seeded default auth file at ${WEBUI_AUTH_FILE}.${C_RESET}" >&2
+  fi
+fi
+
+if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth([=[:space:]]|$) ]]; then
+  echo "${C_VIOLET}WebUI authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
+elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth-path([=[:space:]]|$) ]]; then
+  echo "${C_VIOLET}WebUI authentication file is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
+else
   if [[ ! -f "${WEBUI_AUTH_FILE}" ]]; then
-    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but the file does not exist: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
+    echo "${C_SCARLET}${C_BOLD}CRITICAL:${C_RESET}${C_SCARLET} WebUI auth file is missing: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
+    echo "${C_SCARLET}         Create the auth file or mount it from the host. Recommended path: /data/auth/webui-auth.txt${C_RESET}" >&2
     exit 1
   fi
   if [[ ! -s "${WEBUI_AUTH_FILE}" ]]; then
-    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but the file is empty: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
+    echo "${C_SCARLET}${C_BOLD}CRITICAL:${C_RESET}${C_SCARLET} WebUI auth file is empty: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
     exit 1
   fi
+
+  auth_file_csv="$(extract_auth_file_csv "${WEBUI_AUTH_FILE}")"
+  if [[ -z "${auth_file_csv}" ]]; then
+    echo "${C_SCARLET}${C_BOLD}CRITICAL:${C_RESET}${C_SCARLET} WebUI auth file has no usable credentials: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
+    echo "${C_SCARLET}         Add at least one entry in username:password format.${C_RESET}" >&2
+    exit 1
+  fi
+
+  if echo "${auth_file_csv}" | tr ',' '\n' | awk -F: 'NF>=2 {if ($2=="changeme") found=1} END {exit(found?0:1)}'; then
+    echo "${C_SCARLET}${C_BOLD}CRITICAL:${C_RESET}${C_SCARLET} Insecure default password detected in ${WEBUI_AUTH_FILE}.${C_RESET}" >&2
+    echo "${C_SCARLET}         The password 'changeme' is blocked for safety and startup is aborted.${C_RESET}" >&2
+    echo "${C_ORANGE}         Update the auth file with a strong unique password and restart the container.${C_RESET}" >&2
+    exit 1
+  fi
+
   AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_FILE}")
   USING_WEBUI_AUTH_FILE=1
   echo "${C_VIOLET}WebUI authentication file is enabled via WEBUI_AUTH_FILE.${C_RESET}" >&2
-else
-  if [[ "${WEBUI_PASSWORD}" == "changeme-now" ]]; then
-    echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_PASSWORD is still set to the insecure default value.${C_RESET}" >&2
-    echo "${C_ORANGE}       Set WEBUI_PASSWORD to a unique password before starting the container.${C_RESET}" >&2
-    echo "${C_ORANGE}       Alternatively, manage authentication explicitly with --gradio-auth, --gradio-auth-path, or WEBUI_AUTH_FILE.${C_RESET}" >&2
-    exit 1
-  fi
-  AUTH_ARGS+=("--gradio-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
-  echo "${C_VIOLET}WebUI login is enabled by default. Username: ${WEBUI_USERNAME}${C_RESET}" >&2
 fi
 
 API_ENABLED=0
@@ -353,25 +394,7 @@ if [[ "${API_ENABLED}" == "1" ]]; then
     if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
       echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
     elif [[ "${API_AUTH_FILE_MODE}" == "mirror-webui-file" ]]; then
-      api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-entries = []
-
-for raw_line in path.read_text(encoding='utf-8').splitlines():
-    line = raw_line.strip()
-    if not line or line.startswith('#'):
-        continue
-    for cred in line.split(','):
-        cred = cred.strip()
-        if cred:
-            entries.append(cred)
-
-print(','.join(entries))
-PY
-)"
+      api_auth_value="$(extract_auth_file_csv "${WEBUI_AUTH_FILE}")"
       if [[ -z "${api_auth_value}" ]]; then
         echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
         exit 1
@@ -382,25 +405,7 @@ PY
       echo "${C_SILVER}API auth mirroring from WEBUI_AUTH_FILE disabled via API_AUTH_FILE_MODE=disabled.${C_RESET}" >&2
     else
       echo "${C_ORANGE}[WARNING] Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to mirror-webui-file." >&2
-      api_auth_value="$(python3 - <<'PY' "${WEBUI_AUTH_FILE}"
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-entries = []
-
-for raw_line in path.read_text(encoding='utf-8').splitlines():
-    line = raw_line.strip()
-    if not line or line.startswith('#'):
-        continue
-    for cred in line.split(','):
-        cred = cred.strip()
-        if cred:
-            entries.append(cred)
-
-print(','.join(entries))
-PY
-)"
+      api_auth_value="$(extract_auth_file_csv "${WEBUI_AUTH_FILE}")"
       if [[ -z "${api_auth_value}" ]]; then
         echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
         exit 1
@@ -408,21 +413,8 @@ PY
       AUTH_ARGS+=("--api-auth" "${api_auth_value}")
       echo "${C_VIOLET}API authentication is mirrored from WEBUI_AUTH_FILE.${C_RESET}" >&2
     fi
-  elif [[ "${API_AUTH_MODE}" == "mirror-webui" ]]; then
-    if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-      echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
-    else
-      AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
-    fi
-  elif [[ "${API_AUTH_MODE}" == "disabled" ]]; then
-    echo "${C_SILVER}API authentication mirroring disabled via API_AUTH_MODE=disabled.${C_RESET}" >&2
   else
-    echo "${C_ORANGE}[WARNING] Unrecognized API_AUTH_MODE=${API_AUTH_MODE}. Expected mirror-webui or disabled. Falling back to mirror-webui.${C_RESET}" >&2
-    if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
-      echo "${C_VIOLET}API authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
-    else
-      AUTH_ARGS+=("--api-auth" "${WEBUI_USERNAME}:${WEBUI_PASSWORD}")
-    fi
+    echo "${C_SILVER}API auth mirroring skipped because auth is not sourced from WEBUI_AUTH_FILE.${C_RESET}" >&2
   fi
 else
   if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--api-auth([=[:space:]]|$) ]]; then
@@ -555,7 +547,6 @@ monitor_webui_output() {
       echo ""
       echo "  ${C_VIOLET}┌─ ${C_BOLD}[READY]${C_RESET}${C_VIOLET} ───────────────────────────────────────────────────────────${C_RESET}"
       echo "  ${C_VIOLET}│  WebUI is ready. Access it at the URL shown above.${C_RESET}"
-      echo "  ${C_VIOLET}│  Login username: ${C_BOLD}${WEBUI_USERNAME}${C_RESET}"
       echo "  ${C_VIOLET}└─────────────────────────────────────────────────────────────────────${C_RESET}"
       echo ""
     fi

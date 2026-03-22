@@ -1,8 +1,4 @@
 
-# ⚠️⚠️⚠️ WORK IN PROGRESS ⚠️⚠️⚠️
-
-Do not use this yet unless the work-in-progress notice is removed.
-
 # Stable Diffusion WebUI (AUTOMATIC1111) for Unraid
 
 This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, reasonably lightweight, and more security-conscious than a throwaway personal build.
@@ -84,48 +80,68 @@ That gives the container access to the NVIDIA runtime when the NVIDIA Container 
 This container now enables the AUTOMATIC1111 login page by default.
 The AUTOMATIC1111 API is disabled by default unless you explicitly add `--api` to `COMMANDLINE_ARGS`.
 
-Default login configuration:
+This container defaults to auth-file based login.
 
-- username: `admin`
-- password: `changeme-now`
+Startup seeds a default auth file to `/data/auth/webui-auth.txt` on first launch if it does not exist.
 
-The container will refuse to start while the password is still set to `changeme-now`. Treat that value as a placeholder only and replace it in the container configuration before first normal startup.
+Default seeded credential:
 
-Set your real login values in the container configuration with:
+- `admin:changeme`
 
-- `WEBUI_USERNAME`
-- `WEBUI_PASSWORD`
+Critical safety guard:
 
-Use `WEBUI_PASSWORD` for convenience/testing. For live deployments, prefer `WEBUI_AUTH_FILE` so credentials are managed from a mounted file instead of template variables.
+- Startup will abort with a **CRITICAL** error if any auth-file entry still uses password `changeme`.
+- You must replace `changeme` with a strong password before WebUI can start.
 
-When API is explicitly enabled (`--api`), the container mirrors those credentials to `--api-auth` by default so the API is not left unauthenticated while the UI is protected.
+Use this variable in the template/container config:
 
-If you prefer not to store credentials directly in template variables, mount an auth file and set:
+- `WEBUI_AUTH_FILE` (default: `/data/auth/webui-auth.txt`)
 
-- `WEBUI_AUTH_FILE`
+Recommended host/container paths:
 
-The file format matches AUTOMATIC1111's auth-file format:
+- Host path: `/mnt/user/ai/data/auth/webui-auth.txt`
+- Container path: `/data/auth/webui-auth.txt`
+
+#### Editing the auth file
+
+The file is created with `chmod 600` (owner read/write only). This prevents other processes and containers sharing the `/data` volume from reading your credentials.
+
+**Unraid terminal (recommended):** The Unraid terminal runs as `root`, so root always has access regardless of permissions.
+
+```bash
+nano /mnt/user/ai/data/auth/webui-auth.txt
+```
+
+**SMB share:** Unraid serves SMB authenticated with the root/admin password. If you access the share with your Unraid admin credentials, you can read and write `chmod 600` files normally. If the share is configured as **Public** (no auth), the file will appear inaccessible — Samba maps public connections to an unprivileged user that cannot read owner-only files.
+
+**In summary:** Unraid terminal or SSH is the simplest and most reliable method. Authenticated SMB works. Public/anonymous SMB does not.
+
+Auth file format (AUTOMATIC1111 compatible):
 
 - one credential per line as `username:password`
 - or multiple comma-delimited entries on one line
+- blank lines are allowed
+- lines starting with `#` are treated as comments and ignored
 
 Example:
 
 ```text
-admin:correct horse battery staple
+# one per line
+admin:replace-with-strong-password
 viewer:another-password
+
+# or comma-separated on a single line
+admin:replace-with-strong-password,viewer:another-password
 ```
 
-When `WEBUI_AUTH_FILE` is set, it takes precedence over `WEBUI_USERNAME` and `WEBUI_PASSWORD` unless you explicitly provide your own `--gradio-auth` or `--gradio-auth-path` in `COMMANDLINE_ARGS`.
-
-If API is enabled, the container also mirrors auth-file credentials into API auth by default. You can control that with:
+If API is enabled (`--api`), the container mirrors auth-file credentials into `--api-auth` by default. You can control that with:
 
 - `API_AUTH_FILE_MODE=mirror-webui-file`
 - `API_AUTH_FILE_MODE=disabled`
 
-Important security note: upstream AUTOMATIC1111 parses auth from command-line flags internally. This repo masks those values from the startup log, but command-line style auth should still be treated as sensitive and avoided in screenshots, copied logs, or shared diagnostics.
+> **Security note on API auth:** AUTOMATIC1111's `--api-auth` flag accepts credentials as a plain string (not a file path). When mirroring is active, the container appends `--api-auth user:password` to the `COMMANDLINE_ARGS` environment variable. This means credentials are readable via `docker inspect` and `/proc/<pid>/environ` by any process or user that can inspect the container. This is a known upstream limitation of the A1111 API auth mechanism — there is no file-based equivalent for `--api-auth`. If this exposure is unacceptable for your environment, set `API_AUTH_FILE_MODE=disabled` and do not enable the API, or place the entire service behind a reverse proxy that handles API auth at the network layer.
 
-Operational warning: in some startup paths, credentials provided via `WEBUI_PASSWORD` may still appear in logs (for example as part of generated launch arguments). Treat container logs as sensitive and rotate credentials if they were exposed. Using `WEBUI_AUTH_FILE` is strongly recommended for non-test deployments.
+> **Why `WEBUI_USERNAME` / `WEBUI_PASSWORD` were removed:** Passing credentials via template/env variables exposes them in the same way. Auth-file based login (`--gradio-auth-path`) is safer because the credential string never appears in env vars or command-line arguments.
 
 If you want to manage authentication manually, you can still pass your own auth flags in `COMMANDLINE_ARGS`:
 

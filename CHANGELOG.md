@@ -7,6 +7,18 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Security audit and documentation hardening:
+	- updated `scripts/security-check.sh` `check_auth_guardrails` to test current auth-file changeme guard instead of the removed `WEBUI_PASSWORD` variable (previous check always failed after auth refactor)
+	- updated `SECURITY.md` checklist to reference `changeme` auth-file guard instead of stale `changeme-now` WEBUI_PASSWORD reference; updated verification grep command to match
+	- removed "WORK IN PROGRESS" banner from README top (was blocking CA App Store readiness)
+	- added explicit security warning in README about `--api-auth` credentials being exposed in `COMMANDLINE_ARGS` env var when API mirroring is active (known upstream A1111 limitation)
+	- cleaned up duplicate intro sentence in README auth section
+- Authentication defaults and hardening:
+        - switched startup to auth-file-first workflow using `WEBUI_AUTH_FILE` (default `/data/auth/webui-auth.txt`)
+        - added first-run auth-file seeding from repository template `webui-auth.txt` when target file is missing
+        - seeded default credential is `admin:changeme`, and startup now aborts with a CRITICAL error until `changeme` is replaced
+        - removed `WEBUI_USERNAME` / `WEBUI_PASSWORD` template fields to avoid credential leakage from variable-based auth paths
+        - updated README/template metadata with explicit auth-file path, format, and safety-guard guidance
 - One-time extension bootstrap:
 	- added first-launch extension bootstrap in `start.sh` driven by `EXTENSIONS_BOOTSTRAP_FILE` (default `/data/extensions-bootstrap.txt`)
 	- bootstrap installs extensions into `/data/extensions` and writes persistent completion marker `/data/.state/extensions-bootstrap-v1.done`
