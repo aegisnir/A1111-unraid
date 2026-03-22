@@ -318,6 +318,19 @@ At a minimum, I would keep an eye on:
 - NVIDIA driver/toolkit changes
 - any extensions or models you add yourself
 
+## Licensing and Third-Party Notices
+
+This repository's original project files are licensed under MIT (see `LICENSE`), unless otherwise noted.
+
+This project packages and runs upstream `AUTOMATIC1111/stable-diffusion-webui`, which is licensed under AGPL-3.0.
+
+For third-party license details, see:
+
+- `THIRD_PARTY_NOTICES.md`
+- `LICENSES/AGPL-3.0.txt`
+
+If you distribute images or artifacts that include AGPL-covered components, include corresponding source and license notices for those components.
+
 ## Disclaimer
 
 This repository is shared as-is.
