@@ -70,6 +70,7 @@ ARG WEBUI_REF=master
 # Unraid-friendly defaults (nobody/users). Adjust if you use a different strategy.
 ARG APP_UID=99
 ARG APP_GID=100
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121
 
 # ------------------------------------------------------------------------------
 # Runtime defaults
@@ -99,6 +100,16 @@ RUN apt-get update \
       libxrender1 \
       libxext6 \
  && rm -rf /var/lib/apt/lists/*
+
+# Preinstall the PyTorch stack expected by the pinned AUTOMATIC1111 version.
+# Doing this at build time avoids a very large first-start download in the
+# container runtime, which is especially helpful on Unraid where long-running
+# init downloads can look like a broken or hung container.
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
+ && python3 -m pip install --no-cache-dir \
+   torch==2.1.2 \
+   torchvision==0.16.2 \
+   --extra-index-url "${TORCH_INDEX_URL}"
 
 # ------------------------------------------------------------------------------
 # Create a dedicated non-root user.
