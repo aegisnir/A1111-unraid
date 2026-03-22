@@ -40,6 +40,8 @@ By default, this container now includes `--no-download-sd-model` so it does **no
 
 On first startup, the container creates a Python virtual environment under `/data/venv` and installs the heavyweight core Python dependencies there, including `torch` and `torchvision`. That initial launch can take a while.
 
+On every startup, the container also automatically creates the standard directory layout under `/data` (`models/Stable-diffusion`, `models/VAE`, `models/Lora`, `outputs`) if it does not already exist. This means a fresh, restored, or accidentally deleted data volume self-heals its structure on next start without any manual setup. If `/data` itself ends up owned by root, the container also corrects that automatically before dropping to the unprivileged app user.
+
 The bootstrap currently pins `torch`, `torchvision`, and `xformers` as a tested set so the startup environment stays consistent. These values are meant to track the current expectations of the upstream `AUTOMATIC1111` `dev` branch rather than floating to whatever pip resolves that day. If you decide to change them, treat them as a tested group rather than bumping one package at a time.
 
 The included `template.xml` is set up for a local test image by default:
@@ -309,7 +311,36 @@ If you are using the template defaults, that means removing:
 
 ### I am seeing permission errors
 - Check that your mapped host folders are writable by the configured UID/GID.
+- If `/data` ended up owned by root (e.g. after deleting and Docker recreating the host directory), the container now self-heals this automatically — see the section below.
 - If using `--read-only`, make sure required writable paths are explicitly mounted.
+
+### The container fails to start after deleting `/data`
+
+If you delete the host data directory (default: `/mnt/user/ai/data/`), Docker may recreate it owned by `root` on next start.
+
+**In most cases this is fully automatic.** The container entrypoint (`entrypoint.sh`) runs as root, detects the wrong ownership, corrects it, then drops to the unprivileged app user before startup continues. You should see a log line like:
+
+```
+[entrypoint] /data is owned by uid=0, expected uid=99.
+[entrypoint] Correcting ownership to 99:100 (nobody:users) and setting mode 775...
+[entrypoint] /data ownership corrected. Continuing startup.
+```
+
+On the next startup after that, the container will recreate the full directory structure under `/data` (venv, models, outputs, etc.) automatically.
+
+**If the auto-fix fails** (NFS shares with root squash, unusual SELinux policies, or other host-side restrictions), you will see:
+
+```
+ERROR: /data exists but is not writable by the current user (uid=99).
+       The container entrypoint attempted to correct this automatically but could not.
+```
+
+In that case, correct ownership manually on the Unraid host (as root) and restart:
+
+```bash
+chown nobody:users /mnt/user/ai/data
+chmod 775 /mnt/user/ai/data
+```
 
 ### The container is unhealthy
 - Check whether the application is still listening on the configured port.

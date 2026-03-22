@@ -33,6 +33,11 @@
 
     The default host path is set to /mnt/user/ai/data/ so the large working set lives outside appdata by default.
 
+    <b>Self-healing data directory:</b>
+    The container automatically corrects <b>/data</b> ownership on startup if Docker recreated the directory as root (for example, after deleting the host data path).
+    In most cases no user action is needed. A log message will confirm when ownership was corrected.
+    If the auto-fix fails (NFS root squash, unusual host permissions), the log will explain the manual fix.
+
     <b>Authentication defaults:</b>
     This container enables the AUTOMATIC1111 login page by default unless you explicitly override auth flags in COMMANDLINE_ARGS.
     Default WebUI username: <b>admin</b>
@@ -61,6 +66,7 @@
     - If startup fails with a Torch GPU check error, you can temporarily add --skip-torch-cuda-test to COMMANDLINE_ARGS for troubleshooting.
     - If first-start dependency installation fails, remove /data/venv and retry after rebuilding the image so the bootstrap can recreate a clean environment.
     - WebUI login is enabled by default unless you explicitly set your own --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS.
+    - If you delete the host data directory and Docker recreates it as root, the container self-heals ownership automatically on next start.
   </Overview>
   <Category>AI:</Category>
   <WebUI>http://[IP]:[PORT:7860]</WebUI>

@@ -142,10 +142,18 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
   && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
 
 # ------------------------------------------------------------------------------
-# Copy entrypoint script (from this repository)
+# Copy entrypoint scripts (from this repository)
+#
+# entrypoint.sh runs as root, self-heals /data ownership if needed, then drops
+# to the unprivileged application user via runuser before exec-ing start.sh.
+# This is the standard "init as root, drop privileges" pattern used by postgres,
+# nginx, redis, and many other production container images.
 # ------------------------------------------------------------------------------
+COPY entrypoint.sh /entrypoint.sh
 COPY start.sh /start.sh
-RUN chmod 0755 /start.sh && chown sdwebui:sdwebui /start.sh
+RUN chmod 0755 /entrypoint.sh /start.sh \
+ && chown root:root /entrypoint.sh \
+ && chown sdwebui:sdwebui /start.sh
 
 # Include license and third-party notices in the image for distribution clarity.
 COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/doc/a1111-webui-aegisnir/
@@ -171,10 +179,9 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
 # Remove all SUID/SGID bits from binaries except in /proc, /sys, /dev
 RUN find / -perm /6000 -type f -not -path '/proc/*' -not -path '/sys/*' -not -path '/dev/*' -exec chmod a-s {} + || true
 
-# Run the application as the dedicated non-root runtime user.
+# The container starts as root so entrypoint.sh can self-heal /data ownership.
+# It then drops to sdwebui (UID 99) via runuser before exec-ing start.sh.
 # Runtime hardening should still be reviewed at the container runtime layer
 # (for example: read-only root filesystem, dropped capabilities, no-new-
 # privileges, explicit writable mounts, network exposure limits, etc.).
-USER sdwebui:sdwebui
-
-ENTRYPOINT ["/start.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

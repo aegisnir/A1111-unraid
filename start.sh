@@ -99,6 +99,21 @@ if [[ ! -d "/data" ]]; then
   exit 1
 fi
 
+if [[ ! -w "/data" ]]; then
+  echo "ERROR: /data exists but is not writable by the current user (uid=$(id -u))." >&2
+  echo "       The container entrypoint attempted to correct this automatically but could not." >&2
+  echo "       This can happen with NFS root squash, unusual host permissions, or SELinux policies." >&2
+  echo "" >&2
+  echo "       To fix manually, run the following on the Unraid host (as root) and then restart" >&2
+  echo "       the container:" >&2
+  echo "" >&2
+  echo "         chown nobody:users /mnt/user/ai/data" >&2
+  echo "         chmod 775 /mnt/user/ai/data" >&2
+  echo "" >&2
+  echo "       Adjust the path above if your Unraid share path is different." >&2
+  exit 1
+fi
+
 cd "${WEBUI_DIR}"
 
 mkdir -p "${VENV_DIR}"
@@ -106,6 +121,12 @@ mkdir -p "${RUNTIME_REPOS_DIR}"
 mkdir -p "${RUNTIME_CONFIG_STATES_DIR}"
 mkdir -p "${TMPDIR}"
 mkdir -p "${PIP_CACHE_DIR}"
+# Ensure standard data subtrees exist so the WebUI finds expected paths on a
+# fresh or restored /data volume without requiring the user to re-create them.
+mkdir -p /data/models/Stable-diffusion
+mkdir -p /data/models/VAE
+mkdir -p /data/models/Lora
+mkdir -p /data/outputs
 
 available_kb="$(df -Pk /data | awk 'NR==2 {print $4}')"
 if [[ -z "${available_kb}" || ! "${available_kb}" =~ ^[0-9]+$ ]]; then

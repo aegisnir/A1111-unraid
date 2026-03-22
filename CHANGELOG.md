@@ -7,6 +7,15 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Self-healing startup:
+	- added `entrypoint.sh` as a root-level container entrypoint that automatically corrects `/data` ownership before dropping to the unprivileged app user (`sdwebui` / UID 99)
+	- uses the standard "init as root, drop privileges" pattern (same as postgres, nginx, redis)
+	- handles two distinct degraded states independently:
+		1. **Wrong ownership** (e.g. Docker recreated `/data` as root): `chown` top-level + `find`-based ownership repair on all children + mode restoration for any that lost traversal/read bits
+		2. **Correct ownership but stomped modes** (e.g. `chmod -R 000` on the host while already owned by UID 99): `chmod 775` top-level + `find`-based permission repair restoring `u+rwx` on directories and `u+r` on files
+	- the `find` walks are filtered to only process entries that actually need fixing, so they are fast on healthy volumes and no-ops when everything is correct
+	- `start.sh` still has a fallback hard-error for cases that cannot be auto-fixed (NFS root squash, SELinux, or `chown` silently failing)
+	- `start.sh` now auto-creates standard `/data` subdirectories (`models/Stable-diffusion`, `models/VAE`, `models/Lora`, `outputs`) on every startup so a bare or restored volume gets the expected layout without user action
 - Startup/bootstrap hardening:
 	- fixed the `start.sh` shebang/entrypoint format issue
 	- made `/repositories` handling compatible with read-only container filesystems

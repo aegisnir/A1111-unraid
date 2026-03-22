@@ -8,6 +8,7 @@ Scope note: This report covers the published-image (GHCR) path used for CA readi
 
 ## Gate Summary
 
+- PASS: `entrypoint.sh` shell syntax validation (`bash -n entrypoint.sh`)
 - PASS: `start.sh` shell syntax validation (`bash -n start.sh`)
 - PASS: `template.xml` XML parse validation
 - PASS: CA/security markers present in docs and config at the time of testing:
@@ -39,6 +40,7 @@ Scope note: This report covers the published-image (GHCR) path used for CA readi
 
 ```bash
 docker pull ghcr.io/aegisnir/a1111-webui-aegisnir:latest
+bash -n entrypoint.sh
 bash -n start.sh
 python3 - <<'PY'
 import xml.etree.ElementTree as ET
