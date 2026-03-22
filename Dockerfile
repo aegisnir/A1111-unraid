@@ -136,6 +136,8 @@ RUN set -eux; \
 RUN git clone --branch dev --single-branch https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
   && rm -rf "${WEBUI_DIR}/repositories" \
   && ln -s /data/repositories "${WEBUI_DIR}/repositories" \
+  && rm -rf "${WEBUI_DIR}/config_states" \
+  && ln -s /data/config_states "${WEBUI_DIR}/config_states" \
   && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
 
 # ------------------------------------------------------------------------------

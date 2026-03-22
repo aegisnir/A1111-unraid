@@ -45,6 +45,7 @@ VENV_PYTHON="${VENV_DIR}/bin/python"
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"
 RUNTIME_REPOS_DIR="/data/repositories"
+RUNTIME_CONFIG_STATES_DIR="/data/config_states"
 MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"
 TORCH_VERSION="${TORCH_VERSION:-2.7.0}"
 TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
@@ -90,6 +91,7 @@ cd "${WEBUI_DIR}"
 
 mkdir -p "${VENV_DIR}"
 mkdir -p "${RUNTIME_REPOS_DIR}"
+mkdir -p "${RUNTIME_CONFIG_STATES_DIR}"
 mkdir -p "${TMPDIR}"
 mkdir -p "${PIP_CACHE_DIR}"
 
@@ -97,6 +99,26 @@ available_kb="$(df -Pk /data | awk 'NR==2 {print $4}')"
 if [[ -z "${available_kb}" || ! "${available_kb}" =~ ^[0-9]+$ ]]; then
   echo "ERROR: Unable to determine free space for /data." >&2
   echo "       Verify that /data is mounted and writable before starting the container." >&2
+  exit 1
+fi
+
+if [[ -e "${WEBUI_DIR}/config_states" && ! -L "${WEBUI_DIR}/config_states" ]]; then
+  echo "ERROR: ${WEBUI_DIR}/config_states exists and is not a symlink." >&2
+  echo "       On a read-only container filesystem, start.sh cannot replace it at runtime." >&2
+  echo "       Rebuild the image without that path, or remove it before enabling --read-only." >&2
+  exit 1
+fi
+
+if [[ -L "${WEBUI_DIR}/config_states" ]]; then
+  existing_target="$(readlink "${WEBUI_DIR}/config_states")"
+  if [[ "${existing_target}" != "${RUNTIME_CONFIG_STATES_DIR}" ]]; then
+    echo "ERROR: ${WEBUI_DIR}/config_states points to ${existing_target}, expected ${RUNTIME_CONFIG_STATES_DIR}." >&2
+    echo "       Rebuild the image so the config_states symlink matches the persistent runtime path." >&2
+    exit 1
+  fi
+else
+  echo "ERROR: ${WEBUI_DIR}/config_states symlink is missing." >&2
+  echo "       This image now expects that symlink to be created at build time so startup works with --read-only." >&2
   exit 1
 fi
 
@@ -280,7 +302,11 @@ fi
 #   appropriate for their own environment.
 # - Recommended Unraid usage is to include: --data-dir /data
 #   and map `/data` to a host path with plenty of space.
-"${VENV_PYTHON}" launch.py ${COMMANDLINE_ARGS:-} "${AUTH_ARGS[@]}"
+if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
+  export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} ${AUTH_ARGS[*]}"
+fi
+
+"${VENV_PYTHON}" launch.py
 
 # Instructions to build and run the Docker container for AUTOMATIC1111.
 # These commands should be run in the directory containing the Dockerfile.
