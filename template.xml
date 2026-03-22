@@ -18,6 +18,7 @@
      - Models, outputs, extensions, caches, and other working data are stored in the mapped data share instead of the container filesystem.
      - This allows you to preserve your models and outputs across container updates and easily manage them from the host.
      - The data directory can grow very large very quickly, so I recommend storing it outside of appdata when possible. Appdata works if you prefer it, but be aware of how quickly it can fill your Docker storage area.
+    - If startup fails with a Torch GPU check error, you can temporarily add --skip-torch-cuda-test to COMMANDLINE_ARGS for troubleshooting. I do not recommend using that as a permanent default because it can mask real GPU passthrough issues.
   </Overview>
   <Category>AI:</Category>
   <WebUI>http://[IP]:[PORT:7860]</WebUI>
@@ -28,5 +29,5 @@
   <TemplateURL>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/template.xml</TemplateURL>
   <Config Name="WebUI Port" Target="7860" Default="7860" Mode="tcp" Type="Port" Display="always" Required="true" Mask="false">Container port for the WebUI.</Config>
   <Config Name="Automatic1111 Data Directory" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Type="Path" Display="always" Required="false" Mask="false">Host path for Automatic1111 --data-dir. Default is /mnt/user/ai/data/ so large models, outputs, caches, and extensions live outside appdata. Appdata works if you prefer it, but it may fill your Docker storage area faster than expected.</Config>
-  <Config Name="COMMANDLINE_ARGS" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Mode="" Type="Variable" Display="advanced" Required="false" Mask="false">Extra arguments passed to launch.py. Includes --data-dir /data by default so models, outputs, caches, and extensions live in the mapped data share instead of the container filesystem.</Config>
+  <Config Name="COMMANDLINE_ARGS" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Mode="" Type="Variable" Display="advanced" Required="false" Mask="false">Extra arguments passed to launch.py. Includes --data-dir /data by default so models, outputs, caches, and extensions live in the mapped data share instead of the container filesystem. If you hit a Torch GPU check error during troubleshooting, you can temporarily append --skip-torch-cuda-test.</Config>
 </Container>

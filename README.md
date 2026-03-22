@@ -130,6 +130,7 @@ Make sure your mapped host paths are writable by that UID/GID strategy, or adjus
 - Re-run the GPU sanity check above.
 - Confirm Unraid is providing GPU access to the container.
 - Confirm the host NVIDIA driver/plugin is working.
+- If Automatic1111 fails with a message like `Torch is not able to use GPU`, you can temporarily add `--skip-torch-cuda-test` to `COMMANDLINE_ARGS` for troubleshooting. I do not recommend making that your long-term default, because it can hide a real GPU passthrough problem.
 
 ### I am seeing permission errors
 - Check that your mapped host folders are writable by the configured UID/GID.
