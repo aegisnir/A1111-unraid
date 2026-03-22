@@ -1,13 +1,16 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>A1111-WebUI-Aegisnir</Name>
-  <Repository>aegisnir/a1111-unraid</Repository>
-  <Registry>https://hub.docker.com/r/aegisnir/a1111-unraid</Registry>
+  <Repository>a1111-webui-aegisnir:latest</Repository>
+  <Registry></Registry>
   <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.svg</Icon>
   <ExtraParams></ExtraParams>
   <PostArgs></PostArgs>
   <Description>
     AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
+
+    This template is configured for a locally built image named a1111-webui-aegisnir:latest.
+    Build the image on your Unraid host before creating the container from this template.
 
     DATA DIRECTORY WARNING:
     The path used with --data-dir grows very large very quickly because it can hold models, outputs, extensions, caches, and other working data.
@@ -17,6 +20,9 @@
     The default host path is set to /mnt/user/ai/data/ so the large working set lives outside appdata by default.
   </Description>
   <Overview>
+    This template expects a locally built Docker image named a1111-webui-aegisnir:latest.
+    It does not pull from Docker Hub unless you change the Repository field to a published image.
+
     This template passes Automatic1111 data storage through --data-dir.
 
     - Models, outputs, extensions, caches, and other working data are stored in the mapped data share instead of the container filesystem.
@@ -40,7 +46,7 @@
     Support: Points to the repo issues page for help.
     TemplateURL: Always points to the latest template in main.
   -->
-  <Config Name="WebUI Port" Target="7860" Default="7860" Mode="tcp" Type="Port" Display="always" Required="true" Mask="false">Container port exposed by the AUTOMATIC1111 WebUI.</Config>
-  <Config Name="Automatic1111 Data Directory" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Type="Path" Display="always" Required="true" Mask="false">Host path mapped to Automatic1111 --data-dir. Default is /mnt/user/ai/data/ so large models, outputs, caches, and extensions live outside appdata.</Config>
-  <Config Name="Command Line Arguments" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Mode="" Type="Variable" Display="advanced" Required="false" Mask="false">Extra arguments passed to launch.py. The default includes --data-dir /data. If you hit a Torch GPU check error during troubleshooting, you can temporarily append --skip-torch-cuda-test.</Config>
+    <Config Name="WebUI" Type="Port" Target="7860" Default="7860" Mode="tcp" Display="always" Required="true" Mask="false" Description="Port exposed by the AUTOMATIC1111 WebUI (default: 7860)."/>
+    <Config Name="Data Directory" Type="Path" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Display="always" Required="true" Mask="false" Description="Host path mapped to --data-dir. Default: /mnt/user/ai/data/ (outside appdata)."/>
+    <Config Name="Extra Args" Type="Variable" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Display="advanced" Required="false" Mask="false" Description="Extra arguments for launch.py. Default includes --data-dir /data. For GPU errors, try adding --skip-torch-cuda-test."/>
 </Container>

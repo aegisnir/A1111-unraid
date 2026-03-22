@@ -17,11 +17,18 @@ This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NV
 
 These are the defaults I would personally start with on a trusted LAN.
 
-1. Use **Bridge** networking.
-2. Map container port `7860` to a host port of your choice.
-3. Make sure NVIDIA GPU access works on the Unraid host.
-4. Start the container.
-5. Access the WebUI from a trusted device on your LAN or through a VPN.
+1. Build the image on your Unraid host with the tag `a1111-webui-aegisnir:latest`.
+2. Use **Bridge** networking.
+3. Map container port `7860` to a host port of your choice.
+4. Make sure NVIDIA GPU access works on the Unraid host.
+5. Create the container from the included Unraid template.
+6. Access the WebUI from a trusted device on your LAN or through a VPN.
+
+The included `template.xml` is set up for a locally built image:
+
+- Repository: `a1111-webui-aegisnir:latest`
+
+It is not currently configured to pull a published image from Docker Hub.
 
 Once the container is running, the WebUI is typically available at:
 
