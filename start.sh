@@ -568,12 +568,13 @@ print_launch_notice
 # Launch AUTOMATIC1111 with inline output monitoring.
 # A named pipe routes all WebUI output through monitor_webui_output while
 # signal forwarding ensures Docker stop/kill reaches the Python process cleanly.
-_LOG_PIPE="$(mktemp -u /tmp/a1111-monitor.XXXXXX)"
+_MONITOR_DIR="$(mktemp -d /tmp/a1111-monitor.XXXXXX)"
+_LOG_PIPE="${_MONITOR_DIR}/webui.log.pipe"
 mkfifo "${_LOG_PIPE}"
 
 _WEBUI_PID=""
 
-_cleanup_monitor() { rm -f "${_LOG_PIPE}"; }
+_cleanup_monitor() { rm -rf "${_MONITOR_DIR}"; }
 _forward_signal()  { [[ -n "${_WEBUI_PID}" ]] && kill -TERM "${_WEBUI_PID}" 2>/dev/null || true; }
 
 trap '_cleanup_monitor' EXIT

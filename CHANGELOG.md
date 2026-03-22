@@ -12,6 +12,8 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- added quick verification commands for template flags, startup scripts, auth behavior, bash syntax, and XML parsing
 	- added a README pointer to the checklist so it can be used as a standard pre-release/pre-merge safety check
 	- added `scripts/security-check.sh` as a one-command automated runner for the checklist checks (runtime flags, privilege model, auth guardrails, bash syntax, and XML parse)
+	- hardened startup pipe handling in `start.sh` by replacing `mktemp -u` with secure `mktemp -d` + `mkfifo` path creation
+	- added an automated gate in `scripts/security-check.sh` to fail if unsafe `mktemp -u` usage appears in startup scripts
 - Startup permission-repair fallback:
 	- `entrypoint.sh` no longer aborts immediately if host policy blocks `chown` or `chmod` on `/data`
 	- when automatic repair is denied (`Operation not permitted`), entrypoint now prints a clear host-filesystem warning and continues into `start.sh`

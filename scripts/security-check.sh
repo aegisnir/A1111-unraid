@@ -126,6 +126,12 @@ PY
   else
     fail "template.xml parse failed"
   fi
+
+  if grep -RIn "mktemp -u" start.sh entrypoint.sh >/dev/null 2>&1; then
+    fail "Unsafe mktemp -u usage detected in startup scripts"
+  else
+    pass "No unsafe mktemp -u usage in startup scripts"
+  fi
 }
 
 printf 'Running security baseline checks in %s\n\n' "${ROOT_DIR}"
