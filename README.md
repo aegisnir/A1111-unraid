@@ -69,15 +69,18 @@ That gives the container access to the NVIDIA runtime on hosts where the NVIDIA 
 
 ## Configuration
 
+
 ### `COMMANDLINE_ARGS`
 
 `COMMANDLINE_ARGS` is passed directly to `launch.py`.
 
-The default is:
+**Default:**
 
-- `--listen --port 7860 --data-dir /data`
+- `--listen --port 7860 --data-dir /data --xformers`
 
-If you change this, keep in mind that some flags can affect the security posture of the container. I recommend being especially careful with anything that increases exposure or enables public sharing behavior.
+The `--xformers` flag enables memory-efficient attention and faster image generation on supported GPUs (such as NVIDIA 4090). This is now enabled by default for best performance. If you experience issues, you can remove `--xformers` from the arguments.
+
+If you change these arguments, keep in mind that some flags can affect the security posture of the container. Be especially careful with anything that increases exposure or enables public sharing behavior.
 
 ### `--data-dir`
 

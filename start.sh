@@ -84,12 +84,21 @@ fi
 
 if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
   echo "Installing first-start Python dependencies (this may take a while)..." >&2
-  "${VENV_PYTHON}" -m pip install --upgrade "pip<25" "setuptools<70" wheel
+  # Upgrade pip to latest version
+  "${VENV_PYTHON}" -m pip install --upgrade pip
+  # Pin setuptools for compatibility, upgrade wheel
+  "${VENV_PYTHON}" -m pip install --upgrade "setuptools<70" wheel
+  # Core dependencies
   "${VENV_PYTHON}" -m pip install --upgrade packaging requests regex tqdm ftfy
+  # Torch and torchvision
   "${VENV_PYTHON}" -m pip install \
     torch==2.1.2 \
     torchvision==0.16.2 \
     --extra-index-url "${TORCH_INDEX_URL}"
+  # Try to install xformers (optional, non-fatal if it fails)
+  if ! "${VENV_PYTHON}" -m pip install xformers; then
+    echo "[WARNING] xformers install failed. WebUI will run without it."
+  fi
   touch "${BOOTSTRAP_STAMP}"
 fi
 
