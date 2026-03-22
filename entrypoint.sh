@@ -31,13 +31,16 @@ else
 fi
 
 DATA_DIR="/data"
-APP_USER="sdwebui"
 EXPECTED_UID=99
 EXPECTED_GID=100
 
 warn_repair_blocked() {
   echo "${C_SCARLET}[entrypoint] Automatic /data repair was blocked by the host filesystem or mount policy.${C_RESET}" >&2
   echo "${C_ORANGE}[entrypoint] Continuing startup so start.sh can print the final remediation steps.${C_RESET}" >&2
+}
+
+exec_as_app_user() {
+  exec setpriv --reuid="${EXPECTED_UID}" --regid="${EXPECTED_GID}" --clear-groups /start.sh
 }
 
 if [[ -d "${DATA_DIR}" ]]; then
@@ -48,11 +51,11 @@ if [[ -d "${DATA_DIR}" ]]; then
     # Fix ownership on top-level dir first so the app user can write immediately.
     if ! chown "${EXPECTED_UID}:${EXPECTED_GID}" "${DATA_DIR}"; then
       warn_repair_blocked
-      exec runuser -u "${APP_USER}" -- /start.sh
+      exec_as_app_user
     fi
     if ! chmod 775 "${DATA_DIR}"; then
       warn_repair_blocked
-      exec runuser -u "${APP_USER}" -- /start.sh
+      exec_as_app_user
     fi
     # Correct ownership on all children that ended up under wrong ownership.
     # find limits the walk to only misowned entries so this is fast on a healthy volume.
@@ -71,7 +74,7 @@ if [[ -d "${DATA_DIR}" ]]; then
     echo "${C_ORANGE}[entrypoint] Restoring mode 775 and fixing permission modes under /data...${C_RESET}" >&2
     if ! chmod 775 "${DATA_DIR}"; then
       warn_repair_blocked
-      exec runuser -u "${APP_USER}" -- /start.sh
+      exec_as_app_user
     fi
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
@@ -81,4 +84,4 @@ fi
 
 # Drop privileges and exec start.sh as the application user.
 # Using exec preserves the PID so Docker signals (stop/kill) reach start.sh correctly.
-exec runuser -u "${APP_USER}" -- /start.sh
+exec_as_app_user
