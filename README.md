@@ -163,6 +163,11 @@ Make sure your mapped host paths are writable by that UID/GID strategy, or adjus
 - If Automatic1111 fails with a message like `Torch is not able to use GPU`, you can temporarily add `--skip-torch-cuda-test` to `COMMANDLINE_ARGS` for troubleshooting. I do not recommend making that your long-term default, because it can hide a real GPU passthrough problem.
 - If dependency installation fails on first startup, remove `/data/venv` and retry after updating the image so the bootstrap can rebuild a clean environment.
 
+If you are using the template defaults, that means removing:
+
+- `/mnt/user/ai/data/venv`
+- `/mnt/user/ai/data/repositories`
+
 ### I am seeing permission errors
 - Check that your mapped host folders are writable by the configured UID/GID.
 - If using `--read-only`, make sure required writable paths are explicitly mounted.
