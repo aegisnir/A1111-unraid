@@ -40,7 +40,7 @@ These are the defaults I would start with on a trusted LAN.
 
 On first startup, the container creates a Python virtual environment under `/data/venv` and installs the heavyweight core Python dependencies there, including `torch` and `torchvision`. That initial launch can take a while.
 
-The bootstrap currently pins a conservative compatibility set for `torch`, `torchvision`, and `xformers`. Those versions are not meant to represent the newest available releases; they are meant to avoid dependency drift and keep the startup environment consistent. If you decide to update them, treat them as a tested group rather than bumping one package at a time.
+The bootstrap currently pins `torch`, `torchvision`, and `xformers` as a tested set so the startup environment stays consistent. These values are meant to track the current expectations of the upstream `AUTOMATIC1111` `dev` branch rather than floating to whatever pip resolves that day. If you decide to change them, treat them as a tested group rather than bumping one package at a time.
 
 The included `template.xml` is set up for a locally built image:
 
