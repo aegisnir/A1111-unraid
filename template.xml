@@ -37,10 +37,13 @@
   <WebUI>http://[IP]:[PORT:7860]</WebUI>
   <Network>bridge</Network>
   <Privileged>false</Privileged>
-  <Project>https://github.com/AUTOMATIC1111/stable-diffusion-webui</Project>
+  <Project>https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/dev</Project>
   <Support>https://github.com/aegisnir/A1111-unraid</Support>
   <Changelog>https://github.com/aegisnir/A1111-unraid/blob/main/CHANGELOG.md</Changelog>
   <TemplateURL>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/template.xml</TemplateURL>
+  <!--
+    NOTE: As of March 2026, new installs require the dev branch of AUTOMATIC1111 due to a missing dependency repository. See README for details.
+  -->
 
   <!--
     Changelog: Linked to the repo's CHANGELOG.md for update tracking.

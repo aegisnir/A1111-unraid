@@ -57,15 +57,15 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # ------------------------------------------------------------------------------
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Pin the WebUI to a branch/tag/commit. For more controlled builds,
-# consider using a specific commit SHA and updating intentionally.
+
+# Pin the WebUI to a branch/tag/commit. For new installs, the dev branch is required due to upstream dependency changes.
 #
 # Security note:
 # Avoid passing secrets through build arguments. Industry guidance generally
 # treats build args as poor places for sensitive values because they may show up
 # in build metadata, layer history, logs, or external attestations depending on
 # how and where the image is built.
-ARG WEBUI_REF=master
+ARG WEBUI_REF=dev
 
 # Unraid-friendly defaults (nobody/users). Adjust if you use a different strategy.
 ARG APP_UID=99

@@ -8,7 +8,10 @@ This is a personal hobby project. It is heavily AI-assisted, and it is also a le
 
 # Stable Diffusion WebUI (AUTOMATIC1111) for Unraid
 
+
 This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. My goal is to keep it practical, reasonably lightweight, and more thoughtful about security than a throwaway personal build.
+
+**Important:** As of March 2026, new installs require the `dev` branch of AUTOMATIC1111 due to a missing dependency repository. The main branch will fail to start. See below for updated instructions.
 
 > ⚠️ Public internet exposure is **not** the intended use case.
 > If you expose this beyond a trusted network, the risk profile changes significantly and you should make those decisions carefully for your own environment.
@@ -17,7 +20,14 @@ This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NV
 
 These are the defaults I would personally start with on a trusted LAN.
 
-1. Build the image on your Unraid host with the tag `a1111-webui-aegisnir:latest`.
+1. Clone the AUTOMATIC1111 repository and switch to the `dev` branch:
+	```bash
+	git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
+	cd stable-diffusion-webui
+	git switch dev
+	git pull
+	```
+2. Build the image on your Unraid host with the tag `a1111-webui-aegisnir:latest`.
 2. Use **Bridge** networking.
 3. Map container port `7860` to a host port of your choice.
 4. Make sure NVIDIA GPU access works on the Unraid host.
@@ -175,6 +185,20 @@ If you are using the template defaults, that means removing:
 ### The container is unhealthy
 - Check whether the application is still listening on the configured port.
 - If you changed the port, make sure the healthcheck assumptions still match the runtime behavior.
+
+
+## Using the dev branch
+
+Due to the removal of the original Stable Diffusion repository, you **must** use the `dev` branch of AUTOMATIC1111 for new installs. The `dev` branch includes a fix to use a maintained fork for required dependencies. If you use the `main` branch, the container will fail to start.
+
+To update an existing install:
+
+1. Enter your WebUI directory.
+2. Run:
+	```bash
+	git switch dev
+	git pull
+	```
 
 ## Maintenance
 

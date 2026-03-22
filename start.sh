@@ -8,6 +8,9 @@
 #   error messages to help with troubleshooting.
 #
 # This project is maintained as a personal, AI-assisted learning project.
+#
+# IMPORTANT: As of March 2026, new installs require the dev branch of AUTOMATIC1111 due to a missing dependency repository. The main branch will fail to start. See README for details.
+#
 # The checks below are intended to catch obvious problems early, but they should
 # not be read as proof that the runtime is secure, correct, or production-ready.
 #
