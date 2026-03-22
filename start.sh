@@ -26,6 +26,10 @@ set -euo pipefail
 # Set HOME for the non-root user to /data for consistent config/cache locations
 export HOME=/data
 
+# Use persistent temp storage in /data so large downloads (for example torch wheels)
+# do not exhaust the container's limited writable temp space.
+export TMPDIR=/data/tmp
+
 # Use persistent pip cache in /data for faster rebuilds
 export PIP_CACHE_DIR=/data/pip-cache
 
@@ -41,6 +45,7 @@ VENV_PYTHON="${VENV_DIR}/bin/python"
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}"
 RUNTIME_REPOS_DIR="/data/repositories"
+MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"
 export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
@@ -79,6 +84,28 @@ cd "${WEBUI_DIR}"
 
 mkdir -p "${VENV_DIR}"
 mkdir -p "${RUNTIME_REPOS_DIR}"
+mkdir -p "${TMPDIR}"
+mkdir -p "${PIP_CACHE_DIR}"
+
+available_kb="$(df -Pk /data | awk 'NR==2 {print $4}')"
+if [[ -z "${available_kb}" || ! "${available_kb}" =~ ^[0-9]+$ ]]; then
+  echo "ERROR: Unable to determine free space for /data." >&2
+  echo "       Verify that /data is mounted and writable before starting the container." >&2
+  exit 1
+fi
+
+available_mb="$(( available_kb / 1024 ))"
+echo "Detected free space in /data: ${available_mb} MiB"
+
+required_kb="$(( MIN_BOOTSTRAP_FREE_MB * 1024 ))"
+if [[ ! -f "${BOOTSTRAP_STAMP}" && "${available_kb}" -lt "${required_kb}" ]]; then
+  echo "ERROR: Not enough free space in /data for first-run dependency bootstrap." >&2
+  echo "       Available: ${available_mb} MiB" >&2
+  echo "       Recommended minimum: ${MIN_BOOTSTRAP_FREE_MB} MiB" >&2
+  echo "       Torch, torchvision, xformers, and pip temp files can require several GB on first startup." >&2
+  echo "       Free additional space in the mapped /data path, or set MIN_BOOTSTRAP_FREE_MB if you intentionally want a different threshold." >&2
+  exit 1
+fi
 
 if [[ -e "${WEBUI_DIR}/repositories" && ! -L "${WEBUI_DIR}/repositories" ]]; then
   echo "ERROR: ${WEBUI_DIR}/repositories exists and is not a symlink." >&2
