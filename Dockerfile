@@ -99,10 +99,11 @@ RUN apt-get update \
   python3-setuptools \
       python3-venv \
       python3-pip \
-      libglib2.0-0 \
-      libsm6 \
-      libxrender1 \
-      libxext6 \
+  libglib2.0-0 \
+  libsm6 \
+  libxrender1 \
+  libxext6 \
+  libgl1 \
  && rm -rf /var/lib/apt/lists/*
 
 # Keep the base image lean and install heavyweight Python dependencies on first
