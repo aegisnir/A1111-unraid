@@ -12,12 +12,14 @@ If you notice something I could do better, I am open to constructive criticism, 
 
 ## Update approach
 
-At a high level, this repository generally follows upstream AUTOMATIC1111 development from `master`.
+At a high level, this repository generally follows upstream AUTOMATIC1111 development from `dev`.
 
 In practice, that means:
 - upstream changes may be adopted over time
 - releases may happen irregularly
 - some updates may be small, while others may include larger upstream changes
+
+In some cases, this repository may intentionally pin a tested dependency set (for example `torch`, `torchvision`, and `xformers`) even when newer releases exist. That is mainly to reduce breakage and keep container bootstrap behavior reproducible.
 
 If you choose to use something from this repo, I recommend reviewing changes for yourself and deciding whether a given update fits your own setup, goals, and comfort level.
 
@@ -50,6 +52,8 @@ These labels would only be there to help refer to a specific published state. Th
 Where practical, I may note the upstream AUTOMATIC1111 commit or source state used for a given release.
 
 That is meant to improve clarity. It should not be taken as a guarantee of full reproducibility.
+
+For example, if upstream changes dependency expectations or launcher behavior in a way that affects container startup, I may pin or adjust versions here before considering a release state usable.
 
 ---
 

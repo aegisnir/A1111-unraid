@@ -70,7 +70,7 @@ ARG WEBUI_REF=dev
 # Unraid-friendly defaults (nobody/users). Adjust if you use a different strategy.
 ARG APP_UID=99
 ARG APP_GID=100
-ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128
 
 # ------------------------------------------------------------------------------
 # Runtime defaults

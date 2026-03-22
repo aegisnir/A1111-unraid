@@ -7,10 +7,26 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
-- Template cleanup: removed internal-facing comments, ensured only user-relevant info is present.
-- README cleanup: removed internal notes, ensured all user-facing docs are focused and accurate.
-- Entrypoint and Dockerfile: validated all comments and example commands for accuracy and alignment with actual usage.
-- General: Synchronized all file references, paths, and defaults across Dockerfile, template, README, and scripts.
+- Startup/bootstrap hardening:
+	- fixed the `start.sh` shebang/entrypoint format issue
+	- made `/repositories` handling compatible with read-only container filesystems
+	- redirected pip temp/cache usage into `/data`
+	- added a `/data` free-space preflight and startup diagnostic
+- Dependency management:
+	- aligned bootstrap dependency targets with upstream `AUTOMATIC1111` `dev` expectations
+	- pinned `torch`, `torchvision`, and `xformers` as an explicit tested set
+	- added installed-version logging and a dependency sanity check
+	- relaxed the sanity check to accept valid CUDA local version suffixes such as `+cu126`
+- Authentication/security defaults:
+	- enabled WebUI login by default
+	- mirrored credentials to API auth by default
+	- added template variables for `WEBUI_USERNAME`, `WEBUI_PASSWORD`, and `API_AUTH_MODE`
+	- blocked startup when the placeholder password is unchanged unless auth is managed explicitly
+- Documentation/template updates:
+	- refreshed `README.md` structure and security guidance
+	- documented authentication defaults and HTTPS/TLS options
+	- updated `template.xml` to reflect current hardening and auth behavior
+	- synchronized current defaults across docs, template, and scripts
 
 ## Notes
 
