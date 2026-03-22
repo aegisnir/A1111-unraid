@@ -40,6 +40,8 @@ These are the defaults I would start with on a trusted LAN.
 
 On first startup, the container creates a Python virtual environment under `/data/venv` and installs the heavyweight core Python dependencies there, including `torch` and `torchvision`. That initial launch can take a while.
 
+The bootstrap currently pins a conservative compatibility set for `torch`, `torchvision`, and `xformers`. Those versions are not meant to represent the newest available releases; they are meant to avoid dependency drift and keep the startup environment consistent. If you decide to update them, treat them as a tested group rather than bumping one package at a time.
+
 The included `template.xml` is set up for a locally built image:
 
 - Repository: `a1111-webui-aegisnir:latest`
@@ -82,6 +84,8 @@ That gives the container access to the NVIDIA runtime when the NVIDIA Container 
 - `--listen --port 7860 --data-dir /data --xformers`
 
 The `--xformers` flag enables memory-efficient attention and faster image generation on supported GPUs such as the NVIDIA 4090. It is enabled by default for better performance. If you run into issues, you can remove `--xformers` from the arguments.
+
+To make troubleshooting easier, the startup logs now report both the target bootstrap versions and the installed versions for `torch`, `torchvision`, and `xformers` during first-run setup.
 
 If you change these arguments, keep in mind that some flags can weaken the container's security posture. Be especially careful with anything that increases exposure or enables public sharing behavior.
 

@@ -46,6 +46,9 @@ BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}"
 RUNTIME_REPOS_DIR="/data/repositories"
 MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"
+TORCH_VERSION="${TORCH_VERSION:-2.1.2}"
+TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.16.2}"
+XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.23.post1}"
 export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
@@ -134,6 +137,7 @@ fi
 
 if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
   echo "Installing first-start Python dependencies (this may take a while)..." >&2
+  echo "Bootstrap dependency targets: torch=${TORCH_VERSION}, torchvision=${TORCHVISION_VERSION}, xformers=${XFORMERS_VERSION}" >&2
   # Upgrade pip to latest version
   "${VENV_PYTHON}" -m pip install --upgrade pip
   # Pin setuptools for compatibility, upgrade wheel
@@ -142,13 +146,30 @@ if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
   "${VENV_PYTHON}" -m pip install --prefer-binary --upgrade packaging requests regex tqdm ftfy
   # Torch and torchvision
   "${VENV_PYTHON}" -m pip install --prefer-binary \
-    torch==2.1.2 \
-    torchvision==0.16.2 \
+    "torch==${TORCH_VERSION}" \
+    "torchvision==${TORCHVISION_VERSION}" \
     --extra-index-url "${TORCH_INDEX_URL}"
-  # Try to install xformers (optional, non-fatal if it fails)
-  if ! "${VENV_PYTHON}" -m pip install --prefer-binary xformers; then
-    echo "[WARNING] xformers install failed. WebUI will run without it."
+  # Try to install xformers (optional, non-fatal if it fails).
+  # Pin to a version compatible with the torch/torchvision versions above so pip
+  # does not upgrade torch to an incompatible release.
+  if ! "${VENV_PYTHON}" -m pip install --prefer-binary "xformers==${XFORMERS_VERSION}"; then
+    echo "[WARNING] xformers install failed for version ${XFORMERS_VERSION}. WebUI will run without it."
   fi
+  "${VENV_PYTHON}" - <<'PY'
+import importlib
+
+packages = ["torch", "torchvision", "xformers"]
+versions = []
+
+for name in packages:
+    try:
+        module = importlib.import_module(name)
+        versions.append(f"{name}={getattr(module, '__version__', 'unknown')}")
+    except Exception:
+        versions.append(f"{name}=not-installed")
+
+print("Installed dependency versions: " + ", ".join(versions))
+PY
   touch "${BOOTSTRAP_STAMP}"
 fi
 
