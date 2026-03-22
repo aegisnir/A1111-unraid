@@ -72,11 +72,12 @@ fi
 if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
   echo "Installing first-start Python dependencies (this may take a while)..." >&2
   "${VENV_PYTHON}" -m pip install --upgrade pip setuptools wheel
+  "${VENV_PYTHON}" -m pip install --upgrade packaging requests regex tqdm ftfy
   "${VENV_PYTHON}" -m pip install \
     torch==2.1.2 \
     torchvision==0.16.2 \
     --extra-index-url "${TORCH_INDEX_URL}"
-  "${VENV_PYTHON}" -m pip install "${CLIP_PACKAGE}"
+  "${VENV_PYTHON}" -m pip install --no-build-isolation "${CLIP_PACKAGE}"
   touch "${BOOTSTRAP_STAMP}"
 fi
 
