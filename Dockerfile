@@ -71,7 +71,6 @@ ARG WEBUI_REF=master
 ARG APP_UID=99
 ARG APP_GID=100
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121
-ARG CLIP_PACKAGE=https://github.com/openai/CLIP/archive/d50d76daa670286dd6cacf3bcd80b5e4823fc8e1.zip
 
 # ------------------------------------------------------------------------------
 # Runtime defaults
@@ -85,7 +84,7 @@ ENV COMMANDLINE_ARGS="--listen --port 7860 --data-dir /data"
 ENV WEBUI_DIR="/opt/stable-diffusion-webui"
 ENV A1111_VENV_DIR="/data/venv"
 ENV TORCH_INDEX_URL="${TORCH_INDEX_URL}"
-ENV CLIP_PACKAGE="${CLIP_PACKAGE}"
+ENV PIP_NO_BUILD_ISOLATION=1
 
 # ------------------------------------------------------------------------------
 # Install minimal runtime dependencies.

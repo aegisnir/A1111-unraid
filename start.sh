@@ -26,6 +26,7 @@ VENV_DIR="${A1111_VENV_DIR:-/data/venv}"
 VENV_PYTHON="${VENV_DIR}/bin/python"
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}"
+export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
 
 if [[ ! -d "${WEBUI_DIR}" && -d "${LOCAL_WEBUI_DIR}" ]]; then
   echo "Container WebUI directory not found; falling back to local workspace path: ${LOCAL_WEBUI_DIR}" >&2
@@ -70,7 +71,7 @@ fi
 
 if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
   echo "Installing first-start Python dependencies (this may take a while)..." >&2
-  "${VENV_PYTHON}" -m pip install --upgrade pip setuptools wheel
+  "${VENV_PYTHON}" -m pip install --upgrade "pip<25" "setuptools<70" wheel
   "${VENV_PYTHON}" -m pip install --upgrade packaging requests regex tqdm ftfy
   "${VENV_PYTHON}" -m pip install \
     torch==2.1.2 \

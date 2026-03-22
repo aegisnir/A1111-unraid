@@ -24,7 +24,7 @@ These are the defaults I would personally start with on a trusted LAN.
 5. Create the container from the included Unraid template.
 6. Access the WebUI from a trusted device on your LAN or through a VPN.
 
-On the very first startup, the container now creates a Python virtual environment under `/data/venv` and installs heavyweight Python dependencies there (such as torch and CLIP). That first launch can take a while.
+On the very first startup, the container now creates a Python virtual environment under `/data/venv` and installs the heavyweight core Python dependencies there (such as torch and torchvision). That first launch can take a while.
 
 The included `template.xml` is set up for a locally built image:
 
@@ -157,6 +157,7 @@ Make sure your mapped host paths are writable by that UID/GID strategy, or adjus
 - Confirm Unraid is providing GPU access to the container.
 - Confirm the host NVIDIA driver/plugin is working.
 - If Automatic1111 fails with a message like `Torch is not able to use GPU`, you can temporarily add `--skip-torch-cuda-test` to `COMMANDLINE_ARGS` for troubleshooting. I do not recommend making that your long-term default, because it can hide a real GPU passthrough problem.
+- If dependency installation fails on first startup, remove `/data/venv` and retry after updating the image so the bootstrap can rebuild a clean environment.
 
 ### I am seeing permission errors
 - Check that your mapped host folders are writable by the configured UID/GID.

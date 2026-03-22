@@ -30,8 +30,8 @@
     - This allows you to preserve your models and outputs across container updates and manage them from the host more easily.
     - The data directory can grow very large very quickly, so I recommend storing it outside of appdata when possible.
     - Appdata works if you prefer it, but be aware of how quickly it can fill your Docker storage area.
-    - If startup fails with a Torch GPU check error, you can temporarily add --skip-torch-cuda-test to COMMANDLINE_ARGS for troubleshooting.
-    - I do not recommend using --skip-torch-cuda-test as a permanent default because it can mask real GPU passthrough issues.
+  - If startup fails with a Torch GPU check error, you can temporarily add --skip-torch-cuda-test to COMMANDLINE_ARGS for troubleshooting.
+  - If first-start dependency installation fails, remove /data/venv and retry after rebuilding the image so the bootstrap can recreate a clean environment.
   </Overview>
   <Category>AI:</Category>
   <WebUI>http://[IP]:[PORT:7860]</WebUI>
@@ -49,5 +49,5 @@
   -->
     <Config Name="WebUI" Type="Port" Target="7860" Default="7860" Mode="tcp" Display="always" Required="true" Mask="false" Description="Port exposed by the AUTOMATIC1111 WebUI (default: 7860)."/>
     <Config Name="Data Directory" Type="Path" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Display="always" Required="true" Mask="false" Description="Host path mapped to --data-dir. Default: /mnt/user/ai/data/ (outside appdata)."/>
-    <Config Name="Extra Args" Type="Variable" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Display="advanced" Required="false" Mask="false" Description="Extra arguments for launch.py. Default includes --data-dir /data. For GPU errors, try adding --skip-torch-cuda-test."/>
+  <Config Name="Extra Args" Type="Variable" Target="COMMANDLINE_ARGS" Default="--listen --port 7860 --data-dir /data" Display="advanced" Required="false" Mask="false" Description="Extra arguments for launch.py. Default includes --data-dir /data. For GPU errors, try adding --skip-torch-cuda-test temporarily."/>
 </Container>
