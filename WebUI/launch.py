@@ -1,5 +1,7 @@
 import sys
 import shlex
+from modules.launch_utils import *  # noqa: F403 — upstream modules expect launch.args, launch.list_extensions, etc.
+import modules.launch_utils as launch_utils
 
 
 def _redact_cli_args(argv):
@@ -26,16 +28,15 @@ def _redact_cli_args(argv):
 
 
 def main() -> None:
-    from modules import launch_utils
-
-    # Run the standard A1111 environment preparation (installs missing pip deps).
     launch_utils.prepare_environment()
 
     # Patch start() to redact sensitive CLI arguments from the launch log line.
+    _original_start = launch_utils.start
+
     def redacted_start():
         mode = "API server" if "--nowebui" in sys.argv else "Web UI"
         print(f"Launching {mode} with arguments: {shlex.join(_redact_cli_args(sys.argv[1:]))}")
-        import webui
+        import webui  # noqa: F401
 
     launch_utils.start = redacted_start
     launch_utils.start()
