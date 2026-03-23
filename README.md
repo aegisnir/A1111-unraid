@@ -164,6 +164,8 @@ If `--api-auth` is provided without `--api`, startup logs now warn that API auth
 
 `COMMANDLINE_ARGS` is passed directly to `launch.py`.
 
+> **Log redaction:** Sensitive auth flags (`--gradio-auth`, `--gradio-auth-path`, `--api-auth`, `--api-auth-path`) have their values replaced with `<redacted>` in startup log output. The flag names remain visible so you can confirm they are active.
+
 **Default:**
 
 - `--listen --port 7860 --data-dir /data --xformers --no-download-sd-model --enable-insecure-extension-access`

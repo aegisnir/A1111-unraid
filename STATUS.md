@@ -34,7 +34,7 @@ Last updated: 2026-03-23
   - template now uses `icon.png`
   - local-only folders (`.venv`, `.tmp-data`) cleaned up and ignored
 - Log credential redaction:
-  - custom `launch.py` wrapper redacts `--gradio-auth` and `--api-auth` values from startup log output
+  - custom `launch.py` wrapper redacts `--gradio-auth`, `--gradio-auth-path`, `--api-auth`, and `--api-auth-path` values from startup log output (values appear as `<redacted>`)
 
 ## In Progress
 

@@ -21,18 +21,36 @@
 
 set -euo pipefail
 
-# ── Color palette ────────────────────────────────────────────────────────────
-# Mirror start.sh color conventions. Only emit sequences to a terminal.
+# ─────────────────────────────────────────────────────────────────────────────
+# Color palette
+# ─────────────────────────────────────────────────────────────────────────────
+# Mirror start.sh color conventions. Only emit ANSI sequences when stderr is
+# a terminal; stay plain when output is piped to a log file.
+
 if [[ -t 2 ]]; then
-  C_RESET=$'\e[0m'; C_BOLD=$'\e[1m'
+  C_RESET=$'\e[0m'
   C_SILVER=$'\e[37m'; C_VIOLET=$'\e[95m'; C_ORANGE=$'\e[93m'; C_SCARLET=$'\e[91m'
 else
-  C_RESET='' C_BOLD='' C_SILVER='' C_VIOLET='' C_ORANGE='' C_SCARLET=''
+  C_RESET='' C_SILVER='' C_VIOLET='' C_ORANGE='' C_SCARLET=''
 fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Constants
+# ─────────────────────────────────────────────────────────────────────────────
+# EXPECTED_UID / EXPECTED_GID match the sdwebui user created in the Dockerfile.
+# On Unraid, UID 99 (nobody) and GID 100 (users) are the conventional defaults.
 
 DATA_DIR="/data"
 EXPECTED_UID=99
 EXPECTED_GID=100
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Diagnostic helpers
+# ─────────────────────────────────────────────────────────────────────────────
+# These functions provide actionable error messages when the container runtime
+# blocks operations that this script needs (chown, chmod, setpriv). They read
+# kernel-level security state from /proc/self/status so the user can see
+# exactly what policy is preventing the operation.
 
 print_runtime_diagnostics() {
   local no_new_privs="unknown"
@@ -51,16 +69,27 @@ print_runtime_diagnostics() {
   echo "${C_SILVER}[entrypoint] Runtime diagnostics: uid=$(id -u) gid=$(id -g) NoNewPrivs=${no_new_privs} Seccomp=${seccomp_mode} CapEff=${cap_eff}${C_RESET}" >&2
   if [[ "${cap_eff}" == "0000000000000000" ]]; then
     echo "${C_ORANGE}[entrypoint] CapEff is zero (all capabilities dropped). Add required caps or remove --cap-drop=ALL.${C_RESET}" >&2
+  else
+    echo "${C_ORANGE}[entrypoint] Likely causes: rootless/userns remap, no-new-privileges policy, NFS root-squash, or share ACL/mount restrictions.${C_RESET}" >&2
   fi
-  echo "${C_ORANGE}[entrypoint] Likely causes: rootless/userns remap, no-new-privileges policy, NFS root-squash, or share ACL/mount restrictions.${C_RESET}" >&2
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Error / warning handlers
+# ─────────────────────────────────────────────────────────────────────────────
+
+# warn_repair_blocked: Called when chown/chmod on /data fails. Instead of
+# aborting, we continue into start.sh which has its own /data writability
+# check and will print detailed remediation steps for the user.
 warn_repair_blocked() {
   echo "${C_SCARLET}[entrypoint] Automatic /data repair was blocked by the host filesystem or mount policy.${C_RESET}" >&2
   echo "${C_ORANGE}[entrypoint] Continuing startup so start.sh can print the final remediation steps.${C_RESET}" >&2
   print_runtime_diagnostics
 }
 
+# fatal_priv_drop_blocked: Called when setpriv cannot switch from root to the
+# app user. This is unrecoverable — we cannot run the WebUI as root — so we
+# print host-side fix instructions and exit.
 fatal_priv_drop_blocked() {
   echo "${C_SCARLET}[entrypoint] Cannot drop privileges to uid=${EXPECTED_UID}:gid=${EXPECTED_GID}.${C_RESET}" >&2
   echo "${C_SCARLET}[entrypoint] This container runtime is blocking user/group switching (setuid/setgid).${C_RESET}" >&2
@@ -68,13 +97,21 @@ fatal_priv_drop_blocked() {
   echo "" >&2
   echo "${C_ORANGE}[entrypoint] Host-side actions to resolve:${C_RESET}" >&2
   echo "${C_SILVER}  1) Ensure the container is not forced into a mode that strips setuid/setgid transitions.${C_RESET}" >&2
-  echo "${C_SILVER}  2) Verify /data is writable by UID 99 on the host:${C_RESET}" >&2
-  echo "${C_SILVER}       chown nobody:users /mnt/user/ai/data${C_RESET}" >&2
-  echo "${C_SILVER}       chmod 775 /mnt/user/ai/data${C_RESET}" >&2
+  echo "${C_SILVER}  2) Verify /data is writable by UID 99 on the host (adjust the path to match${C_RESET}" >&2
+  echo "${C_SILVER}     your Unraid container template — check the /data bind-mount path):${C_RESET}" >&2
+  echo "${C_SILVER}       chown nobody:users <your-data-path>${C_RESET}" >&2
+  echo "${C_SILVER}       chmod 775 <your-data-path>${C_RESET}" >&2
   echo "${C_SILVER}  3) Restart the container after applying the host fixes.${C_RESET}" >&2
   exit 1
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Privilege drop
+# ─────────────────────────────────────────────────────────────────────────────
+
+# exec_as_app_user: Drop from root to the unprivileged app user (sdwebui) and
+# exec start.sh. Uses setpriv rather than su/sudo to avoid spawning an extra
+# process — exec replaces PID 1 so Docker signals reach start.sh directly.
 exec_as_app_user() {
   # Probe first so we can print a clear remediation message rather than failing
   # with a terse setpriv error when the runtime forbids setuid/setgid operations.
@@ -84,11 +121,35 @@ exec_as_app_user() {
   exec setpriv --reuid="${EXPECTED_UID}" --regid="${EXPECTED_GID}" --clear-groups /start.sh
 }
 
-if [[ -d "${DATA_DIR}" ]]; then
+# ─────────────────────────────────────────────────────────────────────────────
+# /data ownership & permission self-healing
+# ─────────────────────────────────────────────────────────────────────────────
+# This is the core logic of entrypoint.sh. It inspects the /data bind-mount
+# and repairs ownership/permissions so the unprivileged app user can read and
+# write to it. There are two repair scenarios:
+#
+#   1) Wrong owner  — /data is owned by a different UID (e.g. root created it).
+#                     We chown everything to uid 99:gid 100 and fix modes.
+#
+#   2) Right owner, wrong modes — /data is owned by uid 99 but the permission
+#                     bits are too restrictive (e.g. someone ran chmod 700 on
+#                     the host). We restore mode 775 and fix child modes.
+#
+# If neither condition applies, /data is healthy and we skip straight to the
+# privilege drop.
+
+# Only attempt ownership/permission repair if we are running as root.
+# If the container was started with --user 99:100 (skipping the root entrypoint
+# pattern), we are already the app user and cannot chown/chmod anything.
+# In that case, skip straight to exec-ing start.sh and let it validate /data.
+if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
   data_owner_uid="$(stat -c '%u' "${DATA_DIR}")"
+
+  # ── Scenario 1: Wrong owner ──────────────────────────────────────────────
   if [[ "${data_owner_uid}" != "${EXPECTED_UID}" ]]; then
     echo "${C_ORANGE}[entrypoint] /data is owned by uid=${data_owner_uid}, expected uid=${EXPECTED_UID}.${C_RESET}" >&2
     echo "${C_ORANGE}[entrypoint] Correcting ownership and permissions under /data...${C_RESET}" >&2
+
     # Fix ownership on top-level dir first so the app user can write immediately.
     if ! chown "${EXPECTED_UID}:${EXPECTED_GID}" "${DATA_DIR}"; then
       warn_repair_blocked
@@ -98,31 +159,74 @@ if [[ -d "${DATA_DIR}" ]]; then
       warn_repair_blocked
       exec_as_app_user
     fi
+
     # Correct ownership on all children that ended up under wrong ownership.
-    # find limits the walk to only misowned entries so this is fast on a healthy volume.
+    # find's filter (! -user) limits the walk to only misowned entries so this
+    # is fast on a healthy volume and only slow on a truly broken one.
     find "${DATA_DIR}" ! -user "${EXPECTED_UID}" -exec chown "${EXPECTED_UID}:${EXPECTED_GID}" {} + 2>/dev/null || true
-    # Restore sane permission modes. Stomped permissions (e.g. chmod -R 700 on the host)
-    # leave files inaccessible to the app user even with correct ownership.
-    # Directories need execute bits to be traversable; files need to be readable.
-    # This only runs in the degraded-ownership path, never on a healthy startup.
+
+    # Restore sane permission modes after ownership repair.
+    #
+    # Why this is needed:
+    #   Changing file ownership (chown) does NOT change the permission bits.
+    #   If someone ran something like "chmod -R 700 <your-data-path>" on the
+    #   Unraid host, the directories and files would be locked to the original
+    #   owner. Even after we chown them to uid 99 above, the permission bits
+    #   still say "owner can read/write/execute, nobody else can do anything."
+    #   That's fine for the owner — but directories also need the execute bit
+    #   (u+x) to be *traversable* (you can't cd into or list a directory
+    #   without it), and files need the read bit (u+r) to be readable.
+    #
+    # What we fix:
+    #   - Directories missing u+rwx → add read, write, and traverse permissions
+    #   - Files missing u+r        → add read permission
+    #
+    # This only runs in the degraded-ownership repair path, never on a healthy
+    # startup where permissions are already correct.
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
+
     echo "${C_VIOLET}[entrypoint] /data ownership and permissions corrected. Continuing startup.${C_RESET}" >&2
+
+  # ── Scenario 2: Right owner, wrong modes ─────────────────────────────────
   elif [[ ! -w "${DATA_DIR}" || ! -x "${DATA_DIR}" ]]; then
-    # Ownership is correct but the top-level mode was stomped (e.g. chmod 000 or chmod 700
-    # on the host while the directory was already owned by uid 99).
+    # Ownership is correct (uid 99 owns /data), but the permission *bits* are
+    # too restrictive for the app to work. This can happen if someone ran
+    # something like "chmod 000 <your-data-path>" or "chmod 700 ..." on the
+    # Unraid host — the directory ends up owned by the right user but with
+    # modes that block writing (-w) or traversal (-x).
+    #
+    # We restore mode 775 on /data itself (owner + group can read/write/traverse,
+    # others can read/traverse) and then fix any children the same way as the
+    # ownership-repair branch above.
     echo "${C_ORANGE}[entrypoint] /data is owned by the correct user but is not writable/traversable.${C_RESET}" >&2
     echo "${C_ORANGE}[entrypoint] Restoring mode 775 and fixing permission modes under /data...${C_RESET}" >&2
+
     if ! chmod 775 "${DATA_DIR}"; then
       warn_repair_blocked
       exec_as_app_user
     fi
+
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
+
     echo "${C_VIOLET}[entrypoint] /data permissions restored. Continuing startup.${C_RESET}" >&2
   fi
 fi
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Hand off to start.sh
+# ─────────────────────────────────────────────────────────────────────────────
 # Drop privileges and exec start.sh as the application user.
-# Using exec preserves the PID so Docker signals (stop/kill) reach start.sh correctly.
-exec_as_app_user
+# Using exec preserves the PID so Docker signals (stop/kill) reach start.sh
+# correctly — there is no intermediate shell process to eat the signal.
+
+if [[ "$(id -u)" == "0" ]]; then
+  echo "${C_SILVER}[entrypoint] /data is healthy. Dropping to unprivileged user (uid=${EXPECTED_UID}).${C_RESET}" >&2
+  exec_as_app_user
+else
+  # Already running as the app user (e.g. container started with --user 99:100).
+  # No privilege drop needed — exec start.sh directly.
+  echo "${C_SILVER}[entrypoint] Already running as uid=$(id -u). Skipping privilege drop.${C_RESET}" >&2
+  exec /start.sh
+fi

@@ -134,6 +134,9 @@ RUN set -eux; \
 # is not available inside the image, so deeper forensics or history inspection
 # would need to happen outside this build context.
 # ------------------------------------------------------------------------------
+# Symlink mutable directories into /data so the WebUI can write to them at
+# runtime even when the container filesystem is read-only. The actual
+# directories are created by start.sh on first launch under the /data volume.
 RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
   && rm -rf "${WEBUI_DIR}/repositories" \
   && ln -s /data/repositories "${WEBUI_DIR}/repositories" \
@@ -144,7 +147,8 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
   && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
 
 # Overlay the custom launch.py wrapper that redacts sensitive CLI arguments
-# (--gradio-auth, --api-auth) from startup log output.
+# (--gradio-auth, --gradio-auth-path, --api-auth, --api-auth-path) from
+# startup log output. See WebUI/launch.py for the full redaction logic.
 COPY WebUI/launch.py "${WEBUI_DIR}/launch.py"
 RUN chown sdwebui:sdwebui "${WEBUI_DIR}/launch.py"
 
@@ -186,7 +190,9 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD python3 -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 7860)); s.close()" || exit 1
 
 
-# Remove all SUID/SGID bits from binaries except in /proc, /sys, /dev
+# Strip all SUID/SGID bits from binaries so no binary in the image can
+# escalate privileges if the container is compromised. Skips virtual
+# filesystems (/proc, /sys, /dev) which are kernel-managed.
 RUN find / -perm /6000 -type f -not -path '/proc/*' -not -path '/sys/*' -not -path '/dev/*' -exec chmod a-s {} + || true
 
 # The container starts as root so entrypoint.sh can self-heal /data ownership.

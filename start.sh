@@ -51,32 +51,49 @@ if [[ "$(id -u)" == "0" ]]; then
   exit 1
 fi
 
-WEBUI_DIR="/opt/stable-diffusion-webui"
-LOCAL_WEBUI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/WebUI"
-VENV_DIR="${A1111_VENV_DIR:-/data/venv}"
-VENV_PYTHON="${VENV_DIR}/bin/python"
-BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"
-TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"
-RUNTIME_REPOS_DIR="/data/repositories"
-RUNTIME_CONFIG_STATES_DIR="/data/config_states"
-MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"
-TORCH_VERSION="${TORCH_VERSION:-2.7.0}"
+# ── Paths & version pins ─────────────────────────────────────────────────────
+# These defaults are designed for the Docker image layout. Override via env vars
+# if testing locally or using a non-standard data volume path.
+
+WEBUI_DIR="/opt/stable-diffusion-webui"                            # A1111 source, cloned at image build time
+LOCAL_WEBUI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/WebUI"  # Fallback for local (non-Docker) development
+VENV_DIR="${A1111_VENV_DIR:-/data/venv}"                           # Persistent Python venv, survives container recreation
+VENV_PYTHON="${VENV_DIR}/bin/python"                               # Absolute path to the venv interpreter
+BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"            # Marker file: first-run pip install already done
+TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"  # PyPI extra index for CUDA wheels
+RUNTIME_REPOS_DIR="/data/repositories"                             # Persistent upstream sub-repos (e.g. k-diffusion)
+RUNTIME_CONFIG_STATES_DIR="/data/config_states"                    # Persistent extension state snapshots
+MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"             # Abort first-run if /data has less than this free
+TORCH_VERSION="${TORCH_VERSION:-2.7.0}"                            # Pinned version — update alongside CUDA base image
 TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
 XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.30}"
+
+# ── Authentication paths ─────────────────────────────────────────────────────
+# The user-facing auth file (WEBUI_AUTH_FILE) can contain comments and blank
+# lines for readability. The runtime copy (WEBUI_AUTH_RUNTIME_FILE) is a
+# sanitized version with only username:password lines that Gradio can parse.
 WEBUI_AUTH_FILE_DEFAULT="/data/auth/webui-auth.txt"
 WEBUI_AUTH_FILE="${WEBUI_AUTH_FILE:-${WEBUI_AUTH_FILE_DEFAULT}}"
 WEBUI_AUTH_RUNTIME_FILE="/data/auth/.webui-auth.runtime.txt"
+
+# mirror-webui-file = copy WebUI credentials to --api-auth when --api is enabled
+# disabled        = do not auto-set --api-auth; user manages it manually
 API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-mirror-webui-file}"
-UMASK="${UMASK:-}"
+
+UMASK="${UMASK:-}"                                                 # Optional: override default umask for all file creation
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WEBUI_AUTH_SAMPLE_FILE="${SCRIPT_DIR}/webui-auth.txt"
+WEBUI_AUTH_SAMPLE_FILE="${SCRIPT_DIR}/webui-auth.txt"              # Bundled sample; copied to /data on first launch
+
+# ── Extension bootstrap settings ─────────────────────────────────────────────
+# On first launch, extensions listed in the bootstrap file are git-cloned into
+# /data/extensions. Set EXTENSIONS_BOOTSTRAP_FORCE=true to re-process the list.
 EXTENSIONS_BOOTSTRAP_FILE="${EXTENSIONS_BOOTSTRAP_FILE:-/data/extensions-bootstrap.txt}"
 EXTENSIONS_BOOTSTRAP_FORCE="${EXTENSIONS_BOOTSTRAP_FORCE:-false}"
 EXTENSIONS_DIR_DEFAULT="/data/extensions"
 EXTENSIONS_BOOTSTRAP_STATE_DIR="/data/.state"
 EXTENSIONS_BOOTSTRAP_MARKER="${EXTENSIONS_BOOTSTRAP_STATE_DIR}/extensions-bootstrap-v1.done"
 EXTENSIONS_BOOTSTRAP_SAMPLE_FILE="${SCRIPT_DIR}/extensions-bootstrap.txt"
-export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"
+export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"       # Required by some A1111 dependency builds
 
 if [[ -n "${UMASK}" ]]; then
   if [[ ! "${UMASK}" =~ ^[0-7]{3,4}$ ]]; then
@@ -125,10 +142,10 @@ if [[ ! -w "/data" ]]; then
   echo "${C_SCARLET}       This can happen with NFS root squash, unusual host permissions, or SELinux policies.${C_RESET}" >&2
   echo "" >&2
   echo "${C_ORANGE}       To fix manually, run the following on the Unraid host (as root) and then restart${C_RESET}" >&2
-  echo "${C_ORANGE}       the container:${C_RESET}" >&2
+  echo "${C_ORANGE}       the container (adjust the path to match your container template's /data bind-mount):${C_RESET}" >&2
   echo "" >&2
-  echo "${C_SILVER}         chown nobody:users /mnt/user/ai/data${C_RESET}" >&2
-  echo "${C_SILVER}         chmod 775 /mnt/user/ai/data${C_RESET}" >&2
+  echo "${C_SILVER}         chown nobody:users <your-data-path>${C_RESET}" >&2
+  echo "${C_SILVER}         chmod 775 <your-data-path>${C_RESET}" >&2
   echo "" >&2
   echo "${C_ORANGE}       Adjust the path above if your Unraid share path is different.${C_RESET}" >&2
   exit 1
@@ -329,9 +346,17 @@ then
   exit 1
 fi
 
+# ── Auth argument construction ────────────────────────────────────────────────
+# AUTH_ARGS accumulates --gradio-auth-path and/or --api-auth flags that get
+# appended to COMMANDLINE_ARGS right before launch. USING_WEBUI_AUTH_FILE
+# tracks whether we're sourcing auth from the managed file (vs. the user
+# providing their own --gradio-auth in COMMANDLINE_ARGS).
 AUTH_ARGS=()
 USING_WEBUI_AUTH_FILE=0
 
+# extract_auth_file_csv: Read an auth file and return all username:password
+# pairs as a single comma-separated string. Ignores comments (#) and blank
+# lines. Used both for --api-auth (which needs CSV format) and for validation.
 extract_auth_file_csv() {
   local auth_file_path="$1"
   python3 - <<'PY' "${auth_file_path}"
@@ -354,6 +379,9 @@ print(','.join(entries))
 PY
 }
 
+# write_runtime_auth_file: Build a sanitized copy of the auth file with one
+# username:password entry per line (no comments, no blank lines). Gradio's
+# --gradio-auth-path parser is strict and will crash on anything unexpected.
 write_runtime_auth_file() {
   local source_auth_file="$1"
   local runtime_auth_file="$2"
@@ -407,8 +435,10 @@ else
     exit 1
   fi
 
-  # Validate credential formatting up front so malformed entries fail fast with
-  # a clear message instead of later crashing inside Gradio auth parsing.
+  # Validate credential formatting up front so malformed entries fail fast
+  # with a clear message instead of later crashing inside Gradio auth parsing.
+  # The awk check ensures every entry has a non-empty username AND password
+  # separated by a colon. Entries like ":password", "user:", or "nocolon" fail.
   if echo "${auth_file_csv}" | tr ',' '\n' | awk -F: '($1=="" || $2=="" || NF<2){bad=1} END{exit bad?0:1}'; then
     echo "${C_SCARLET}${C_BOLD}CRITICAL:${C_RESET}${C_SCARLET} WebUI auth file contains malformed credential entries: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
     echo "${C_SCARLET}         Expected format is username:password (one per line or comma-separated).${C_RESET}" >&2
@@ -599,6 +629,8 @@ monitor_webui_output() {
   done
 }
 
+# is_truthy: Accepts common boolean-like env var values (1, true, yes, on)
+# and returns 0 (success); anything else returns 1 (failure).
 is_truthy() {
   case "${1,,}" in
     1|true|yes|on) return 0 ;;
@@ -717,9 +749,19 @@ fi
 
 print_launch_notice
 
-# Launch AUTOMATIC1111 with inline output monitoring.
-# A named pipe routes all WebUI output through monitor_webui_output while
-# signal forwarding ensures Docker stop/kill reaches the Python process cleanly.
+# ── Launch with output monitoring ────────────────────────────────────────────
+#
+# Architecture: named-pipe pattern
+#   WebUI (stdout+stderr) → named pipe → monitor_webui_output → user terminal
+#
+#   This lets us inject inline [NOTE] / [KNOWN WARNING] annotations after
+#   recognised log lines without buffering or modifying the WebUI process.
+#
+# Signal handling:
+#   Docker stop/kill sends SIGTERM to PID 1 (entrypoint). The trap below
+#   forwards it to the WebUI process so it can shut down gracefully. The EXIT
+#   trap cleans up the temp directory holding the named pipe.
+#
 _MONITOR_DIR="$(mktemp -d /tmp/a1111-monitor.XXXXXX)"
 _LOG_PIPE="${_MONITOR_DIR}/webui.log.pipe"
 mkfifo "${_LOG_PIPE}"
@@ -732,11 +774,13 @@ _forward_signal()  { [[ -n "${_WEBUI_PID}" ]] && kill -TERM "${_WEBUI_PID}" 2>/d
 trap '_cleanup_monitor' EXIT
 trap '_forward_signal' TERM INT
 
-# Start the output monitor first (reader must open the pipe before writer).
+# Start the output monitor first — the reader must open the pipe before the
+# writer, otherwise the writer blocks indefinitely waiting for a reader.
 monitor_webui_output < "${_LOG_PIPE}" &
 _MONITOR_PID=$!
 
-# Launch the WebUI writing to the named pipe.
+# Launch the WebUI. Both stdout and stderr go through the pipe so
+# monitor_webui_output sees all output (Python warnings go to stderr).
 "${VENV_PYTHON}" launch.py > "${_LOG_PIPE}" 2>&1 &
 _WEBUI_PID=$!
 
@@ -744,7 +788,7 @@ _WEBUI_PID=$!
 _WEBUI_EXIT=0
 wait "${_WEBUI_PID}" || _WEBUI_EXIT=$?
 
-# Let the monitor drain any remaining output before we exit.
+# Let the monitor drain any remaining buffered output before we exit.
 wait "${_MONITOR_PID}" 2>/dev/null || true
 
 exit "${_WEBUI_EXIT}"
