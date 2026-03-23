@@ -638,17 +638,27 @@ _poll_for_ready() {
     _port="${BASH_REMATCH[1]}"
   fi
 
-  # Determine the host IP via the default gateway entry in /proc/net/route.
-  # In Docker bridge networking the gateway IS the host (Unraid server).
-  # The Gateway field is a little-endian hex 32-bit value — decode it without
-  # any external tools by parsing byte pairs right-to-left.
+  # Determine the URL host — checked in order:
+  #   1. WEBUI_HOST_IP env var (explicit override; required in bridge/NAT mode)
+  #   2. Container's own outbound IP if it is a real LAN address
+  #      (macvlan / Unraid br0 / --network=host — container IP is directly reachable)
+  #   3. Placeholder with hint to set WEBUI_HOST_IP
   local _host_ip=""
-  local _gw_hex
-  _gw_hex="$(awk 'NR>1 && $2=="00000000" {print $3; exit}' /proc/net/route 2>/dev/null || true)"
-  if [[ "${#_gw_hex}" -eq 8 ]]; then
-    _host_ip="$(printf '%d.%d.%d.%d' \
-      "0x${_gw_hex:6:2}" "0x${_gw_hex:4:2}" \
-      "0x${_gw_hex:2:2}" "0x${_gw_hex:0:2}")"
+  if [[ -n "${WEBUI_HOST_IP:-}" ]]; then
+    _host_ip="${WEBUI_HOST_IP}"
+  else
+    # Python3 is always available (it runs A1111). The UDP connect() resolves the
+    # source address without actually sending any data to 8.8.8.8.
+    local _own_ip
+    _own_ip="$(python3 -c 'import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.connect(("8.8.8.8",80)); print(s.getsockname()[0]); s.close()' 2>/dev/null || true)"
+    # Docker allocates bridge subnets from 172.16.0.0/12 (172.16–172.31.x.x).
+    # If the container's IP is outside that range it has a real LAN address and
+    # IS directly reachable by browsers — use it.  In bridge/NAT mode the container
+    # only sees a 172.x.x.x address; the host's real LAN IP is not discoverable
+    # from inside the container without WEBUI_HOST_IP being set.
+    if [[ -n "${_own_ip}" && ! "${_own_ip}" =~ ^172\.(1[6-9]|2[0-9]|3[01])\. ]]; then
+      _host_ip="${_own_ip}"
+    fi
   fi
 
   local _timeout=600   # Give up after 10 min (matches HEALTHCHECK start-period)
@@ -665,7 +675,7 @@ _poll_for_ready() {
       if [[ -n "${_host_ip}" ]]; then
         _url="http://${_host_ip}:${_port}/"
       else
-        _url="http://<unraid-ip>:${_port}/  (host IP could not be detected)"
+        _url="http://<host-ip>:${_port}/"
       fi
       echo ""
       echo "  ${C_ACCENT}${C_BOLD}┌─ [READY] ───────────────────────────────────────────────────────────┐${C_RESET}"
