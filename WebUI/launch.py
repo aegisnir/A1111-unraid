@@ -6,7 +6,7 @@ import modules.launch_utils as launch_utils
 
 def _redact_cli_args(argv):
     redacted = []
-    sensitive_flags = {"--gradio-auth", "--api-auth"}
+    sensitive_flags = {"--gradio-auth", "--gradio-auth-path", "--api-auth", "--api-auth-path"}
     i = 0
 
     while i < len(argv):
@@ -36,7 +36,11 @@ def main() -> None:
     def redacted_start():
         mode = "API server" if "--nowebui" in sys.argv else "Web UI"
         print(f"Launching {mode} with arguments: {shlex.join(_redact_cli_args(sys.argv[1:]))}")
-        import webui  # noqa: F401
+        import webui
+        if "--nowebui" in sys.argv:
+            webui.api_only()
+        else:
+            webui.webui()
 
     launch_utils.start = redacted_start
     launch_utils.start()
