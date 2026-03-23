@@ -675,7 +675,7 @@ _poll_for_ready() {
       if [[ -n "${_host_ip}" ]]; then
         _url="http://${_host_ip}:${_port}/"
       else
-        _url="http://<host-ip>:${_port}/"
+        _url="http://<your-unraid-ip>:${_port}/"
       fi
       echo ""
       echo "  ${C_ACCENT}${C_BOLD}┌─ [READY] ───────────────────────────────────────────────────────────┐${C_RESET}"

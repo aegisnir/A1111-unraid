@@ -21,8 +21,7 @@ This is a personal hobby project. It is heavily AI-assisted, and it is also a le
 These are the defaults I would start with on a trusted LAN.
 
 1. Install the template from the Unraid CA app flow (or import `template.xml`).
-2. For local testing, confirm the image repository is set to `a1111-webui-aegisnir:local`.
-	For a published-image workflow, set it to `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`.
+2. The published image is `ghcr.io/aegisnir/a1111-webui-aegisnir:dev`. For local builds, set the repository to `a1111-webui-aegisnir:local`.
 3. Use **Bridge** networking.
 4. Map container port `7860` to a host port of your choice.
 5. Make sure NVIDIA GPU access works on the Unraid host.

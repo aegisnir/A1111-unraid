@@ -7,6 +7,13 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Console output revisions:
+	- Color detection changed from `[[ -t 2 ]]` tty guard to always-on ANSI; suppress with `NO_COLOR=1` or `TERM=dumb` (the tty check returned false in Docker when no TTY is attached, which is the normal case in Unraid's log viewer — all colors were being stripped silently)
+	- `C_INFO` changed from `\e[95m` (bright magenta, rendered poorly or invisibly in some terminals) to `\e[35m` (regular magenta/violet, reliably visible)
+	- All annotation boxes fully closed: content lines are now padded to exact inner width and have a right-side `│` border; previous implementation left the right side open
+	- READY banner replaced log-line match on `Running on local URL` with an independent background poller (`_poll_for_ready`) that uses bash's `/dev/tcp` built-in to probe the port every 5 seconds; the log-line approach was silently failing across Gradio versions
+	- READY banner now auto-detects the container's own outbound LAN IP (works in macvlan / Unraid br0 / `--network=host`); shows `http://<your-unraid-ip>:<port>/` placeholder in standard Docker bridge/NAT mode where the host's IP is not discoverable from inside the container
+
 - Authentication behavior update:
 	- removed startup hard-stop for auth files containing password `changeme`
 	- startup now allows first-launch default login `admin:changeme` and logs continue normally
