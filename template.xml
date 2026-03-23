@@ -1,17 +1,15 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>A1111-WebUI-Aegisnir</Name>
-  <Repository>a1111-webui-aegisnir:local</Repository>
-  <Registry></Registry>
+  <Repository>ghcr.io/aegisnir/a1111-webui-aegisnir:dev</Repository>
+  <Registry>https://ghcr.io</Registry>
   <Icon>https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/icon.png</Icon>
   <ExtraParams>--runtime=nvidia --read-only --tmpfs /tmp:rw,noexec,nosuid,size=2g --security-opt no-new-privileges:true --cap-drop=ALL --cap-add=CHOWN --cap-add=FOWNER --cap-add=SETUID --cap-add=SETGID --pids-limit=2048</ExtraParams>
   <PostArgs></PostArgs>
   <Description>
     AUTOMATIC1111 Stable Diffusion WebUI for Unraid.
 
-    This template is configured for a locally built test image:
-    <b>a1111-webui-aegisnir:local</b>
-    Build this image on your Unraid host before creating the container.
+    Image: <b>ghcr.io/aegisnir/a1111-webui-aegisnir:dev</b>
 
     README:
     <b>https://github.com/aegisnir/A1111-unraid/blob/main/README.md</b>
@@ -61,8 +59,7 @@
     The image includes a Docker HEALTHCHECK that probes port 7860. It uses generous timers (10 min start grace, 5 retries) to avoid false positives during bootstrap, model loading, or heavy extension operations. Unhealthy status is informational only and does not auto-restart the container.
   </Description>
   <Overview>
-  This template is configured for a local test image by default.
-  If you maintain your own custom image, you can override the Repository field.
+  Image: ghcr.io/aegisnir/a1111-webui-aegisnir:dev
   The default Extra Parameters include --runtime=nvidia so Docker can expose the NVIDIA runtime inside the container.
   Full setup and usage docs: https://github.com/aegisnir/A1111-unraid/blob/main/README.md
 
