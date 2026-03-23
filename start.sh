@@ -624,23 +624,40 @@ monitor_webui_output() {
       echo ""
     fi
 
-    # WebUI ready signal — Gradio only prints "Running on local URL" after it has
-    # successfully bound the port, so this line IS the confirmation the UI is live.
-    # No additional probe needed — trusting the upstream signal is simpler and more reliable.
-    if [[ "${line}" == *"Running on local URL"* ]]; then
-      local _ready_port="7860"
-      if [[ "${line}" =~ :([0-9]+)[[:space:]]*$ ]]; then
-        _ready_port="${BASH_REMATCH[1]}"
-      fi
+  done
+}
+
+# _poll_for_ready: independent background poller that prints the READY banner
+# once the WebUI port is confirmed accepting TCP connections.
+# Runs completely outside the log monitor so it is not affected by log content
+# or Gradio version changes. Uses bash's built-in /dev/tcp — no external tools.
+_poll_for_ready() {
+  local _port="7860"
+  # Extract --port value from COMMANDLINE_ARGS if the user overrode the default
+  if [[ "${COMMANDLINE_ARGS:-}" =~ --port[[:space:]]+([0-9]+) ]]; then
+    _port="${BASH_REMATCH[1]}"
+  fi
+
+  local _timeout=600   # Give up after 10 min (matches HEALTHCHECK start-period)
+  local _interval=5    # Poll every 5 s
+  local _elapsed=0
+
+  while [[ $_elapsed -lt $_timeout ]]; do
+    sleep "${_interval}"
+    _elapsed=$(( _elapsed + _interval ))
+    # /dev/tcp is a bash built-in — opens a TCP connection without any external binary
+    # shellcheck disable=SC2188
+    if (: < /dev/tcp/127.0.0.1/"${_port}") 2>/dev/null; then
       echo ""
       echo "  ${C_ACCENT}${C_BOLD}┌─ [READY] ───────────────────────────────────────────────────────────┐${C_RESET}"
       echo "  ${C_ACCENT}${C_BOLD}│  WebUI is LIVE — open it in your browser:                           │${C_RESET}"
-      echo "  ${C_ACCENT}${C_BOLD}│  http://<your-unraid-ip>:${_ready_port}/                                      │${C_RESET}"
+      echo "  ${C_ACCENT}${C_BOLD}│  http://<your-unraid-ip>:${_port}/                                        │${C_RESET}"
       echo "  ${C_ACCENT}${C_BOLD}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
+      return 0
     fi
-
   done
+  # Timed out without confirming — silently give up (HEALTHCHECK will flag unhealthy)
 }
 
 # is_truthy: Accepts common boolean-like env var values (1, true, yes, on)
@@ -782,9 +799,13 @@ _LOG_PIPE="${_MONITOR_DIR}/webui.log.pipe"
 mkfifo "${_LOG_PIPE}"
 
 _WEBUI_PID=""
+_POLLER_PID=""
 
 # shellcheck disable=SC2317 # These are invoked by trap, not direct calls.
-_cleanup_monitor() { rm -rf "${_MONITOR_DIR}"; }
+_cleanup_monitor() {
+  [[ -n "${_POLLER_PID}" ]] && kill "${_POLLER_PID}" 2>/dev/null || true
+  rm -rf "${_MONITOR_DIR}"
+}
 # shellcheck disable=SC2317
 _forward_signal()  { [[ -n "${_WEBUI_PID}" ]] && kill -TERM "${_WEBUI_PID}" 2>/dev/null; true; }
 
@@ -800,6 +821,11 @@ _MONITOR_PID=$!
 # monitor_webui_output sees all output (Python warnings go to stderr).
 "${VENV_PYTHON}" launch.py > "${_LOG_PIPE}" 2>&1 &
 _WEBUI_PID=$!
+
+# Start the background poller — runs independently, prints READY banner when
+# port is confirmed live. Killed on container stop via _cleanup_monitor.
+_poll_for_ready &
+_POLLER_PID=$!
 
 # Wait for the WebUI to exit and capture its exit code.
 _WEBUI_EXIT=0
