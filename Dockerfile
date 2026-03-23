@@ -146,6 +146,12 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
   && ln -s /data/extensions "${WEBUI_DIR}/extensions" \
   && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
 
+# Create the /config directory that holds auth files and state.
+# The actual contents are bind-mounted from the host (appdata on Unraid);
+# this just ensures the mount point exists and has correct ownership in the
+# image so the read-only container filesystem doesn't cause confusion.
+RUN mkdir -p /config && chown sdwebui:sdwebui /config
+
 # Overlay the custom launch.py wrapper that redacts sensitive CLI arguments
 # (--gradio-auth, --gradio-auth-path, --api-auth, --api-auth-path) from
 # startup log output. See WebUI/launch.py for the full redaction logic.

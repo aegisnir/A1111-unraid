@@ -81,7 +81,7 @@ The AUTOMATIC1111 API is disabled by default unless you explicitly add `--api` t
 
 This container defaults to auth-file based login.
 
-Startup seeds a default auth file to `/data/auth/webui-auth.txt` on first launch if it does not exist.
+Startup seeds a default auth file to `/config/auth/webui-auth.txt` on first launch if it does not exist.
 
 Default seeded credential:
 
@@ -96,12 +96,12 @@ Startup does not block the default credential. For security, change it as soon a
 
 Use this variable in the template/container config:
 
-- `WEBUI_AUTH_FILE` (default: `/data/auth/webui-auth.txt`)
+- `WEBUI_AUTH_FILE` (default: `/config/auth/webui-auth.txt`)
 
 Recommended host/container paths:
 
-- Host path: `/mnt/user/ai/data/auth/webui-auth.txt`
-- Container path: `/data/auth/webui-auth.txt`
+- Host path: `/mnt/user/appdata/A1111-WebUI-Aegisnir/auth/webui-auth.txt`
+- Container path: `/config/auth/webui-auth.txt`
 
 #### Editing the auth file
 
@@ -110,7 +110,7 @@ The file is created with `chmod 600` (owner read/write only). This prevents othe
 **Unraid terminal (recommended):** The Unraid terminal runs as `root`, so root always has access regardless of permissions.
 
 ```bash
-nano /mnt/user/ai/data/auth/webui-auth.txt
+nano /mnt/user/appdata/A1111-WebUI-Aegisnir/auth/webui-auth.txt
 ```
 
 **SMB share:** Unraid serves SMB authenticated with the root/admin password. If you access the share with your Unraid admin credentials, you can read and write `chmod 600` files normally. If the share is configured as **Public** (no auth), the file will appear inaccessible — Samba maps public connections to an unprivileged user that cannot read owner-only files.
@@ -121,7 +121,7 @@ nano /mnt/user/ai/data/auth/webui-auth.txt
 
 - WebUI login is enabled by default.
 - First-launch default login is `admin` / `changeme`.
-- Recommended first action after login: update `/data/auth/webui-auth.txt` with a strong unique password.
+- Recommended first action after login: update `/config/auth/webui-auth.txt` with a strong unique password.
 
 Auth file format (AUTOMATIC1111 compatible):
 

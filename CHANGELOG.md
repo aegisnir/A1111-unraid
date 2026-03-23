@@ -30,7 +30,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- added explicit security warning in README about `--api-auth` credentials being exposed in `COMMANDLINE_ARGS` env var when API mirroring is active (known upstream A1111 limitation)
 	- cleaned up duplicate intro sentence in README auth section
 - Authentication defaults and hardening:
-        - switched startup to auth-file-first workflow using `WEBUI_AUTH_FILE` (default `/data/auth/webui-auth.txt`)
+        - switched startup to auth-file-first workflow using `WEBUI_AUTH_FILE` (default `/config/auth/webui-auth.txt`)
         - added first-run auth-file seeding from repository template `webui-auth.txt` when target file is missing
         - removed `WEBUI_USERNAME` / `WEBUI_PASSWORD` template fields to avoid credential leakage from variable-based auth paths
         - updated README/template metadata with explicit auth-file path, format, and safety-guard guidance

@@ -73,9 +73,9 @@ XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.30}"
 # The user-facing auth file (WEBUI_AUTH_FILE) can contain comments and blank
 # lines for readability. The runtime copy (WEBUI_AUTH_RUNTIME_FILE) is a
 # sanitized version with only username:password lines that Gradio can parse.
-WEBUI_AUTH_FILE_DEFAULT="/data/auth/webui-auth.txt"
+WEBUI_AUTH_FILE_DEFAULT="/config/auth/webui-auth.txt"
 WEBUI_AUTH_FILE="${WEBUI_AUTH_FILE:-${WEBUI_AUTH_FILE_DEFAULT}}"
-WEBUI_AUTH_RUNTIME_FILE="/data/auth/.webui-auth.runtime.txt"
+WEBUI_AUTH_RUNTIME_FILE="/config/auth/.webui-auth.runtime.txt"
 
 # mirror-webui-file = copy WebUI credentials to --api-auth when --api is enabled
 # disabled        = do not auto-set --api-auth; user manages it manually
@@ -155,7 +155,7 @@ mkdir -p /data/models/Stable-diffusion
 mkdir -p /data/models/VAE
 mkdir -p /data/models/Lora
 mkdir -p /data/outputs
-mkdir -p /data/auth
+mkdir -p /config/auth
 
 available_kb="$(df -Pk /data | awk 'NR==2 {print $4}')"
 if [[ -z "${available_kb}" || ! "${available_kb}" =~ ^[0-9]+$ ]]; then
@@ -394,7 +394,7 @@ else
 
   if [[ ! -f "${WEBUI_AUTH_FILE}" ]]; then
     echo "${C_CRIT}${C_BOLD}CRITICAL:${C_RESET}${C_CRIT} WebUI auth file is missing: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
-    echo "${C_CRIT}         Create the auth file or mount it from the host. Recommended path: /data/auth/webui-auth.txt${C_RESET}" >&2
+    echo "${C_CRIT}         Create the auth file or mount it from the host. Recommended path: /config/auth/webui-auth.txt${C_RESET}" >&2
     exit 1
   fi
   if [[ ! -s "${WEBUI_AUTH_FILE}" ]]; then

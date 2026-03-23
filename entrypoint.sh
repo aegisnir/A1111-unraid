@@ -221,6 +221,26 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
+# /config ownership self-healing
+# ─────────────────────────────────────────────────────────────────────────────
+# /config holds auth files and state markers. It is a separate bind-mount from
+# /data so it can live in appdata and be backed up independently.
+# Apply the same simple ownership check as /data: if Docker created the host
+# appdata directory as root, fix it now while we are still root.
+if [[ "$(id -u)" == "0" ]] && [[ -d "/config" ]]; then
+  config_owner_uid="$(stat -c '%u' /config)"
+  if [[ "${config_owner_uid}" != "${EXPECTED_UID}" ]]; then
+    echo "${C_WARN}[entrypoint] /config is owned by uid=${config_owner_uid}, expected uid=${EXPECTED_UID}.${C_RESET}" >&2
+    echo "${C_WARN}[entrypoint] Correcting /config ownership...${C_RESET}" >&2
+    if ! chown -R "${EXPECTED_UID}:${EXPECTED_GID}" /config; then
+      echo "${C_WARN}[entrypoint] Could not fix /config ownership. Auth file seeding may fail.${C_RESET}" >&2
+    else
+      echo "${C_INFO}[entrypoint] /config ownership corrected.${C_RESET}" >&2
+    fi
+  fi
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Hand off to start.sh
 # ─────────────────────────────────────────────────────────────────────────────
 # Drop privileges and exec start.sh as the application user.
