@@ -68,6 +68,10 @@ MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"             # Abort first
 TORCH_VERSION="${TORCH_VERSION:-2.7.0}"                            # Pinned version — update alongside CUDA base image
 TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
 XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.30}"
+RESTART_ON_EXIT="${RESTART_ON_EXIT:-1}"            # 1 = restart WebUI after any exit; 0 = exit container cleanly
+RESTART_DELAY="${RESTART_DELAY:-5}"                # Seconds to wait before restarting after a clean exit
+RESTART_DELAY_MAX="${RESTART_DELAY_MAX:-60}"       # Backoff ceiling for crash restarts (seconds)
+RESTART_MAX_ATTEMPTS="${RESTART_MAX_ATTEMPTS:-0}"  # 0 = retry indefinitely; N = stop after N consecutive restarts
 
 # ── Authentication paths ─────────────────────────────────────────────────────
 # The user-facing auth file (WEBUI_AUTH_FILE) can contain comments and blank
@@ -734,9 +738,7 @@ else
   echo "${C_ACCENT}Starting WebUI (no COMMANDLINE_ARGS provided).${C_RESET}"
 fi
 
-print_launch_notice
-
-# ── Launch with output monitoring ────────────────────────────────────────────
+# ── Launch with output monitoring and automatic restart ─────────────────────
 #
 # Architecture: named-pipe pattern
 #   WebUI (stdout+stderr) → named pipe → monitor_webui_output → user terminal
@@ -744,49 +746,139 @@ print_launch_notice
 #   This lets us inject inline [NOTE] / [KNOWN WARNING] annotations after
 #   recognised log lines without buffering or modifying the WebUI process.
 #
-# Signal handling:
-#   Docker stop/kill sends SIGTERM to PID 1 (entrypoint). The trap below
-#   forwards it to the WebUI process so it can shut down gracefully. The EXIT
-#   trap cleans up the temp directory holding the named pipe.
+# Restart policy:
+#   RESTART_ON_EXIT=1 (default): restart the WebUI after any exit — whether
+#     the user clicked "Apply and quit" in the Extensions tab, or the process
+#     crashed.  A deliberate container stop (docker stop / Unraid Stop) sends
+#     SIGTERM, which sets _DELIBERATE_STOP=1 and suppresses the restart so the
+#     container exits cleanly without Unraid needing to SIGKILL it.
 #
-_MONITOR_DIR="$(mktemp -d /tmp/a1111-monitor.XXXXXX)"
-_LOG_PIPE="${_MONITOR_DIR}/webui.log.pipe"
-mkfifo "${_LOG_PIPE}"
-
+#   Crash backoff: after a non-zero exit the delay doubles each attempt
+#     (RESTART_DELAY → RESTART_DELAY*2 → ...) up to RESTART_DELAY_MAX, so a
+#     persistent crash loop does not hammer the system.  A clean exit (exit 0,
+#     e.g. "Apply and quit") always uses the flat RESTART_DELAY.
+#
+# Note on "Restart UI" (footer button vs "Apply and quit"):
+#   "Restart UI" is an in-process operation handled entirely inside A1111's
+#   Python while-loop — the Python process never exits and this bash loop is
+#   not involved.  In some Gradio versions the in-process restart has a
+#   port-release timing bug that prevents the browser from reconnecting; if
+#   that happens, "Apply and quit" + automatic restart here is the reliable
+#   alternative.
+#
+_MONITOR_DIR=""
+_LOG_PIPE=""
 _WEBUI_PID=""
 _POLLER_PID=""
+_DELIBERATE_STOP=0   # set to 1 when SIGTERM/INT is received from Docker/Unraid
 
 # shellcheck disable=SC2317 # These are invoked by trap, not direct calls.
 _cleanup_monitor() {
   [[ -n "${_POLLER_PID}" ]] && kill "${_POLLER_PID}" 2>/dev/null || true
-  rm -rf "${_MONITOR_DIR}"
+  _POLLER_PID=""
+  [[ -n "${_MONITOR_DIR:-}" && -d "${_MONITOR_DIR}" ]] && rm -rf "${_MONITOR_DIR}" || true
+  _MONITOR_DIR=""
+  _LOG_PIPE=""
 }
 # shellcheck disable=SC2317
-_forward_signal()  { [[ -n "${_WEBUI_PID}" ]] && kill -TERM "${_WEBUI_PID}" 2>/dev/null; true; }
+_forward_signal() {
+  _DELIBERATE_STOP=1
+  [[ -n "${_WEBUI_PID}" ]] && kill -TERM "${_WEBUI_PID}" 2>/dev/null
+  true
+}
 
 trap '_cleanup_monitor' EXIT
 trap '_forward_signal' TERM INT
 
-# Start the output monitor first — the reader must open the pipe before the
-# writer, otherwise the writer blocks indefinitely waiting for a reader.
-monitor_webui_output < "${_LOG_PIPE}" &
-_MONITOR_PID=$!
+_RESTART_ATTEMPT=0
+_CRASH_DELAY="${RESTART_DELAY}"
+_WEBUI_EXIT_FINAL=0
 
-# Launch the WebUI. Both stdout and stderr go through the pipe so
-# monitor_webui_output sees all output (Python warnings go to stderr).
-"${VENV_PYTHON}" launch.py > "${_LOG_PIPE}" 2>&1 &
-_WEBUI_PID=$!
+while true; do
+  _MONITOR_DIR="$(mktemp -d /tmp/a1111-monitor.XXXXXX)"
+  _LOG_PIPE="${_MONITOR_DIR}/webui.log.pipe"
+  mkfifo "${_LOG_PIPE}"
 
-# Start the background poller — runs independently, prints READY banner when
-# port is confirmed live. Killed on container stop via _cleanup_monitor.
-_poll_for_ready &
-_POLLER_PID=$!
+  if [[ "${_RESTART_ATTEMPT}" -gt 0 ]]; then
+    echo "" >&2
+    echo "${C_WARN}${C_BOLD}── Restarting WebUI (attempt ${_RESTART_ATTEMPT}${RESTART_MAX_ATTEMPTS:+ of ${RESTART_MAX_ATTEMPTS}}) ──────────────────────────${C_RESET}" >&2
+    echo "" >&2
+  else
+    print_launch_notice
+  fi
 
-# Wait for the WebUI to exit and capture its exit code.
-_WEBUI_EXIT=0
-wait "${_WEBUI_PID}" || _WEBUI_EXIT=$?
+  # Start the output monitor first — the reader must open the pipe before the
+  # writer, otherwise the writer blocks indefinitely waiting for a reader.
+  monitor_webui_output < "${_LOG_PIPE}" &
+  _MONITOR_PID=$!
 
-# Let the monitor drain any remaining buffered output before we exit.
-wait "${_MONITOR_PID}" 2>/dev/null || true
+  # Launch the WebUI. Both stdout and stderr go through the pipe so
+  # monitor_webui_output sees all output (Python warnings go to stderr).
+  "${VENV_PYTHON}" launch.py > "${_LOG_PIPE}" 2>&1 &
+  _WEBUI_PID=$!
 
-exit "${_WEBUI_EXIT}"
+  # Start the background poller — runs independently, prints READY banner when
+  # port is confirmed live. Killed between restarts via _cleanup_monitor.
+  _poll_for_ready &
+  _POLLER_PID=$!
+
+  # Wait for the WebUI to exit and capture its exit code.
+  _WEBUI_EXIT=0
+  wait "${_WEBUI_PID}" || _WEBUI_EXIT=$?
+
+  # Kill the poller and tear down the named pipe before the next iteration.
+  _cleanup_monitor
+
+  # Let the monitor drain any remaining buffered output before we restart.
+  wait "${_MONITOR_PID}" 2>/dev/null || true
+
+  _WEBUI_EXIT_FINAL="${_WEBUI_EXIT}"
+
+  # ── Restart decision ───────────────────────────────────────────────────────
+  # 1. Deliberate stop — docker stop, Unraid Stop button, etc.
+  if [[ "${_DELIBERATE_STOP}" == "1" ]]; then
+    echo "${C_INFO}Container stop signal received. Exiting cleanly.${C_RESET}" >&2
+    _WEBUI_EXIT_FINAL=0
+    break
+  fi
+
+  # 2. Restart policy disabled via env var.
+  if ! is_truthy "${RESTART_ON_EXIT}"; then
+    if [[ "${_WEBUI_EXIT}" -eq 0 ]]; then
+      echo "${C_INFO}WebUI exited cleanly. RESTART_ON_EXIT is off — container exiting.${C_RESET}" >&2
+    else
+      echo "${C_CRIT}WebUI exited with code ${_WEBUI_EXIT}. RESTART_ON_EXIT is off — container exiting.${C_RESET}" >&2
+    fi
+    break
+  fi
+
+  # 3. Max restart attempts exceeded.
+  _RESTART_ATTEMPT=$(( _RESTART_ATTEMPT + 1 ))
+  if [[ "${RESTART_MAX_ATTEMPTS}" -gt 0 && "${_RESTART_ATTEMPT}" -gt "${RESTART_MAX_ATTEMPTS}" ]]; then
+    echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} WebUI has restarted ${RESTART_MAX_ATTEMPTS} time(s) and keeps exiting. Giving up.${C_RESET}" >&2
+    _WEBUI_EXIT_FINAL=1
+    break
+  fi
+
+  # 4. Choose restart delay and print reason.
+  if [[ "${_WEBUI_EXIT}" -eq 0 ]]; then
+    # Clean exit ("Apply and quit") — flat delay, reset crash backoff.
+    _delay="${RESTART_DELAY}"
+    _CRASH_DELAY="${RESTART_DELAY}"
+    echo "${C_WARN}WebUI exited cleanly (Apply and quit?). Restarting in ${_delay}s...${C_RESET}" >&2
+  else
+    # Crash or unexpected exit — exponential backoff.
+    _delay="${_CRASH_DELAY}"
+    _next=$(( _CRASH_DELAY * 2 ))
+    if [[ "${_next}" -gt "${RESTART_DELAY_MAX}" ]]; then
+      _CRASH_DELAY="${RESTART_DELAY_MAX}"
+    else
+      _CRASH_DELAY="${_next}"
+    fi
+    echo "${C_CRIT}WebUI crashed or exited unexpectedly (code ${_WEBUI_EXIT}). Restarting in ${_delay}s...${C_RESET}" >&2
+  fi
+
+  sleep "${_delay}"
+done
+
+exit "${_WEBUI_EXIT_FINAL}"
