@@ -28,10 +28,11 @@ set -euo pipefail
 # C_WARN   (orange)  → caution / warnings that need attention but are not fatal
 # C_CRIT   (scarlet) → critical errors requiring user action
 # C_ACCENT (cyan)    → accent / highlights (URLs, commands, structural chrome)
-# Only emit color sequences when stderr is a terminal; stay plain in log files.
-if [[ -t 2 ]]; then
+# Colors are enabled by default because Docker/Unraid log viewers render ANSI.
+# Set NO_COLOR=1 or TERM=dumb in the container environment to suppress them.
+if [[ "${NO_COLOR:-}" == "" && "${TERM:-}" != "dumb" ]]; then
   C_RESET=$'\e[0m'; C_BOLD=$'\e[1m'; C_ACCENT=$'\e[96m'
-  C_INFO=$'\e[95m'; C_WARN=$'\e[93m'; C_CRIT=$'\e[91m'
+  C_INFO=$'\e[35m'; C_WARN=$'\e[93m'; C_CRIT=$'\e[91m'
 else
   C_RESET='' C_BOLD='' C_ACCENT='' C_INFO='' C_WARN='' C_CRIT=''
 fi
@@ -585,51 +586,69 @@ monitor_webui_output() {
     if [[ $_saw_checkpoint -eq 0 && "${line}" == *"No checkpoints found"* ]]; then
       _saw_checkpoint=1
       echo ""
-      echo "  ${C_WARN}┌─ ${C_BOLD}[KNOWN WARNING]${C_RESET}${C_WARN} ───────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_WARN}┌─ [KNOWN WARNING] ───────────────────────────────────────────────────┐${C_RESET}"
       echo "  ${C_WARN}│  No model checkpoint was found. This is expected on a fresh install${C_RESET}"
       echo "  ${C_WARN}│  or if /data/models/ was cleared. The WebUI will still start.${C_RESET}"
       echo "  ${C_WARN}│${C_RESET}"
       echo "  ${C_WARN}│  Fix: add a .safetensors or .ckpt file to:${C_RESET}"
       echo "  ${C_WARN}│         /data/models/Stable-diffusion/${C_RESET}"
       echo "  ${C_WARN}│  then restart the container, or use Settings → Refresh in the UI.${C_RESET}"
-      echo "  ${C_WARN}└─────────────────────────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_WARN}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
     fi
 
     # CUDA out of memory — actionable GPU issue
     if [[ "${line}" == *"CUDA out of memory"* ]]; then
       echo ""
-      echo "  ${C_CRIT}┌─ ${C_BOLD}[GPU MEMORY ERROR]${C_RESET}${C_CRIT} ────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_CRIT}┌─ [GPU MEMORY ERROR] ────────────────────────────────────────────────┐${C_RESET}"
       echo "  ${C_CRIT}│  Your GPU ran out of VRAM during this operation.${C_RESET}"
       echo "  ${C_CRIT}│  Tips:${C_RESET}"
       echo "  ${C_CRIT}│    • Reduce image resolution or batch size${C_RESET}"
       echo "  ${C_CRIT}│    • Enable xformers (--xformers in COMMANDLINE_ARGS)${C_RESET}"
       echo "  ${C_CRIT}│    • Try a smaller or lower-precision model${C_RESET}"
-      echo "  ${C_CRIT}└─────────────────────────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_CRIT}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
     fi
 
     # GPU not visible to PyTorch — likely missing --runtime=nvidia or NVIDIA plugin issue
     if [[ "${line}" == *"torch.cuda.is_available() = False"* || "${line}" == *"Torch is not able to use GPU"* ]]; then
       echo ""
-      echo "  ${C_CRIT}┌─ ${C_BOLD}[GPU NOT DETECTED]${C_RESET}${C_CRIT} ────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_CRIT}┌─ [GPU NOT DETECTED] ────────────────────────────────────────────────┐${C_RESET}"
       echo "  ${C_CRIT}│  PyTorch cannot see a CUDA-capable GPU.${C_RESET}"
       echo "  ${C_CRIT}│  Check:${C_RESET}"
       echo "  ${C_CRIT}│    • --runtime=nvidia is present in Extra Parameters in the template${C_RESET}"
       echo "  ${C_CRIT}│    • The Unraid NVIDIA plugin is installed and working${C_RESET}"
       echo "  ${C_CRIT}│    • Run on the host to verify:${C_RESET}"
       echo "  ${C_CRIT}│        docker run --rm --gpus all nvidia/cuda:12.9.1-runtime-ubuntu22.04 nvidia-smi${C_RESET}"
-      echo "  ${C_CRIT}└─────────────────────────────────────────────────────────────────────${C_RESET}"
+      echo "  ${C_CRIT}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
     fi
 
-    # WebUI ready signal — Gradio prints this when the server is accepting connections
+    # WebUI ready signal — Gradio prints this when the server is accepting connections.
+    # A socket probe confirms the port is live before the banner is printed.
     if [[ "${line}" == *"Running on local URL"* ]]; then
-      echo ""
-      echo "  ${C_ACCENT}┌─ ${C_BOLD}[READY]${C_RESET}${C_ACCENT} ───────────────────────────────────────────────────────────${C_RESET}"
-      echo "  ${C_INFO}│  WebUI is ready. Access it at the URL shown above.${C_RESET}"
-      echo "  ${C_ACCENT}└─────────────────────────────────────────────────────────────────────${C_RESET}"
-      echo ""
+      local _ready_port="7860"
+      if [[ "${line}" =~ :([0-9]+)[[:space:]]*$ ]]; then
+        _ready_port="${BASH_REMATCH[1]}"
+      fi
+      # Probe once; retry after 3 s if the first attempt fails.
+      local _probe_ok=0
+      if python3 -c "import socket; s=socket.socket(); s.settimeout(5); s.connect(('127.0.0.1', ${_ready_port})); s.close()" 2>/dev/null; then
+        _probe_ok=1
+      else
+        sleep 3
+        if python3 -c "import socket; s=socket.socket(); s.settimeout(5); s.connect(('127.0.0.1', ${_ready_port})); s.close()" 2>/dev/null; then
+          _probe_ok=1
+        fi
+      fi
+      if [[ "${_probe_ok}" -eq 1 ]]; then
+        echo ""
+        echo "  ${C_ACCENT}${C_BOLD}┌─ [READY] ───────────────────────────────────────────────────────────┐${C_RESET}"
+        echo "  ${C_ACCENT}${C_BOLD}│  WebUI is LIVE — port ${_ready_port} confirmed accepting connections.${C_RESET}"
+        echo "  ${C_ACCENT}${C_BOLD}│  Access at: http://<your-unraid-ip>:${_ready_port}/${C_RESET}"
+        echo "  ${C_ACCENT}${C_BOLD}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
+        echo ""
+      fi
     fi
 
   done

@@ -31,9 +31,11 @@ set -euo pipefail
 # Only emit ANSI sequences when stderr is a terminal; stay plain when output
 # is piped to a log file.
 
-if [[ -t 2 ]]; then
+# Colors are enabled by default because Docker/Unraid log viewers render ANSI.
+# Set NO_COLOR=1 or TERM=dumb in the container environment to suppress them.
+if [[ "${NO_COLOR:-}" == "" && "${TERM:-}" != "dumb" ]]; then
   C_RESET=$'\e[0m'
-  C_ACCENT=$'\e[96m'; C_INFO=$'\e[95m'; C_WARN=$'\e[93m'; C_CRIT=$'\e[91m'
+  C_ACCENT=$'\e[96m'; C_INFO=$'\e[35m'; C_WARN=$'\e[93m'; C_CRIT=$'\e[91m'
 else
   C_RESET='' C_ACCENT='' C_INFO='' C_WARN='' C_CRIT=''
 fi
