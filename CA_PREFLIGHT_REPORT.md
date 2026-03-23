@@ -40,11 +40,8 @@ Before broad CA submission, publish a `:latest` tag and re-run this report.
 
 ```bash
 docker pull ghcr.io/aegisnir/a1111-webui-aegisnir:dev
-bash -n entrypoint.sh
-bash -n start.sh
-python3 - <<'PY'
-import xml.etree.ElementTree as ET
-ET.parse('template.xml')
-print('template.xml parse ok')
-PY
+bash -n entrypoint.sh && bash -n start.sh
+shellcheck -s bash entrypoint.sh start.sh scripts/security-check.sh
+python3 -c "import xml.etree.ElementTree as ET; ET.parse('template.xml')"
+bash scripts/security-check.sh
 ```

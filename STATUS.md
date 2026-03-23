@@ -47,6 +47,13 @@
 - Code quality:
   - both shell scripts pass `shellcheck` cleanly
   - removed dead code (`_original_start` in launch.py, unused `C_BOLD` in entrypoint.sh)
+- Pre-release security audit:
+  - fixed auth file permission race: seed and runtime auth files written under `umask 077` + belt-and-suspenders `chmod 600` for upgrade safety
+  - extension bootstrap now requires HTTPS-only URLs (plain HTTP rejected)
+  - fixed stale "via runuser" comments in Dockerfile (code uses `setpriv`)
+  - fixed syntax error in SECURITY.md python3 verification command
+  - `scripts/security-check.sh` expanded from 17 to 27 automated checks (added: shellcheck, HEALTHCHECK presence, SUID strip, log redaction, HTTPS-only URLs, umask protection)
+  - cleaned up stale variable names and clarified superseded items in CHANGELOG
 
 ## In Progress
 

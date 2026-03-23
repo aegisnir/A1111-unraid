@@ -413,8 +413,9 @@ elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gr
 else
   # Seed the default auth file on first launch if it does not exist yet.
   if [[ ! -f "${WEBUI_AUTH_FILE}" && -f "${WEBUI_AUTH_SAMPLE_FILE}" ]]; then
-    cp "${WEBUI_AUTH_SAMPLE_FILE}" "${WEBUI_AUTH_FILE}"
-    chmod 600 "${WEBUI_AUTH_FILE}" 2>/dev/null || true
+    # Create the seeded auth file with restrictive permissions from the start
+    # so credentials are never world-readable, even briefly (umask 077 → 600).
+    ( umask 077; cp "${WEBUI_AUTH_SAMPLE_FILE}" "${WEBUI_AUTH_FILE}" )
     echo "${C_WARN}Seeded default auth file at ${WEBUI_AUTH_FILE}.${C_RESET}" >&2
   fi
 
@@ -448,7 +449,12 @@ else
 
   # Gradio auth-path parsing is strict and can crash on comments/blank lines.
   # Build a sanitized runtime auth file with only username:password entries.
-  write_runtime_auth_file "${WEBUI_AUTH_FILE}" "${WEBUI_AUTH_RUNTIME_FILE}"
+  # umask 077 ensures the file is created as mode 600 if it does not yet exist,
+  # eliminating the race window between creation and a subsequent chmod.
+  # The explicit chmod 600 afterward handles the upgrade case where the file
+  # already exists from a previous run with looser permissions (e.g. 644 from
+  # an older version of this script that used cp-then-chmod ordering).
+  ( umask 077; write_runtime_auth_file "${WEBUI_AUTH_FILE}" "${WEBUI_AUTH_RUNTIME_FILE}" )
   chmod 600 "${WEBUI_AUTH_RUNTIME_FILE}" 2>/dev/null || true
 
   AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_RUNTIME_FILE}")
@@ -681,8 +687,8 @@ bootstrap_extensions_once() {
       continue
     fi
 
-    if [[ ! "${repo_url}" =~ ^https?:// ]]; then
-      echo "${C_WARN}[WARNING] Invalid extension URL in bootstrap list (must start with http/https): ${repo_url}${C_RESET}" >&2
+    if [[ ! "${repo_url}" =~ ^https:// ]]; then
+      echo "${C_WARN}[WARNING] Skipping extension URL (HTTPS required): ${repo_url}${C_RESET}" >&2
       ((failed_count+=1))
       continue
     fi
@@ -727,9 +733,10 @@ bootstrap_extensions_once() {
 # ─────────────────────────────────────────────────────────────────────────────
 # Build final COMMANDLINE_ARGS with auth flags appended, then launch.
 #
-# Recommendation: avoid placing secrets in COMMANDLINE_ARGS when possible.
-# Command-line arguments can appear in logs, process lists, or screenshots
-# more easily than dedicated secret-management methods.
+# Note: --api-auth credentials are appended here as a plain string because
+# A1111 has no file-based equivalent for API auth. This means credentials
+# are visible via docker inspect / /proc/<pid>/environ. See README for
+# the full discussion and mitigation options.
 # ─────────────────────────────────────────────────────────────────────────────
 if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
   quoted_auth_args=()

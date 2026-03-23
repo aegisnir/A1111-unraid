@@ -42,7 +42,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- startup now treats API as explicitly opt-in: API auth injection runs only when `--api` is present in `COMMANDLINE_ARGS`
 	- added startup note that API is disabled by default unless `--api` is set
 	- added warning when users pass `--api-auth` without enabling `--api`
-	- updated README/template docs to clarify API-off-by-default behavior and when `API_AUTH_MODE` / `API_AUTH_FILE_MODE` apply
+	- updated README/template docs to clarify API-off-by-default behavior and when `API_AUTH_FILE_MODE` applies
 	- documented extension-access tradeoff: omitting `--enable-insecure-extension-access` does not block existing extension runtime; it mainly limits install/update/management from the WebUI
 	- enabled `--enable-insecure-extension-access` by default in template and Dockerfile fallback args for this personal project workflow
 	- added explicit README risk callouts for insecure extension access and documented what `--allow-code` enables vs what leaving it unset prevents
@@ -110,10 +110,18 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- updated template.xml and README to document healthcheck behavior and tuning rationale
 	- relaxed the sanity check to accept valid CUDA local version suffixes such as `+cu126`
 	- made `xformers` truly optional in sanity checks so startup does not fail when it is unavailable
+- Pre-release security audit:
+	- fixed auth file permission race: auth file seed and runtime auth file are now written under `umask 077` so credentials are never world-readable even briefly
+	- extension bootstrap now requires HTTPS URLs; plain HTTP is rejected to prevent MITM during git clone
+	- fixed stale "via runuser" references in Dockerfile (code uses `setpriv`)
+	- fixed missing closing quote in SECURITY.md python3 verification command
+	- expanded `scripts/security-check.sh` with checks for: shellcheck, HEALTHCHECK presence, SUID bit strip, log redaction, HTTPS-only extension URLs, and auth file permission hardening
+	- cleaned up stale variable names in CHANGELOG (`API_AUTH_MODE` → `API_AUTH_FILE_MODE`, clarified superseded `WEBUI_USERNAME`/`WEBUI_PASSWORD`)
+	- updated `COMMANDLINE_ARGS` code comment to honestly describe the `--api-auth` env var exposure tradeoff
 - Authentication/security defaults:
 	- enabled WebUI login by default
 	- mirrored credentials to API auth by default
-	- added template variables for `WEBUI_USERNAME`, `WEBUI_PASSWORD`, and `API_AUTH_MODE`
+	- *(superseded)* early iterations used `WEBUI_USERNAME` / `WEBUI_PASSWORD` template variables; these were removed in favor of auth-file workflow (`WEBUI_AUTH_FILE`) to avoid credential leakage via env vars
 	- blocked startup when the placeholder password is unchanged unless auth is managed explicitly
 	- made startup auth log redaction patch read-only-safe by patching in memory
 - Documentation/template updates:

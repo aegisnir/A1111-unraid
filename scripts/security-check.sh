@@ -71,12 +71,14 @@ PY
 }
 
 check_startup_privilege_model() {
+  # shellcheck disable=SC2016 # Grepping for literal $(id -u) text, not expanding it.
   if grep -q '\$(id -u)' start.sh && grep -q 'Refusing to run as root' start.sh; then
     pass "start.sh refuses to run application as root"
   else
     fail "start.sh root refusal check missing"
   fi
 
+  # shellcheck disable=SC2016 # Grepping for literal \${EXPECTED_UID} text, not expanding it.
   if grep -q 'setpriv --reuid="\${EXPECTED_UID}" --regid="\${EXPECTED_GID}" --clear-groups /start.sh' entrypoint.sh; then
     pass "entrypoint.sh drops privileges with setpriv before launch"
   else
@@ -125,6 +127,16 @@ check_syntax_and_template() {
     fail "Bash syntax check failed"
   fi
 
+  if command -v shellcheck >/dev/null 2>&1; then
+    if shellcheck -s bash entrypoint.sh start.sh >/dev/null 2>&1; then
+      pass "shellcheck passed (entrypoint.sh, start.sh)"
+    else
+      fail "shellcheck reported issues in startup scripts"
+    fi
+  else
+    printf '[SKIP] shellcheck not installed\n'
+  fi
+
   if python3 - <<'PY'
 import xml.etree.ElementTree as ET
 ET.parse('template.xml')
@@ -142,12 +154,60 @@ PY
   fi
 }
 
+check_build_hardening() {
+  # HEALTHCHECK must be present with a start-period of at least 300s.
+  if grep -q 'HEALTHCHECK' Dockerfile; then
+    local start_period
+    start_period="$(grep 'start-period' Dockerfile | grep -oP '\d+(?=s)' | head -1)"
+    if [[ -n "${start_period}" && "${start_period}" -ge 300 ]]; then
+      pass "Dockerfile HEALTHCHECK present with start-period=${start_period}s (>= 300s)"
+    else
+      fail "Dockerfile HEALTHCHECK start-period too short or not found (found: ${start_period:-none})"
+    fi
+  else
+    fail "Dockerfile HEALTHCHECK instruction missing"
+  fi
+
+  # SUID/SGID bits should be stripped at build time.
+  if grep -q 'chmod a-s' Dockerfile; then
+    pass "Dockerfile strips SUID/SGID bits at build time"
+  else
+    fail "Dockerfile SUID/SGID strip not found"
+  fi
+
+  # launch.py must contain the credential redaction function.
+  if grep -q '_redact_cli_args' WebUI/launch.py; then
+    pass "launch.py contains credential redaction logic"
+  else
+    fail "launch.py credential redaction (_redact_cli_args) not found"
+  fi
+}
+
+check_credential_handling() {
+  # Auth file writes must use umask 077 to avoid permission race.
+  if grep -q 'umask 077' start.sh; then
+    pass "Auth file writes use restrictive umask (077)"
+  else
+    fail "Auth file writes missing umask 077 protection"
+  fi
+
+  # Extension bootstrap must require HTTPS (not HTTP).
+  # The URL validation regex in start.sh should match ^https:// only, not ^https?://.
+  if grep -q '\^https://' start.sh && ! grep -q 'https?://' start.sh; then
+    pass "Extension bootstrap requires HTTPS-only URLs"
+  else
+    fail "Extension bootstrap may accept plain HTTP URLs"
+  fi
+}
+
 printf 'Running security baseline checks in %s\n\n' "${ROOT_DIR}"
 
 check_runtime_defaults
 check_startup_privilege_model
 check_auth_guardrails
 check_syntax_and_template
+check_build_hardening
+check_credential_handling
 
 printf '\nSummary: %d passed, %d failed\n' "${PASS_COUNT}" "${FAIL_COUNT}"
 

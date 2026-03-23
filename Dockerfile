@@ -156,7 +156,7 @@ RUN chown sdwebui:sdwebui "${WEBUI_DIR}/launch.py"
 # Copy entrypoint scripts (from this repository)
 #
 # entrypoint.sh runs as root, self-heals /data ownership if needed, then drops
-# to the unprivileged application user via runuser before exec-ing start.sh.
+# to the unprivileged application user via setpriv before exec-ing start.sh.
 # This is the standard "init as root, drop privileges" pattern used by postgres,
 # nginx, redis, and many other production container images.
 # ------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ HEALTHCHECK --interval=120s --timeout=30s --start-period=600s --retries=5 \
 RUN find / -perm /6000 -type f -not -path '/proc/*' -not -path '/sys/*' -not -path '/dev/*' -exec chmod a-s {} + || true
 
 # The container starts as root so entrypoint.sh can self-heal /data ownership.
-# It then drops to sdwebui (UID 99) via runuser before exec-ing start.sh.
+# It then drops to sdwebui (UID 99) via setpriv before exec-ing start.sh.
 # Runtime hardening should still be reviewed at the container runtime layer
 # (for example: read-only root filesystem, dropped capabilities, no-new-
 # privileges, explicit writable mounts, network exposure limits, etc.).

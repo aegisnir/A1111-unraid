@@ -78,7 +78,7 @@ grep -n 'WEBUI_AUTH_FILE\|api-auth\|gradio-auth\|WEBUI_AUTH_SAMPLE_FILE\|no usab
 - [ ] PASS if shellcheck passes for startup scripts:
 	`shellcheck -s bash entrypoint.sh start.sh`
 - [ ] PASS if template XML parses:
-	`python3 -c "import xml.etree.ElementTree as ET; ET.parse('template.xml')`
+	`python3 -c "import xml.etree.ElementTree as ET; ET.parse('template.xml')"`
 - [ ] PASS if README, template, and changelog describe the same hardening defaults.
 - [ ] PASS if Dockerfile HEALTHCHECK is present with a start-period of at least 300s.
 
