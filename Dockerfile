@@ -163,9 +163,8 @@ RUN chown sdwebui:sdwebui "${WEBUI_DIR}/launch.py"
 COPY entrypoint.sh /entrypoint.sh
 COPY start.sh /start.sh
 COPY webui-auth.txt /webui-auth.txt
-COPY extensions-bootstrap.txt /extensions-bootstrap.txt
 RUN chmod 0755 /entrypoint.sh /start.sh \
- && chmod 0644 /webui-auth.txt /extensions-bootstrap.txt \
+ && chmod 0644 /webui-auth.txt \
  && chown root:root /entrypoint.sh \
  && chown sdwebui:sdwebui /start.sh
 

@@ -191,49 +191,6 @@ What `--allow-code` does:
 - This can be useful for advanced local workflows, but it meaningfully increases remote code execution risk if the UI is exposed or credentials are weak.
 - Keeping `--allow-code` unset blocks those code-execution features and reduces attack surface.
 
-### One-time extension bootstrap
-
-This container can auto-install your preferred extension set on first launch only.
-
-Default behavior:
-
-- Startup reads extension URLs from `EXTENSIONS_BOOTSTRAP_FILE` (default: `/data/extensions-bootstrap.txt`).
-- It clones each listed extension into `/data/extensions` once.
-- It writes a completion marker at `/data/.state/extensions-bootstrap-v1.done`.
-- Future launches skip bootstrap unless explicitly forced.
-
-Safety behavior:
-
-- Bootstrap is fail-open by design.
-- If one extension fails to clone, startup logs a warning and continues to the next extension.
-- Extension bootstrap failures never block AUTOMATIC1111 startup.
-
-List format:
-
-- One repository URL per line.
-- Blank lines and lines starting with `#` are ignored.
-- The repo ships a pre-populated, fully commented template at `extensions-bootstrap.txt` generated from the official AUTOMATIC1111 extension index.
-- Each entry includes a commented stats line (stars, created date, last updated date, index-added date, and tags).
-- On first launch, startup copies that template to `/data/extensions-bootstrap.txt` if the file does not already exist.
-- Uncomment only the extensions you actually want installed.
-
-Example:
-
-```text
-https://github.com/Mikubill/sd-webui-controlnet.git
-https://github.com/Bing-su/adetailer.git
-```
-
-Manual rerun:
-
-- Set `EXTENSIONS_BOOTSTRAP_FORCE=true` (or `1/yes/on`) to run bootstrap again on next start.
-- Useful when you intentionally update your extension list after first launch.
-
-Notes:
-
-- By default, image build maps `stable-diffusion-webui/extensions` to `/data/extensions`, so bootstrap-installed extensions load from persistent storage without extra launch args.
-- Extension bootstrap clones the latest remote HEAD at bootstrap time; no commit pinning is enforced by default.
-
 ### HTTPS / TLS options
 
 By default, AUTOMATIC1111 serves over HTTP, not HTTPS.

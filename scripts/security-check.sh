@@ -191,13 +191,6 @@ check_credential_handling() {
     fail "Auth file writes missing umask 077 protection"
   fi
 
-  # Extension bootstrap must require HTTPS (not HTTP).
-  # The URL validation regex in start.sh should match ^https:// only, not ^https?://.
-  if grep -q '\^https://' start.sh && ! grep -q 'https?://' start.sh; then
-    pass "Extension bootstrap requires HTTPS-only URLs"
-  else
-    fail "Extension bootstrap may accept plain HTTP URLs"
-  fi
 }
 
 printf 'Running security baseline checks in %s\n\n' "${ROOT_DIR}"

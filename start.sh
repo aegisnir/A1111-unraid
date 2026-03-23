@@ -84,16 +84,6 @@ API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-mirror-webui-file}"
 UMASK="${UMASK:-}"                                                 # Optional: override default umask for all file creation
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WEBUI_AUTH_SAMPLE_FILE="${SCRIPT_DIR}/webui-auth.txt"              # Bundled sample; copied to /data on first launch
-
-# ── Extension bootstrap settings ─────────────────────────────────────────────
-# On first launch, extensions listed in the bootstrap file are git-cloned into
-# /data/extensions. Set EXTENSIONS_BOOTSTRAP_FORCE=true to re-process the list.
-EXTENSIONS_BOOTSTRAP_FILE="${EXTENSIONS_BOOTSTRAP_FILE:-/data/extensions-bootstrap.txt}"
-EXTENSIONS_BOOTSTRAP_FORCE="${EXTENSIONS_BOOTSTRAP_FORCE:-false}"
-EXTENSIONS_DIR_DEFAULT="/data/extensions"
-EXTENSIONS_BOOTSTRAP_STATE_DIR="/data/.state"
-EXTENSIONS_BOOTSTRAP_MARKER="${EXTENSIONS_BOOTSTRAP_STATE_DIR}/extensions-bootstrap-v1.done"
-EXTENSIONS_BOOTSTRAP_SAMPLE_FILE="${SCRIPT_DIR}/extensions-bootstrap.txt"
 export PIP_NO_BUILD_ISOLATION="${PIP_NO_BUILD_ISOLATION:-1}"       # Required by some A1111 dependency builds
 
 if [[ -n "${UMASK}" ]]; then
@@ -224,24 +214,6 @@ if [[ -L "${WEBUI_DIR}/repositories" ]]; then
 else
   echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/repositories symlink is missing.${C_RESET}" >&2
   echo "${C_WARN}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
-  exit 1
-fi
-
-# Extension bootstrap destination compatibility:
-# Newer images symlink ${WEBUI_DIR}/extensions -> /data/extensions so no
-# unsupported launch.py flags are needed. On older images without that symlink,
-# fall back to the in-tree extensions path.
-if [[ -L "${WEBUI_DIR}/extensions" ]]; then
-  ext_target="$(readlink "${WEBUI_DIR}/extensions")"
-  if [[ "${ext_target}" != "/data/extensions" ]]; then
-    echo "${C_WARN}[WARNING] ${WEBUI_DIR}/extensions points to ${ext_target}; expected /data/extensions. Using ${WEBUI_DIR}/extensions for bootstrap.${C_RESET}" >&2
-    EXTENSIONS_DIR_DEFAULT="${WEBUI_DIR}/extensions"
-  fi
-elif [[ -d "${WEBUI_DIR}/extensions" ]]; then
-  echo "${C_WARN}[WARNING] ${WEBUI_DIR}/extensions is not symlinked to /data/extensions. Using legacy in-tree extensions directory for this image.${C_RESET}" >&2
-  EXTENSIONS_DIR_DEFAULT="${WEBUI_DIR}/extensions"
-else
-  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} Expected extensions directory not found at ${WEBUI_DIR}/extensions.${C_RESET}" >&2
   exit 1
 fi
 
@@ -698,92 +670,6 @@ is_truthy() {
   esac
 }
 
-bootstrap_extensions_once() {
-  local force_mode="${EXTENSIONS_BOOTSTRAP_FORCE}"
-  local installed_count=0
-  local skipped_count=0
-  local failed_count=0
-  local line repo_url dest_name dest_path
-
-  mkdir -p "${EXTENSIONS_BOOTSTRAP_STATE_DIR}"
-  mkdir -p "${EXTENSIONS_DIR_DEFAULT}"
-
-  if [[ -f "${EXTENSIONS_BOOTSTRAP_SAMPLE_FILE}" && ! -e "${EXTENSIONS_BOOTSTRAP_FILE}" ]]; then
-    cp -f "${EXTENSIONS_BOOTSTRAP_SAMPLE_FILE}" "${EXTENSIONS_BOOTSTRAP_FILE}"
-    echo "${C_INFO}Created extension bootstrap list at ${EXTENSIONS_BOOTSTRAP_FILE}${C_RESET}" >&2
-  fi
-
-  if [[ -f "${EXTENSIONS_BOOTSTRAP_MARKER}" ]] && ! is_truthy "${force_mode}"; then
-    echo "${C_ACCENT}Extension bootstrap already completed previously; skipping one-time extension install.${C_RESET}" >&2
-    return 0
-  fi
-
-  if is_truthy "${force_mode}"; then
-    echo "${C_WARN}Extension bootstrap force mode enabled (EXTENSIONS_BOOTSTRAP_FORCE=${force_mode}); processing list now.${C_RESET}" >&2
-  else
-    echo "${C_INFO}Running one-time extension bootstrap from ${EXTENSIONS_BOOTSTRAP_FILE}${C_RESET}" >&2
-  fi
-
-  if [[ ! -f "${EXTENSIONS_BOOTSTRAP_FILE}" ]]; then
-    echo "${C_WARN}[WARNING] Extension bootstrap list not found: ${EXTENSIONS_BOOTSTRAP_FILE}${C_RESET}" >&2
-    echo "${C_WARN}[WARNING] Continuing startup without extension bootstrap and marking bootstrap as complete.${C_RESET}" >&2
-    touch "${EXTENSIONS_BOOTSTRAP_MARKER}"
-    return 0
-  fi
-
-  while IFS= read -r line || [[ -n "${line}" ]]; do
-    repo_url="${line%%#*}"
-    repo_url="${repo_url%$'\r'}"
-    repo_url="${repo_url%"${repo_url##*[![:space:]]}"}"
-    repo_url="${repo_url#"${repo_url%%[![:space:]]*}"}"
-
-    if [[ -z "${repo_url}" ]]; then
-      continue
-    fi
-
-    if [[ ! "${repo_url}" =~ ^https:// ]]; then
-      echo "${C_WARN}[WARNING] Skipping extension URL (HTTPS required): ${repo_url}${C_RESET}" >&2
-      ((failed_count+=1))
-      continue
-    fi
-
-    dest_name="$(basename "${repo_url}")"
-    dest_name="${dest_name%.git}"
-
-    if [[ -z "${dest_name}" || "${dest_name}" == "." || "${dest_name}" == ".." ]]; then
-      echo "${C_WARN}[WARNING] Could not derive extension directory name from URL: ${repo_url}${C_RESET}" >&2
-      ((failed_count+=1))
-      continue
-    fi
-
-    dest_path="${EXTENSIONS_DIR_DEFAULT}/${dest_name}"
-
-    if [[ -d "${dest_path}" ]]; then
-      echo "${C_ACCENT}Extension already present, skipping clone: ${dest_name}${C_RESET}" >&2
-      ((skipped_count+=1))
-      continue
-    fi
-
-    echo "${C_INFO}Installing extension: ${repo_url}${C_RESET}" >&2
-    if git clone --depth 1 "${repo_url}" "${dest_path}"; then
-      ((installed_count+=1))
-    else
-      echo "${C_WARN}[WARNING] Failed to install extension: ${repo_url}${C_RESET}" >&2
-      echo "${C_WARN}[WARNING] Continuing with next extension.${C_RESET}" >&2
-      rm -rf "${dest_path}" || true
-      ((failed_count+=1))
-    fi
-  done < "${EXTENSIONS_BOOTSTRAP_FILE}"
-
-  touch "${EXTENSIONS_BOOTSTRAP_MARKER}"
-
-  if [[ "${failed_count}" -gt 0 ]]; then
-    echo "${C_WARN}Extension bootstrap finished with warnings: installed=${installed_count}, skipped=${skipped_count}, failed=${failed_count}.${C_RESET}" >&2
-  else
-    echo "${C_INFO}Extension bootstrap complete: installed=${installed_count}, skipped=${skipped_count}, failed=${failed_count}.${C_RESET}" >&2
-  fi
-}
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Build final COMMANDLINE_ARGS with auth flags appended, then launch.
 #
@@ -799,8 +685,6 @@ if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
   done
   export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} ${quoted_auth_args[*]}"
 fi
-
-bootstrap_extensions_once
 
 if [[ -n "${COMMANDLINE_ARGS:-}" ]]; then
   echo "${C_ACCENT}Starting WebUI (COMMANDLINE_ARGS set).${C_RESET}"
