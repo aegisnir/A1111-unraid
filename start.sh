@@ -624,31 +624,20 @@ monitor_webui_output() {
       echo ""
     fi
 
-    # WebUI ready signal — Gradio prints this when the server is accepting connections.
-    # A socket probe confirms the port is live before the banner is printed.
+    # WebUI ready signal — Gradio only prints "Running on local URL" after it has
+    # successfully bound the port, so this line IS the confirmation the UI is live.
+    # No additional probe needed — trusting the upstream signal is simpler and more reliable.
     if [[ "${line}" == *"Running on local URL"* ]]; then
       local _ready_port="7860"
       if [[ "${line}" =~ :([0-9]+)[[:space:]]*$ ]]; then
         _ready_port="${BASH_REMATCH[1]}"
       fi
-      # Probe once; retry after 3 s if the first attempt fails.
-      local _probe_ok=0
-      if python3 -c "import socket; s=socket.socket(); s.settimeout(5); s.connect(('127.0.0.1', ${_ready_port})); s.close()" 2>/dev/null; then
-        _probe_ok=1
-      else
-        sleep 3
-        if python3 -c "import socket; s=socket.socket(); s.settimeout(5); s.connect(('127.0.0.1', ${_ready_port})); s.close()" 2>/dev/null; then
-          _probe_ok=1
-        fi
-      fi
-      if [[ "${_probe_ok}" -eq 1 ]]; then
-        echo ""
-        echo "  ${C_ACCENT}${C_BOLD}┌─ [READY] ───────────────────────────────────────────────────────────┐${C_RESET}"
-        echo "  ${C_ACCENT}${C_BOLD}│  WebUI is LIVE — port ${_ready_port} confirmed accepting connections.         │${C_RESET}"
-        echo "  ${C_ACCENT}${C_BOLD}│  Open: http://<your-unraid-ip>:${_ready_port}/                                │${C_RESET}"
-        echo "  ${C_ACCENT}${C_BOLD}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
-        echo ""
-      fi
+      echo ""
+      echo "  ${C_ACCENT}${C_BOLD}┌─ [READY] ───────────────────────────────────────────────────────────┐${C_RESET}"
+      echo "  ${C_ACCENT}${C_BOLD}│  WebUI is LIVE — open it in your browser:                           │${C_RESET}"
+      echo "  ${C_ACCENT}${C_BOLD}│  http://<your-unraid-ip>:${_ready_port}/                                      │${C_RESET}"
+      echo "  ${C_ACCENT}${C_BOLD}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
+      echo ""
     fi
 
   done
