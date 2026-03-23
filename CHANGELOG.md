@@ -7,6 +7,10 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Authentication behavior update:
+	- removed startup hard-stop for auth files containing password `changeme`
+	- startup now allows first-launch default login `admin:changeme` and logs continue normally
+	- updated README/template/security metadata to document default end-user login behavior and recommended password change after first login
 - Fixes:
 	- included `webui-auth.txt` and `extensions-bootstrap.txt` in the built image so first-run seeding works as documented
 	- fixes startup failure where `WEBUI_AUTH_FILE` could not be auto-seeded because the sample file was missing from the image

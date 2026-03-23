@@ -91,18 +91,18 @@ check_startup_privilege_model() {
 }
 
 check_auth_guardrails() {
-  # Auth is now file-based only. Check that the auth-file changeme guard is present.
-  if grep -q '"changeme"' start.sh && grep -q 'CRITICAL' start.sh && grep -q 'changeme' start.sh; then
-    pass "Auth-file changeme password is blocked at startup"
-  else
-    fail "Auth-file changeme guard missing from start.sh"
-  fi
-
-  # Check that the auth-file is seeded on first launch from the sample file.
+  # Auth is file-based only. Check that first-launch auth-file seeding is present.
   if grep -q 'WEBUI_AUTH_SAMPLE_FILE' start.sh && grep -q 'cp.*WEBUI_AUTH_SAMPLE_FILE.*WEBUI_AUTH_FILE' start.sh; then
     pass "Auth-file first-launch seeding is present"
   else
     fail "Auth-file first-launch seeding missing"
+  fi
+
+  # Check that auth-file presence/content validation is still enforced.
+  if grep -q 'auth file is missing' start.sh && grep -q 'auth file is empty' start.sh && grep -q 'no usable credentials' start.sh; then
+    pass "Auth-file presence and parseability guards are present"
+  else
+    fail "Auth-file presence/parseability guards missing"
   fi
 
   if grep -q 'WEBUI_AUTH_FILE' start.sh && grep -q 'WEBUI_AUTH_FILE' README.md; then

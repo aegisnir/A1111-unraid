@@ -60,15 +60,15 @@ grep -n "id -u\|setpriv\|NoNewPrivs\|CapEff" entrypoint.sh start.sh
 
 ### Authentication guardrails
 
-- [ ] PASS if startup blocks any auth-file entry whose password is `changeme` (auth-file-based guard).
-- [ ] PASS if startup seeds a default auth-file on first launch when the file is missing.
+- [ ] PASS if startup seeds a default auth-file containing `admin:changeme` on first launch when the file is missing.
+- [ ] PASS if startup requires a present, non-empty, parseable auth-file before launch.
 - [ ] PASS if `WEBUI_AUTH_FILE` is supported and documented as the sole supported credential mechanism.
 - [ ] PASS if API auth is not silently left open when WebUI auth is configured (mirror behavior or explicit override required).
 
 Verification command:
 
 ```bash
-grep -n 'changeme\|WEBUI_AUTH_FILE\|api-auth\|gradio-auth\|WEBUI_AUTH_SAMPLE_FILE' start.sh README.md
+grep -n 'WEBUI_AUTH_FILE\|api-auth\|gradio-auth\|WEBUI_AUTH_SAMPLE_FILE\|no usable credentials\|auth file is empty' start.sh README.md
 ```
 
 ### Safety checks and docs consistency

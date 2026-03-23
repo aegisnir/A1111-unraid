@@ -88,10 +88,12 @@ Default seeded credential:
 
 - `admin:changeme`
 
-Critical safety guard:
+Default end-user login (first launch):
 
-- Startup will abort with a **CRITICAL** error if any auth-file entry still uses password `changeme`.
-- You must replace `changeme` with a strong password before WebUI can start.
+- Username: `admin`
+- Password: `changeme`
+
+Startup does not block the default credential. For security, change it as soon as possible after first launch.
 
 Use this variable in the template/container config:
 
@@ -115,6 +117,12 @@ nano /mnt/user/ai/data/auth/webui-auth.txt
 **SMB share:** Unraid serves SMB authenticated with the root/admin password. If you access the share with your Unraid admin credentials, you can read and write `chmod 600` files normally. If the share is configured as **Public** (no auth), the file will appear inaccessible — Samba maps public connections to an unprivileged user that cannot read owner-only files.
 
 **In summary:** Unraid terminal or SSH is the simplest and most reliable method. Authenticated SMB works. Public/anonymous SMB does not.
+
+#### Default login summary for end users
+
+- WebUI login is enabled by default.
+- First-launch default login is `admin` / `changeme`.
+- Recommended first action after login: update `/data/auth/webui-auth.txt` with a strong unique password.
 
 Auth file format (AUTOMATIC1111 compatible):
 

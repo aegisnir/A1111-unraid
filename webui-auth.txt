@@ -2,8 +2,8 @@
 # This file is auto-seeded to /data/auth/webui-auth.txt on first launch if missing.
 #
 # IMPORTANT:
-# - Startup blocks if any credential uses password 'changeme'.
-# - Replace the default password before normal use.
+# - Default first-launch login is admin:changeme.
+# - Replace the default password as soon as possible.
 #
 # Format:
 # - one credential per line as username:password

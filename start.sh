@@ -369,13 +369,6 @@ else
     exit 1
   fi
 
-  if echo "${auth_file_csv}" | tr ',' '\n' | awk -F: 'NF>=2 {if ($2=="changeme") found=1} END {exit(found?0:1)}'; then
-    echo "${C_SCARLET}${C_BOLD}CRITICAL:${C_RESET}${C_SCARLET} Insecure default password detected in ${WEBUI_AUTH_FILE}.${C_RESET}" >&2
-    echo "${C_SCARLET}         The password 'changeme' is blocked for safety and startup is aborted.${C_RESET}" >&2
-    echo "${C_ORANGE}         Update the auth file with a strong unique password and restart the container.${C_RESET}" >&2
-    exit 1
-  fi
-
   AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_FILE}")
   USING_WEBUI_AUTH_FILE=1
   echo "${C_VIOLET}WebUI authentication file is enabled via WEBUI_AUTH_FILE.${C_RESET}" >&2

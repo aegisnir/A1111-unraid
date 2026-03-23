@@ -41,9 +41,8 @@
     <b>Authentication defaults:</b>
     This container uses auth-file based login by default.
     On first launch, startup seeds <b>/data/auth/webui-auth.txt</b> if missing.
-    Seeded default credential: <b>admin:changeme</b>
-    <b>CRITICAL safety check:</b> startup aborts if any credential still uses password <b>changeme</b>.
-    Replace it with a strong password before normal use.
+    <b>Default end-user login (first launch):</b> <b>admin</b> / <b>changeme</b>
+    Startup does not block this default; change it after first login for normal use.
     Use <b>WEBUI_AUTH_FILE</b> to override the auth-file path if needed.
     Recommended auth file path: <b>/data/auth/webui-auth.txt</b>
     Example syntax:
@@ -91,7 +90,7 @@
   -->
   <Config Name="WebUI" Type="Port" Target="7860" Default="7860" Mode="tcp" Display="always" Required="true" Mask="false" Description="Port exposed by the AUTOMATIC1111 WebUI (default: 7860)."/>
   <Config Name="Data Directory" Type="Path" Target="/data" Default="/mnt/user/ai/data/" Mode="rw" Display="always" Required="true" Mask="false" Description="Host path mapped to --data-dir. Default: /mnt/user/ai/data/ (outside appdata)."/>
-  <Config Name="WebUI Auth File" Type="Variable" Target="WEBUI_AUTH_FILE" Default="/data/auth/webui-auth.txt" Display="always" Required="true" Mask="false" Description="Path inside the container to an AUTOMATIC1111 auth file (recommended/default: /data/auth/webui-auth.txt). If the file is missing on first launch, startup seeds it from the repository default template. Format: username:password per line, or comma-separated entries on one line. Blank lines and # comments are ignored. Startup aborts with CRITICAL if any password is still 'changeme'."/>
+  <Config Name="WebUI Auth File" Type="Variable" Target="WEBUI_AUTH_FILE" Default="/data/auth/webui-auth.txt" Display="always" Required="true" Mask="false" Description="Path inside the container to an AUTOMATIC1111 auth file (recommended/default: /data/auth/webui-auth.txt). If the file is missing on first launch, startup seeds it from the repository default template. Default seeded login is admin:changeme. Format: username:password per line, or comma-separated entries on one line. Blank lines and # comments are ignored. For security, change the default password after first login."/>
   <Config Name="API Auth File Mode" Type="Variable" Target="API_AUTH_FILE_MODE" Default="mirror-webui-file" Display="advanced" Required="false" Mask="false" Description="Controls API authentication when WEBUI_AUTH_FILE is set and API is enabled via --api. 'mirror-webui-file' mirrors the auth file into --api-auth. 'disabled' leaves API auth unset unless you pass your own --api-auth in COMMANDLINE_ARGS."/>
   <Config Name="Extension Bootstrap List" Type="Variable" Target="EXTENSIONS_BOOTSTRAP_FILE" Default="/data/extensions-bootstrap.txt" Display="advanced" Required="false" Mask="false" Description="Path to the one-time extension bootstrap list file. One repository URL per line. On first launch, each extension is cloned from this list; failures are logged and startup continues."/>
   <Config Name="Force Extension Bootstrap" Type="Variable" Target="EXTENSIONS_BOOTSTRAP_FORCE" Default="false" Display="advanced" Required="false" Mask="false" Description="Set to true/1/yes/on to force the extension bootstrap pass on next launch even if it already ran before. Extension bootstrap is fail-open: clone errors are logged and WebUI startup continues."/>
