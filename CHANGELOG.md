@@ -7,6 +7,16 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Appdata split extended — A1111 user config files moved to `/config/a1111/` (appdata):
+	- `config.json` — all Settings tab values, including settings added by extensions via the A1111 opts API
+	- `ui-config.json` — UI component defaults (slider ranges, textbox sizes)
+	- `styles.csv` — saved prompt styles
+	- `config_states/` — extension enable/disable snapshots
+	- Symlinks are created at startup so A1111 finds everything at its expected paths under `/data`
+	- Automatic migration: any existing files/directories at the old `/data/` locations are moved on first start with the new image; appdata copy wins if both exist
+	- Extension-specific standalone state files (e.g. civitai browser favourites/ban lists) remain under `/data/extensions/<name>/` — covered by `/data` persistence, not appdata backup
+	- Combined with the existing auth file split, the full `/data` volume can now be wiped and the container rebuilt without losing any settings; only models need to be re-downloaded
+
 - Image: added `build-essential` and `python3-dev` to the base image apt packages so that Python extensions requiring C/C++ compilation (e.g. `hnswlib` used by `sd-webui-infinite-image-browsing`) build successfully without needing `IIB_SKIP_OPTIONAL_DEPS=1`
 
 - Console output revisions:

@@ -143,7 +143,7 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
   && rm -rf "${WEBUI_DIR}/repositories" \
   && ln -s /data/repositories "${WEBUI_DIR}/repositories" \
   && rm -rf "${WEBUI_DIR}/config_states" \
-  && ln -s /data/config_states "${WEBUI_DIR}/config_states" \
+  && ln -s /config/a1111/config_states "${WEBUI_DIR}/config_states" \
   && rm -rf "${WEBUI_DIR}/extensions" \
   && ln -s /data/extensions "${WEBUI_DIR}/extensions" \
   && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
@@ -152,7 +152,7 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
 # The actual contents are bind-mounted from the host (appdata on Unraid);
 # this just ensures the mount point exists and has correct ownership in the
 # image so the read-only container filesystem doesn't cause confusion.
-RUN mkdir -p /config && chown sdwebui:sdwebui /config
+RUN mkdir -p /config/a1111 && chown -R sdwebui:sdwebui /config
 
 # Overlay the custom launch.py wrapper that redacts sensitive CLI arguments
 # (--gradio-auth, --gradio-auth-path, --api-auth, --api-auth-path) from

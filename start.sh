@@ -63,7 +63,7 @@ VENV_PYTHON="${VENV_DIR}/bin/python"                               # Absolute pa
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"            # Marker file: first-run pip install already done
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"  # PyPI extra index for CUDA wheels
 RUNTIME_REPOS_DIR="/data/repositories"                             # Persistent upstream sub-repos (e.g. k-diffusion)
-RUNTIME_CONFIG_STATES_DIR="/data/config_states"                    # Persistent extension state snapshots
+RUNTIME_CONFIG_STATES_DIR="/config/a1111/config_states"            # Persistent extension state snapshots (in appdata)
 MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"             # Abort first-run if /data has less than this free
 TORCH_VERSION="${TORCH_VERSION:-2.7.0}"                            # Pinned version — update alongside CUDA base image
 TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
@@ -146,7 +146,6 @@ cd "${WEBUI_DIR}"
 
 mkdir -p "${VENV_DIR}"
 mkdir -p "${RUNTIME_REPOS_DIR}"
-mkdir -p "${RUNTIME_CONFIG_STATES_DIR}"
 mkdir -p "${TMPDIR}"
 mkdir -p "${PIP_CACHE_DIR}"
 # Ensure standard data subtrees exist so the WebUI finds expected paths on a
@@ -156,6 +155,49 @@ mkdir -p /data/models/VAE
 mkdir -p /data/models/Lora
 mkdir -p /data/outputs
 mkdir -p /config/auth
+mkdir -p /config/a1111
+
+# ── Appdata symlinks ──────────────────────────────────────────────────────────
+# A1111 writes config.json, ui-config.json, styles.csv, and config_states/ under
+# /data by default. We redirect them to /config/a1111 via symlinks so they live
+# in appdata, are included in CA Backup, and survive a /data wipe or rebuild.
+#
+# All extension settings that use the A1111 opts API (visible in the Settings tab)
+# are stored in config.json and are therefore covered here. Extension-specific
+# standalone files (e.g. civitai browser favourites/ban lists, search history)
+# live inside /data/extensions/<name>/ and survive as long as /data does.
+_ensure_appdata_link() {
+  # _ensure_appdata_link <target-in-/config> <link-in-/data>
+  # Ensures LINK is a symlink pointing to TARGET.
+  # Migration: if LINK is a real file/dir, moves it to TARGET first.
+  # If both exist as real content, TARGET (appdata) wins.
+  local target="$1" link="$2"
+  if [[ -L "${link}" && "$(readlink "${link}")" == "${target}" ]]; then
+    return 0
+  fi
+  [[ -L "${link}" ]] && rm "${link}"
+  if [[ -e "${link}" && ! -e "${target}" ]]; then
+    mv "${link}" "${target}"
+  elif [[ -e "${link}" && -e "${target}" ]]; then
+    rm -rf "${link}"
+  fi
+  ln -sf "${target}" "${link}"
+}
+
+_ensure_appdata_link /config/a1111/config.json    /data/config.json
+_ensure_appdata_link /config/a1111/ui-config.json /data/ui-config.json
+_ensure_appdata_link /config/a1111/styles.csv     /data/styles.csv
+
+# config_states: migrate from /data if upgrading from a pre-appdata-split image
+if [[ -d "/data/config_states" && ! -L "/data/config_states" ]]; then
+  echo "${C_WARN}Migrating /data/config_states -> /config/a1111/config_states${C_RESET}" >&2
+  if [[ ! -d "/config/a1111/config_states" ]]; then
+    mv /data/config_states /config/a1111/config_states
+  else
+    rm -rf /data/config_states
+  fi
+fi
+mkdir -p "${RUNTIME_CONFIG_STATES_DIR}"
 
 available_kb="$(df -Pk /data | awk 'NR==2 {print $4}')"
 if [[ -z "${available_kb}" || ! "${available_kb}" =~ ^[0-9]+$ ]]; then
