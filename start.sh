@@ -638,6 +638,19 @@ _poll_for_ready() {
     _port="${BASH_REMATCH[1]}"
   fi
 
+  # Determine the host IP via the default gateway entry in /proc/net/route.
+  # In Docker bridge networking the gateway IS the host (Unraid server).
+  # The Gateway field is a little-endian hex 32-bit value — decode it without
+  # any external tools by parsing byte pairs right-to-left.
+  local _host_ip=""
+  local _gw_hex
+  _gw_hex="$(awk 'NR>1 && $2=="00000000" {print $3; exit}' /proc/net/route 2>/dev/null || true)"
+  if [[ "${#_gw_hex}" -eq 8 ]]; then
+    _host_ip="$(printf '%d.%d.%d.%d' \
+      "0x${_gw_hex:6:2}" "0x${_gw_hex:4:2}" \
+      "0x${_gw_hex:2:2}" "0x${_gw_hex:0:2}")"
+  fi
+
   local _timeout=600   # Give up after 10 min (matches HEALTHCHECK start-period)
   local _interval=5    # Poll every 5 s
   local _elapsed=0
@@ -648,10 +661,16 @@ _poll_for_ready() {
     # /dev/tcp is a bash built-in — opens a TCP connection without any external binary
     # shellcheck disable=SC2188
     if (: < /dev/tcp/127.0.0.1/"${_port}") 2>/dev/null; then
+      local _url
+      if [[ -n "${_host_ip}" ]]; then
+        _url="http://${_host_ip}:${_port}/"
+      else
+        _url="http://<unraid-ip>:${_port}/  (host IP could not be detected)"
+      fi
       echo ""
       echo "  ${C_ACCENT}${C_BOLD}┌─ [READY] ───────────────────────────────────────────────────────────┐${C_RESET}"
       echo "  ${C_ACCENT}${C_BOLD}│  WebUI is LIVE — open it in your browser:                           │${C_RESET}"
-      echo "  ${C_ACCENT}${C_BOLD}│  http://<your-unraid-ip>:${_port}/                                        │${C_RESET}"
+      printf  "  ${C_ACCENT}${C_BOLD}│  %-67s│${C_RESET}\n" "${_url}"
       echo "  ${C_ACCENT}${C_BOLD}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
       return 0
