@@ -208,6 +208,24 @@ else
   exit 1
 fi
 
+# Extension bootstrap destination compatibility:
+# Newer images symlink ${WEBUI_DIR}/extensions -> /data/extensions so no
+# unsupported launch.py flags are needed. On older images without that symlink,
+# fall back to the in-tree extensions path.
+if [[ -L "${WEBUI_DIR}/extensions" ]]; then
+  ext_target="$(readlink "${WEBUI_DIR}/extensions")"
+  if [[ "${ext_target}" != "/data/extensions" ]]; then
+    echo "${C_ORANGE}[WARNING] ${WEBUI_DIR}/extensions points to ${ext_target}; expected /data/extensions. Using ${WEBUI_DIR}/extensions for bootstrap.${C_RESET}" >&2
+    EXTENSIONS_DIR_DEFAULT="${WEBUI_DIR}/extensions"
+  fi
+elif [[ -d "${WEBUI_DIR}/extensions" ]]; then
+  echo "${C_ORANGE}[WARNING] ${WEBUI_DIR}/extensions is not symlinked to /data/extensions. Using legacy in-tree extensions directory for this image.${C_RESET}" >&2
+  EXTENSIONS_DIR_DEFAULT="${WEBUI_DIR}/extensions"
+else
+  echo "${C_SCARLET}${C_BOLD}ERROR:${C_RESET}${C_SCARLET} Expected extensions directory not found at ${WEBUI_DIR}/extensions.${C_RESET}" >&2
+  exit 1
+fi
+
 if [[ ! -x "${VENV_PYTHON}" ]]; then
   echo "${C_VIOLET}Creating persistent Python virtual environment in ${VENV_DIR}${C_RESET}" >&2
   python3 -m venv "${VENV_DIR}"
@@ -653,12 +671,6 @@ if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
     quoted_auth_args+=("$(printf '%q' "${arg}")")
   done
   export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} ${quoted_auth_args[*]}"
-fi
-
-if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--extensions-dir([=[:space:]]|$) ]]; then
-  echo "${C_SILVER}Using user-defined extensions directory from COMMANDLINE_ARGS.${C_RESET}" >&2
-else
-  export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} --extensions-dir ${EXTENSIONS_DIR_DEFAULT}"
 fi
 
 bootstrap_extensions_once

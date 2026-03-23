@@ -14,6 +14,8 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 - Fixes:
 	- included `webui-auth.txt` and `extensions-bootstrap.txt` in the built image so first-run seeding works as documented
 	- fixes startup failure where `WEBUI_AUTH_FILE` could not be auto-seeded because the sample file was missing from the image
+	- removed unsupported `--extensions-dir` launch argument injection (newer A1111 no longer accepts this flag)
+	- image now symlinks `stable-diffusion-webui/extensions` to `/data/extensions` so extension bootstrap remains persistent without extra launch args
 - Security audit and documentation hardening:
 	- updated `scripts/security-check.sh` `check_auth_guardrails` to test current auth-file changeme guard instead of the removed `WEBUI_PASSWORD` variable (previous check always failed after auth refactor)
 	- updated `SECURITY.md` checklist to reference `changeme` auth-file guard instead of stale `changeme-now` WEBUI_PASSWORD reference; updated verification grep command to match
@@ -31,7 +33,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- bootstrap installs extensions into `/data/extensions` and writes persistent completion marker `/data/.state/extensions-bootstrap-v1.done`
 	- bootstrap is fail-open by design: extension clone errors are logged as warnings and startup proceeds to the next entry without blocking WebUI launch
 	- added `EXTENSIONS_BOOTSTRAP_FORCE` to allow manual rerun on demand without reintroducing per-start retry loops
-	- startup now appends `--extensions-dir /data/extensions` automatically unless user already provides `--extensions-dir` in `COMMANDLINE_ARGS`
+	- image maps `stable-diffusion-webui/extensions` to `/data/extensions` so bootstrap-installed extensions load from persistent storage
 	- replaced repository-level `extensions-bootstrap.txt` with a pre-populated, fully commented list compiled from the official `AUTOMATIC1111/stable-diffusion-webui-extensions` index
 	- each extension entry in `extensions-bootstrap.txt` now includes a commented stats line (stars from index snapshot, created date, last updated commit time, added-to-index date, tags)
 	- startup auto-seeds `/data/extensions-bootstrap.txt` from that template on first launch if missing; users uncomment the entries they want

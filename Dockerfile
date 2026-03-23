@@ -139,6 +139,8 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
   && ln -s /data/repositories "${WEBUI_DIR}/repositories" \
   && rm -rf "${WEBUI_DIR}/config_states" \
   && ln -s /data/config_states "${WEBUI_DIR}/config_states" \
+  && rm -rf "${WEBUI_DIR}/extensions" \
+  && ln -s /data/extensions "${WEBUI_DIR}/extensions" \
   && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
 
 # ------------------------------------------------------------------------------

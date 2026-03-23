@@ -230,7 +230,7 @@ Manual rerun:
 
 Notes:
 
-- By default, startup appends `--extensions-dir /data/extensions` unless you already provide your own `--extensions-dir` in `COMMANDLINE_ARGS`.
+- By default, image build maps `stable-diffusion-webui/extensions` to `/data/extensions`, so bootstrap-installed extensions load from persistent storage without extra launch args.
 - Extension bootstrap clones the latest remote HEAD at bootstrap time; no commit pinning is enforced by default.
 
 ### HTTPS / TLS options
