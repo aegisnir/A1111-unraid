@@ -100,6 +100,8 @@ RUN apt-get update \
       python3-setuptools \
       python3-venv \
       python3-pip \
+      python3-dev \
+      build-essential \
       libglib2.0-0 \
       libsm6 \
       libxrender1 \

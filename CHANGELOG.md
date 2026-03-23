@@ -7,6 +7,8 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Image: added `build-essential` and `python3-dev` to the base image apt packages so that Python extensions requiring C/C++ compilation (e.g. `hnswlib` used by `sd-webui-infinite-image-browsing`) build successfully without needing `IIB_SKIP_OPTIONAL_DEPS=1`
+
 - Console output revisions:
 	- Color detection changed from `[[ -t 2 ]]` tty guard to always-on ANSI; suppress with `NO_COLOR=1` or `TERM=dumb` (the tty check returned false in Docker when no TTY is attached, which is the normal case in Unraid's log viewer — all colors were being stripped silently)
 	- `C_INFO` changed from `\e[95m` (bright magenta, rendered poorly or invisibly in some terminals) to `\e[35m` (regular magenta/violet, reliably visible)
