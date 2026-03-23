@@ -65,6 +65,7 @@ TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
 XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.30}"
 WEBUI_AUTH_FILE_DEFAULT="/data/auth/webui-auth.txt"
 WEBUI_AUTH_FILE="${WEBUI_AUTH_FILE:-${WEBUI_AUTH_FILE_DEFAULT}}"
+WEBUI_AUTH_RUNTIME_FILE="/data/auth/.webui-auth.runtime.txt"
 API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-mirror-webui-file}"
 UMASK="${UMASK:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -353,6 +354,30 @@ print(','.join(entries))
 PY
 }
 
+write_runtime_auth_file() {
+  local source_auth_file="$1"
+  local runtime_auth_file="$2"
+  python3 - <<'PY' "${source_auth_file}" "${runtime_auth_file}"
+import sys
+from pathlib import Path
+
+src = Path(sys.argv[1])
+dst = Path(sys.argv[2])
+entries = []
+
+for raw_line in src.read_text(encoding='utf-8').splitlines():
+  line = raw_line.strip()
+  if not line or line.startswith('#'):
+    continue
+  for cred in line.split(','):
+    cred = cred.strip()
+    if cred:
+      entries.append(cred)
+
+dst.write_text("\n".join(entries) + "\n", encoding='utf-8')
+PY
+}
+
 if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth([=[:space:]]|$) ]]; then
   echo "${C_VIOLET}WebUI authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
 elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth-path([=[:space:]]|$) ]]; then
@@ -396,7 +421,12 @@ else
     exit 1
   fi
 
-  AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_FILE}")
+  # Gradio auth-path parsing is strict and can crash on comments/blank lines.
+  # Build a sanitized runtime auth file with only username:password entries.
+  write_runtime_auth_file "${WEBUI_AUTH_FILE}" "${WEBUI_AUTH_RUNTIME_FILE}"
+  chmod 600 "${WEBUI_AUTH_RUNTIME_FILE}" 2>/dev/null || true
+
+  AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_RUNTIME_FILE}")
   USING_WEBUI_AUTH_FILE=1
   echo "${C_VIOLET}WebUI authentication file is enabled via WEBUI_AUTH_FILE.${C_RESET}" >&2
 fi

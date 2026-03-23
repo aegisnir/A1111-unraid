@@ -17,6 +17,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- removed unsupported `--extensions-dir` launch argument injection (newer A1111 no longer accepts this flag)
 	- image now symlinks `stable-diffusion-webui/extensions` to `/data/extensions` so extension bootstrap remains persistent without extra launch args
 	- added auth-file credential format validation in startup to fail fast with a clear CRITICAL error instead of Gradio `IndexError` on malformed entries
+	- startup now writes a sanitized runtime auth file (comments/blank lines removed) before passing `--gradio-auth-path`, preventing Gradio `IndexError` from commented auth templates
 - Security audit and documentation hardening:
 	- updated `scripts/security-check.sh` `check_auth_guardrails` to test current auth-file changeme guard instead of the removed `WEBUI_PASSWORD` variable (previous check always failed after auth refactor)
 	- updated `SECURITY.md` checklist to reference `changeme` auth-file guard instead of stale `changeme-now` WEBUI_PASSWORD reference; updated verification grep command to match
