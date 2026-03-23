@@ -64,8 +64,9 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- template defaults were corrected to keep least-privilege hardening while preserving required startup operations: `--cap-drop=ALL` plus `--cap-add=CHOWN,FOWNER,SETUID,SETGID`
 - Console color palette:
 	- added ANSI color output to `start.sh` and `entrypoint.sh` for terminal sessions (plain in log files via `[[ -t 2 ]]` guard)
-	- color scheme: **violet** (`\e[95m`) for informational/safe-to-ignore messages; **orange** (`\e[93m`) for caution/warnings; **scarlet** (`\e[91m`) for critical errors; **silver** (`\e[37m`) for structural chrome (borders, labels, dim text)
-	- applied consistently: ERROR lines → scarlet+bold label; WARNING lines → orange; auth/ready/venv notices → violet; borders, free-space, UMASK → silver
+	- color scheme: **violet** (`\e[95m`) for informational; **orange** (`\e[93m`) for caution/warnings; **scarlet** (`\e[91m`) for critical errors; **cyan** (`\e[96m`) for accent/highlights (URLs, borders, structural chrome)
+	- color variables use semantic names (`C_INFO`, `C_WARN`, `C_CRIT`, `C_ACCENT`) so code intent is self-documenting regardless of actual ANSI color
+	- applied consistently: ERROR lines → C_CRIT+bold label; WARNING lines → C_WARN; auth/ready/venv notices → C_INFO; borders, URLs, highlights → C_ACCENT
 	- `print_launch_notice` banner and all inline annotation boxes (`[NOTE]`, `[KNOWN WARNING]`, `[GPU MEMORY ERROR]`, `[GPU NOT DETECTED]`, `[READY]`) are fully color-coded
 	- `entrypoint.sh` uses the same palette for its ownership/permission repair notices
 - Console output improvements:
@@ -98,6 +99,15 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- aligned bootstrap dependency targets with upstream `AUTOMATIC1111` `dev` expectations
 	- pinned `torch`, `torchvision`, and `xformers` as an explicit tested set
 	- added installed-version logging and a dependency sanity check
+- Docker healthcheck:
+	- added `HEALTHCHECK` instruction to Dockerfile with conservative timers tuned for A1111 workloads
+	- 10 min start-period grace for first-run bootstrap, 2 min interval, 30 s timeout, 5 retries
+	- requires ~12 min of total unresponsiveness to flag unhealthy — avoids false positives from model loading, extension installs, image browser, etc.
+	- healthcheck is informational only; Docker/Unraid will not auto-restart the container
+- Code quality:
+	- both shell scripts pass `shellcheck` cleanly (fixed SC2295 quoting bug, suppressed SC2317 false positives on trap callbacks, fixed SC2015 `A && B || C` pattern)
+	- removed unused `_original_start` variable from `launch.py`
+	- updated template.xml and README to document healthcheck behavior and tuning rationale
 	- relaxed the sanity check to accept valid CUDA local version suffixes such as `+cu126`
 	- made `xformers` truly optional in sanity checks so startup does not fail when it is unavailable
 - Authentication/security defaults:

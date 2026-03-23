@@ -68,7 +68,6 @@ def main() -> None:
 
     # Replace the default start() with our redacted version so the "Launching
     # Web UI with arguments: ..." log line never leaks credentials.
-    _original_start = launch_utils.start  # noqa: F841 — kept for reference if future patching needs it
 
     def redacted_start():
         mode = "API server" if "--nowebui" in sys.argv else "Web UI"

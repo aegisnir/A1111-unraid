@@ -180,14 +180,31 @@ EXPOSE 7860
 
 # ------------------------------------------------------------------------------
 # Healthcheck
-# Checks if something is listening on localhost:7860.
-# This is a lightweight signal, not a full correctness check.
-# In other words, it can help detect obvious startup failures, but it should not
-# be treated as proof that the application is healthy, safe, authenticated, or
-# functioning correctly for every request path.
+# Probes whether the Gradio HTTP server is accepting TCP connections on :7860.
+# This is a lightweight liveness signal, not a correctness check — a healthy
+# status only means "something answered on the port," not that the app is
+# fully functional or authenticated.
+#
+# Timer rationale (tuned for A1111 on Unraid):
+#   --start-period 600s   First-run bootstrap installs ~4 GB of Python deps;
+#                         10 min grace avoids false-unhealthy during that window.
+#   --interval     120s   Check every 2 min — frequent enough to catch crashes,
+#                         rare enough to not spam during model loads.
+#   --timeout       30s   Model swaps and extension installs can briefly stall
+#                         the event loop; 30 s absorbs transient pauses.
+#   --retries        5    Requires 5 consecutive failures (~10+ min of total
+#                         unresponsiveness) before marking unhealthy, which
+#                         virtually eliminates false positives from normal
+#                         heavy operations (model loading, image browser, etc.).
+#
+# Net effect: the container must be completely unresponsive for roughly
+# 12–13 minutes straight before Docker/Unraid flips the status to unhealthy.
+# Normal heavy workloads (ControlNet preprocessors, batch generation,
+# thousands of thumbnails) do NOT block the HTTP server that long because
+# Gradio handles requests in separate threads.
 # ------------------------------------------------------------------------------
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD python3 -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 7860)); s.close()" || exit 1
+HEALTHCHECK --interval=120s --timeout=30s --start-period=600s --retries=5 \
+  CMD python3 -c "import socket; s=socket.socket(); s.settimeout(5); s.connect(('127.0.0.1', 7860)); s.close()" || exit 1
 
 
 # Strip all SUID/SGID bits from binaries so no binary in the image can

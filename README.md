@@ -374,12 +374,26 @@ If you use `--read-only`, expect to provide explicit writable mounts for anythin
 - The container will refuse to start as root (UID 0) for safety.
 - All SUID/SGID bits are removed from binaries at build time to prevent privilege escalation via legacy system tools.
 
+### Docker Healthcheck
+
+The image includes a built-in `HEALTHCHECK` that probes whether the Gradio HTTP server is accepting TCP connections on port 7860. The timers are tuned conservatively for A1111 workloads:
+
+| Setting | Value | Why |
+|---|---|---|
+| `--start-period` | 10 min | First-run bootstrap installs ~4 GB of Python deps |
+| `--interval` | 2 min | Enough to catch crashes without spamming during model loads |
+| `--timeout` | 30 s | Absorbs brief pauses during model swaps and extension installs |
+| `--retries` | 5 | Requires ~12 min of total unresponsiveness before marking unhealthy |
+
+**Important:** Unhealthy status is **informational only**. Docker/Unraid will not auto-restart the container — it just shows a red dot vs green dot. Normal heavy operations (model loading, ControlNet preprocessing, image browser scanning thousands of files) do **not** cause false positives because Gradio handles HTTP requests in separate threads.
+
 ## Operational notes
 
 - Anyone who can reach the WebUI port may be able to interact with it.
 - Host networking, public exposure, and relaxed runtime settings all change the risk profile.
 - Models, extensions, and other third-party content should be treated as untrusted inputs.
 - A healthy container only means the service responded on the expected port. It does **not** prove the application is safe or fully working.
+- The built-in Docker healthcheck uses conservative timers (10 min start grace, 5 retries at 2 min intervals) to avoid false positives during heavy operations like model loading or extension installs.
 
 ## Troubleshooting
 
@@ -453,8 +467,11 @@ chmod 775 /mnt/user/ai/data
 ```
 
 ### The container is unhealthy
-- Check whether the application is still listening on the configured port.
-- If you changed the port, make sure the healthcheck assumptions still match the runtime behavior.
+- The Dockerfile includes a TCP healthcheck on port 7860. It is deliberately generous: 10-minute start grace, 2-minute interval, 30-second timeout, 5 retries. The container must be completely unresponsive for ~12 minutes straight before Docker marks it unhealthy.
+- Normal heavy operations (model loading, extension installs, image browser scanning) do **not** cause false positives because Gradio handles HTTP in separate threads.
+- Unhealthy status is informational only — Docker/Unraid will **not** auto-restart the container unless you configure a restart policy that acts on health state.
+- If you see unhealthy status, check the container logs for crash output.
+- If you changed the port in `COMMANDLINE_ARGS`, the healthcheck still probes 7860. Either keep the default port or rebuild the image with a matching `HEALTHCHECK`.
 
 ## Using the dev branch
 

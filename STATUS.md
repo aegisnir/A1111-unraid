@@ -35,10 +35,21 @@ Last updated: 2026-03-23
   - local-only folders (`.venv`, `.tmp-data`) cleaned up and ignored
 - Log credential redaction:
   - custom `launch.py` wrapper redacts `--gradio-auth`, `--gradio-auth-path`, `--api-auth`, and `--api-auth-path` values from startup log output (values appear as `<redacted>`)
+- Docker healthcheck:
+  - `HEALTHCHECK` instruction with conservative timers tuned for A1111 workloads (10 min start grace, 2 min interval, 30 s timeout, 5 retries)
+  - requires ~12 min of total unresponsiveness to flag unhealthy; avoids false positives from model loading, extension installs, etc.
+  - documented in Dockerfile, README, and template.xml
+- Console output:
+  - semantic color palette: `C_INFO` (violet), `C_WARN` (orange), `C_CRIT` (scarlet), `C_ACCENT` (cyan)
+  - variable names describe intent, not color — code is self-documenting
+  - pre-launch banner with model count, first-run notice, known-warnings table, and access URL
+  - inline annotations for known noisy messages (`[NOTE]`, `[KNOWN WARNING]`, `[READY]`, etc.)
+- Code quality:
+  - both shell scripts pass `shellcheck` cleanly
+  - removed dead code (`_original_start` in launch.py, unused `C_BOLD` in entrypoint.sh)
 
 ## In Progress
 
-- Final documentation polish and consistency checks across README/template/changelog wording.
 - End-to-end Unraid validation cycle (fresh install, restart, recreate, upgrade simulation).
 
 ## Remaining
@@ -48,10 +59,12 @@ Last updated: 2026-03-23
   - model load + generation
   - recreate/persistence
   - rebuild/upgrade simulation
-- Commit pending local documentation/template edits after final review.
 - Decide release posture:
   - continue local-image workflow, or
   - publish image/tag and re-point template repository for broader distribution.
+- Potential future improvements:
+  - GitHub Actions CI workflow for automated build/lint/security checks
+  - template.xml audit against Unraid CA App Store requirements
 
 ## Notes
 

@@ -24,14 +24,18 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────────────────────────────
 # Color palette
 # ─────────────────────────────────────────────────────────────────────────────
-# Mirror start.sh color conventions. Only emit ANSI sequences when stderr is
-# a terminal; stay plain when output is piped to a log file.
+# C_INFO   (violet)  → informational / status messages
+# C_WARN   (orange)  → caution / warnings that need attention but are not fatal
+# C_CRIT   (scarlet) → critical errors requiring user action
+# C_ACCENT (cyan)    → accent / highlights (URLs, commands, structural chrome)
+# Only emit ANSI sequences when stderr is a terminal; stay plain when output
+# is piped to a log file.
 
 if [[ -t 2 ]]; then
   C_RESET=$'\e[0m'
-  C_SILVER=$'\e[37m'; C_VIOLET=$'\e[95m'; C_ORANGE=$'\e[93m'; C_SCARLET=$'\e[91m'
+  C_ACCENT=$'\e[96m'; C_INFO=$'\e[95m'; C_WARN=$'\e[93m'; C_CRIT=$'\e[91m'
 else
-  C_RESET='' C_SILVER='' C_VIOLET='' C_ORANGE='' C_SCARLET=''
+  C_RESET='' C_ACCENT='' C_INFO='' C_WARN='' C_CRIT=''
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -66,11 +70,11 @@ print_runtime_diagnostics() {
     cap_eff="${cap_eff:-unknown}"
   fi
 
-  echo "${C_SILVER}[entrypoint] Runtime diagnostics: uid=$(id -u) gid=$(id -g) NoNewPrivs=${no_new_privs} Seccomp=${seccomp_mode} CapEff=${cap_eff}${C_RESET}" >&2
+  echo "${C_ACCENT}[entrypoint] Runtime diagnostics: uid=$(id -u) gid=$(id -g) NoNewPrivs=${no_new_privs} Seccomp=${seccomp_mode} CapEff=${cap_eff}${C_RESET}" >&2
   if [[ "${cap_eff}" == "0000000000000000" ]]; then
-    echo "${C_ORANGE}[entrypoint] CapEff is zero (all capabilities dropped). Add required caps or remove --cap-drop=ALL.${C_RESET}" >&2
+    echo "${C_WARN}[entrypoint] CapEff is zero (all capabilities dropped). Add required caps or remove --cap-drop=ALL.${C_RESET}" >&2
   else
-    echo "${C_ORANGE}[entrypoint] Likely causes: rootless/userns remap, no-new-privileges policy, NFS root-squash, or share ACL/mount restrictions.${C_RESET}" >&2
+    echo "${C_WARN}[entrypoint] Likely causes: rootless/userns remap, no-new-privileges policy, NFS root-squash, or share ACL/mount restrictions.${C_RESET}" >&2
   fi
 }
 
@@ -82,8 +86,8 @@ print_runtime_diagnostics() {
 # aborting, we continue into start.sh which has its own /data writability
 # check and will print detailed remediation steps for the user.
 warn_repair_blocked() {
-  echo "${C_SCARLET}[entrypoint] Automatic /data repair was blocked by the host filesystem or mount policy.${C_RESET}" >&2
-  echo "${C_ORANGE}[entrypoint] Continuing startup so start.sh can print the final remediation steps.${C_RESET}" >&2
+  echo "${C_CRIT}[entrypoint] Automatic /data repair was blocked by the host filesystem or mount policy.${C_RESET}" >&2
+  echo "${C_WARN}[entrypoint] Continuing startup so start.sh can print the final remediation steps.${C_RESET}" >&2
   print_runtime_diagnostics
 }
 
@@ -91,17 +95,17 @@ warn_repair_blocked() {
 # app user. This is unrecoverable — we cannot run the WebUI as root — so we
 # print host-side fix instructions and exit.
 fatal_priv_drop_blocked() {
-  echo "${C_SCARLET}[entrypoint] Cannot drop privileges to uid=${EXPECTED_UID}:gid=${EXPECTED_GID}.${C_RESET}" >&2
-  echo "${C_SCARLET}[entrypoint] This container runtime is blocking user/group switching (setuid/setgid).${C_RESET}" >&2
+  echo "${C_CRIT}[entrypoint] Cannot drop privileges to uid=${EXPECTED_UID}:gid=${EXPECTED_GID}.${C_RESET}" >&2
+  echo "${C_CRIT}[entrypoint] This container runtime is blocking user/group switching (setuid/setgid).${C_RESET}" >&2
   print_runtime_diagnostics
   echo "" >&2
-  echo "${C_ORANGE}[entrypoint] Host-side actions to resolve:${C_RESET}" >&2
-  echo "${C_SILVER}  1) Ensure the container is not forced into a mode that strips setuid/setgid transitions.${C_RESET}" >&2
-  echo "${C_SILVER}  2) Verify /data is writable by UID 99 on the host (adjust the path to match${C_RESET}" >&2
-  echo "${C_SILVER}     your Unraid container template — check the /data bind-mount path):${C_RESET}" >&2
-  echo "${C_SILVER}       chown nobody:users <your-data-path>${C_RESET}" >&2
-  echo "${C_SILVER}       chmod 775 <your-data-path>${C_RESET}" >&2
-  echo "${C_SILVER}  3) Restart the container after applying the host fixes.${C_RESET}" >&2
+  echo "${C_WARN}[entrypoint] Host-side actions to resolve:${C_RESET}" >&2
+  echo "${C_ACCENT}  1) Ensure the container is not forced into a mode that strips setuid/setgid transitions.${C_RESET}" >&2
+  echo "${C_ACCENT}  2) Verify /data is writable by UID 99 on the host (adjust the path to match${C_RESET}" >&2
+  echo "${C_ACCENT}     your Unraid container template — check the /data bind-mount path):${C_RESET}" >&2
+  echo "${C_ACCENT}       chown nobody:users <your-data-path>${C_RESET}" >&2
+  echo "${C_ACCENT}       chmod 775 <your-data-path>${C_RESET}" >&2
+  echo "${C_ACCENT}  3) Restart the container after applying the host fixes.${C_RESET}" >&2
   exit 1
 }
 
@@ -147,8 +151,8 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
 
   # ── Scenario 1: Wrong owner ──────────────────────────────────────────────
   if [[ "${data_owner_uid}" != "${EXPECTED_UID}" ]]; then
-    echo "${C_ORANGE}[entrypoint] /data is owned by uid=${data_owner_uid}, expected uid=${EXPECTED_UID}.${C_RESET}" >&2
-    echo "${C_ORANGE}[entrypoint] Correcting ownership and permissions under /data...${C_RESET}" >&2
+    echo "${C_WARN}[entrypoint] /data is owned by uid=${data_owner_uid}, expected uid=${EXPECTED_UID}.${C_RESET}" >&2
+    echo "${C_WARN}[entrypoint] Correcting ownership and permissions under /data...${C_RESET}" >&2
 
     # Fix ownership on top-level dir first so the app user can write immediately.
     if ! chown "${EXPECTED_UID}:${EXPECTED_GID}" "${DATA_DIR}"; then
@@ -186,7 +190,7 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
 
-    echo "${C_VIOLET}[entrypoint] /data ownership and permissions corrected. Continuing startup.${C_RESET}" >&2
+    echo "${C_INFO}[entrypoint] /data ownership and permissions corrected. Continuing startup.${C_RESET}" >&2
 
   # ── Scenario 2: Right owner, wrong modes ─────────────────────────────────
   elif [[ ! -w "${DATA_DIR}" || ! -x "${DATA_DIR}" ]]; then
@@ -199,8 +203,8 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
     # We restore mode 775 on /data itself (owner + group can read/write/traverse,
     # others can read/traverse) and then fix any children the same way as the
     # ownership-repair branch above.
-    echo "${C_ORANGE}[entrypoint] /data is owned by the correct user but is not writable/traversable.${C_RESET}" >&2
-    echo "${C_ORANGE}[entrypoint] Restoring mode 775 and fixing permission modes under /data...${C_RESET}" >&2
+    echo "${C_WARN}[entrypoint] /data is owned by the correct user but is not writable/traversable.${C_RESET}" >&2
+    echo "${C_WARN}[entrypoint] Restoring mode 775 and fixing permission modes under /data...${C_RESET}" >&2
 
     if ! chmod 775 "${DATA_DIR}"; then
       warn_repair_blocked
@@ -210,7 +214,7 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
 
-    echo "${C_VIOLET}[entrypoint] /data permissions restored. Continuing startup.${C_RESET}" >&2
+    echo "${C_INFO}[entrypoint] /data permissions restored. Continuing startup.${C_RESET}" >&2
   fi
 fi
 
@@ -222,11 +226,11 @@ fi
 # correctly — there is no intermediate shell process to eat the signal.
 
 if [[ "$(id -u)" == "0" ]]; then
-  echo "${C_SILVER}[entrypoint] /data is healthy. Dropping to unprivileged user (uid=${EXPECTED_UID}).${C_RESET}" >&2
+  echo "${C_ACCENT}[entrypoint] /data is healthy. Dropping to unprivileged user (uid=${EXPECTED_UID}).${C_RESET}" >&2
   exec_as_app_user
 else
   # Already running as the app user (e.g. container started with --user 99:100).
   # No privilege drop needed — exec start.sh directly.
-  echo "${C_SILVER}[entrypoint] Already running as uid=$(id -u). Skipping privilege drop.${C_RESET}" >&2
+  echo "${C_ACCENT}[entrypoint] Already running as uid=$(id -u). Skipping privilege drop.${C_RESET}" >&2
   exec /start.sh
 fi

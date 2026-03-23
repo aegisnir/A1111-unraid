@@ -53,6 +53,12 @@
     <b>Model checkpoint note:</b>
     The default args include <b>--no-download-sd-model</b>. If no checkpoint exists yet, startup can report "No checkpoints found".
     Add a <b>.safetensors</b> or <b>.ckpt</b> file under <b>/data/models/Stable-diffusion</b>.
+
+    <b>Log safety:</b>
+    Sensitive auth flags (<b>--gradio-auth</b>, <b>--gradio-auth-path</b>, <b>--api-auth</b>, <b>--api-auth-path</b>) have their values replaced with <b>&lt;redacted&gt;</b> in startup log output, so logs are safe to share.
+
+    <b>Built-in healthcheck:</b>
+    The image includes a Docker HEALTHCHECK that probes port 7860. It uses generous timers (10 min start grace, 5 retries) to avoid false positives during bootstrap, model loading, or heavy extension operations. Unhealthy status is informational only and does not auto-restart the container.
   </Description>
   <Overview>
   This template is configured for a local test image by default.
@@ -70,6 +76,8 @@
     - If first-start dependency installation fails, remove /data/venv and retry after rebuilding the image so the bootstrap can recreate a clean environment.
     - WebUI login is enabled by default unless you explicitly set your own --gradio-auth or --gradio-auth-path in COMMANDLINE_ARGS.
     - If you delete the host data directory and Docker recreates it as root, the container self-heals ownership automatically on next start.
+    - Container logs annotate known harmless warnings inline (timm, TypedStorage, missing checkpoints) and display a [READY] box when the WebUI is accepting connections.
+    - A built-in Docker healthcheck monitors port 7860 with conservative timers to avoid false positives during heavy operations.
   </Overview>
   <Category>AI:</Category>
   <WebUI>http://[IP]:[PORT:7860]</WebUI>
