@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-03-23
+> For change history and last updated date, see [git log](../../commits/dev).
 
 ## Completed
 
