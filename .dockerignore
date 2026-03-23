@@ -5,9 +5,20 @@
 # GitHub config
 .github
 
-# Documentation
+# Documentation (not needed in image)
 README.md
 SECURITY.md
+CHANGELOG.md
+CONTRIBUTING.md
+VERSIONING.md
+STATUS.md
+CA_PREFLIGHT_REPORT.md
+
+# Scripts (dev-only, not shipped in image)
+scripts/
+
+# Icon (referenced by URL, not bundled)
+icon.png
 
 # Editor / OS junk
 .DS_Store

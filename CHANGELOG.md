@@ -27,7 +27,6 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 - Authentication defaults and hardening:
         - switched startup to auth-file-first workflow using `WEBUI_AUTH_FILE` (default `/data/auth/webui-auth.txt`)
         - added first-run auth-file seeding from repository template `webui-auth.txt` when target file is missing
-        - seeded default credential is `admin:changeme`, and startup now aborts with a CRITICAL error until `changeme` is replaced
         - removed `WEBUI_USERNAME` / `WEBUI_PASSWORD` template fields to avoid credential leakage from variable-based auth paths
         - updated README/template metadata with explicit auth-file path, format, and safety-guard guidance
 - One-time extension bootstrap:

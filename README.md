@@ -26,7 +26,7 @@ These are the defaults I would start with on a trusted LAN.
 3. Use **Bridge** networking.
 4. Map container port `7860` to a host port of your choice.
 5. Make sure NVIDIA GPU access works on the Unraid host.
-6. Set required template variables (especially replacing the default password placeholder).
+6. Review the default login credentials (`admin` / `changeme`) and change them after first login.
 7. Start the container and access the WebUI from a trusted device on your LAN or through a VPN.
 
 If you build your own image, the Dockerfile tracks upstream `AUTOMATIC1111` `dev` by default via `WEBUI_REF=dev`.

@@ -97,14 +97,14 @@ RUN apt-get update \
       ca-certificates \
       git \
       python3 \
-  python3-setuptools \
+      python3-setuptools \
       python3-venv \
       python3-pip \
-  libglib2.0-0 \
-  libsm6 \
-  libxrender1 \
-  libxext6 \
-  libgl1 \
+      libglib2.0-0 \
+      libsm6 \
+      libxrender1 \
+      libxext6 \
+      libgl1 \
  && rm -rf /var/lib/apt/lists/*
 
 # Keep the base image lean and install heavyweight Python dependencies on first
@@ -142,6 +142,11 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
   && rm -rf "${WEBUI_DIR}/extensions" \
   && ln -s /data/extensions "${WEBUI_DIR}/extensions" \
   && chown -R sdwebui:sdwebui "${WEBUI_DIR}"
+
+# Overlay the custom launch.py wrapper that redacts sensitive CLI arguments
+# (--gradio-auth, --api-auth) from startup log output.
+COPY WebUI/launch.py "${WEBUI_DIR}/launch.py"
+RUN chown sdwebui:sdwebui "${WEBUI_DIR}/launch.py"
 
 # ------------------------------------------------------------------------------
 # Copy entrypoint scripts (from this repository)

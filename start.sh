@@ -383,18 +383,13 @@ if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--grad
 elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth-path([=[:space:]]|$) ]]; then
   echo "${C_VIOLET}WebUI authentication file is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
 else
+  # Seed the default auth file on first launch if it does not exist yet.
   if [[ ! -f "${WEBUI_AUTH_FILE}" && -f "${WEBUI_AUTH_SAMPLE_FILE}" ]]; then
     cp "${WEBUI_AUTH_SAMPLE_FILE}" "${WEBUI_AUTH_FILE}"
     chmod 600 "${WEBUI_AUTH_FILE}" 2>/dev/null || true
     echo "${C_ORANGE}Seeded default auth file at ${WEBUI_AUTH_FILE}.${C_RESET}" >&2
   fi
-fi
 
-if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth([=[:space:]]|$) ]]; then
-  echo "${C_VIOLET}WebUI authentication is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
-elif [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth-path([=[:space:]]|$) ]]; then
-  echo "${C_VIOLET}WebUI authentication file is being managed via COMMANDLINE_ARGS.${C_RESET}" >&2
-else
   if [[ ! -f "${WEBUI_AUTH_FILE}" ]]; then
     echo "${C_SCARLET}${C_BOLD}CRITICAL:${C_RESET}${C_SCARLET} WebUI auth file is missing: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
     echo "${C_SCARLET}         Create the auth file or mount it from the host. Recommended path: /data/auth/webui-auth.txt${C_RESET}" >&2

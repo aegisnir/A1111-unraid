@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-03-22
+Last updated: 2026-03-23
 
 ## Completed
 
@@ -17,9 +17,11 @@ Last updated: 2026-03-22
   - free-space checks and clearer startup errors
 - Authentication flow improved:
   - default WebUI login enabled
-  - placeholder password blocking
-  - optional `WEBUI_AUTH_FILE` support
+  - auth-file seeded on first launch (`admin:changeme`); startup does not block the default
+  - `WEBUI_AUTH_FILE` support
   - API auth mirroring behavior controls
+  - runtime auth-file sanitizer prevents Gradio crash on comments/blank lines
+  - credential format validation with clear error messages
 - Documentation and template alignment:
   - local test image default set to `a1111-webui-aegisnir:local`
   - README and template guidance updated for Unraid local-build workflow
@@ -31,6 +33,8 @@ Last updated: 2026-03-22
 - Icon/template updates:
   - template now uses `icon.png`
   - local-only folders (`.venv`, `.tmp-data`) cleaned up and ignored
+- Log credential redaction:
+  - custom `launch.py` wrapper redacts `--gradio-auth` and `--api-auth` values from startup log output
 
 ## In Progress
 
