@@ -16,6 +16,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- fixes startup failure where `WEBUI_AUTH_FILE` could not be auto-seeded because the sample file was missing from the image
 	- removed unsupported `--extensions-dir` launch argument injection (newer A1111 no longer accepts this flag)
 	- image now symlinks `stable-diffusion-webui/extensions` to `/data/extensions` so extension bootstrap remains persistent without extra launch args
+	- added auth-file credential format validation in startup to fail fast with a clear CRITICAL error instead of Gradio `IndexError` on malformed entries
 - Security audit and documentation hardening:
 	- updated `scripts/security-check.sh` `check_auth_guardrails` to test current auth-file changeme guard instead of the removed `WEBUI_PASSWORD` variable (previous check always failed after auth refactor)
 	- updated `SECURITY.md` checklist to reference `changeme` auth-file guard instead of stale `changeme-now` WEBUI_PASSWORD reference; updated verification grep command to match

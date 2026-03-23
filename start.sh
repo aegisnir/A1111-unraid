@@ -387,6 +387,15 @@ else
     exit 1
   fi
 
+  # Validate credential formatting up front so malformed entries fail fast with
+  # a clear message instead of later crashing inside Gradio auth parsing.
+  if echo "${auth_file_csv}" | tr ',' '\n' | awk -F: '($1=="" || $2=="" || NF<2){bad=1} END{exit bad?0:1}'; then
+    echo "${C_SCARLET}${C_BOLD}CRITICAL:${C_RESET}${C_SCARLET} WebUI auth file contains malformed credential entries: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
+    echo "${C_SCARLET}         Expected format is username:password (one per line or comma-separated).${C_RESET}" >&2
+    echo "${C_SCARLET}         Remove trailing commas and ensure every entry includes both username and password.${C_RESET}" >&2
+    exit 1
+  fi
+
   AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_FILE}")
   USING_WEBUI_AUTH_FILE=1
   echo "${C_VIOLET}WebUI authentication file is enabled via WEBUI_AUTH_FILE.${C_RESET}" >&2
