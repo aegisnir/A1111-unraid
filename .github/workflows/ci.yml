@@ -56,6 +56,11 @@ jobs:
         with:
           dockerfile: Dockerfile
           failure-threshold: error
+          # DL3008: Pin versions in apt-get install.
+          # Suppressed: apt version strings are distro-specific and volatile.
+          # The CUDA base image is pinned by digest; stale packages are
+          # mitigated by periodic base-image rebuilds, not apt version pins.
+          ignore: DL3008
 
       - name: Python security scan (bandit)
         # Scans WebUI/launch.py for common Python security issues (unsafe
