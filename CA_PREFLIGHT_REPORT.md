@@ -1,10 +1,10 @@
 # CA Preflight Report
 
-Date: 2026-03-23
+Date: 2026-03-24
 Repository: aegisnir/A1111-unraid
 Branch: dev
 
-Scope note: This report covers the published-image (GHCR) path used for CA readiness checks. The current local testing template default may differ.
+Scope note: This report covers the pre-release (`:dev` / `v1.0.0`) path. `:latest` is not yet published and is deferred until `dev` proves stable in the wild.
 
 ## Gate Summary
 
@@ -24,17 +24,20 @@ Scope note: This report covers the published-image (GHCR) path used for CA readi
 
 ## Blocking Issues
 
-None at this time for the `:dev` tag.
+None at this time for the `:dev` / `v1.0.0` pre-release tag.
 
-The `:latest` tag (`ghcr.io/aegisnir/a1111-webui-aegisnir:latest`) is not yet published.
-Before broad CA submission, publish a `:latest` tag and re-run this report.
+The `:latest` tag (`ghcr.io/aegisnir/a1111-webui-aegisnir:latest`) is intentionally not yet published.
+Release strategy: `dev` branch / `:dev` tag is the pre-release used for real-world testing.
+`main` branch and `:latest` tag will be promoted only after `dev` proves stable.
 
-## Required Before Broad CA Submission
+## Required Before Broad CA Submission (`:latest` / `main` promotion)
 
-1. Publish a valid `:latest` image/tag to GHCR and verify pull works.
-2. Re-run an Unraid template-only fresh install test.
-3. Re-run container recreate/upgrade persistence test for `/data`.
-4. Re-run read-only runtime smoke test on real Unraid.
+1. Confirm `dev` pre-release is stable after real-world user testing.
+2. Merge `dev` → `main`, push `:latest` image to GHCR, and verify pull works.
+3. Re-run an Unraid template-only fresh install test against `:latest`.
+4. Re-run container recreate/upgrade persistence test for `/data`.
+5. Re-run read-only runtime smoke test on real Unraid.
+6. Submit `template.xml` URL to Unraid CA repository.
 
 ## Suggested Verification Commands
 

@@ -12,7 +12,7 @@
     Image: <b>ghcr.io/aegisnir/a1111-webui-aegisnir:dev</b>
 
     README:
-    <b>https://github.com/aegisnir/A1111-unraid/blob/main/README.md</b>
+    <b>https://github.com/aegisnir/A1111-unraid/blob/dev/README.md</b>
 
     ## Security Hardening Defaults
     The template now sets the following security options by default:
@@ -61,7 +61,7 @@
   <Overview>
   Image: ghcr.io/aegisnir/a1111-webui-aegisnir:dev
   The default Extra Parameters include --runtime=nvidia so Docker can expose the NVIDIA runtime inside the container.
-  Full setup and usage docs: https://github.com/aegisnir/A1111-unraid/blob/main/README.md
+  Full setup and usage docs: https://github.com/aegisnir/A1111-unraid/blob/dev/README.md
 
     This template passes Automatic1111 data storage through --data-dir.
 
@@ -82,7 +82,7 @@
   <Privileged>false</Privileged>
   <Project>https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/dev</Project>
   <Support>https://github.com/aegisnir/A1111-unraid</Support>
-  <Changelog>https://github.com/aegisnir/A1111-unraid/blob/main/CHANGELOG.md</Changelog>
+  <Changelog>https://github.com/aegisnir/A1111-unraid/blob/dev/CHANGELOG.md</Changelog>
   <TemplateURL>https://raw.githubusercontent.com/aegisnir/A1111-unraid/dev/template.xml</TemplateURL>
   <!--
     NOTE: As of March 2026, new installs require the dev branch of AUTOMATIC1111 due to a missing dependency repository. See README for details.

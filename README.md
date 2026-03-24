@@ -1,7 +1,13 @@
 
 # Stable Diffusion WebUI (AUTOMATIC1111) for Unraid
 
-This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, reasonably lightweight, and more security-conscious than a throwaway personal build.
+[![GitHub release](https://img.shields.io/github/v/release/aegisnir/A1111-unraid?include_prereleases&label=release&color=blue)](https://github.com/aegisnir/A1111-unraid/releases)
+[![Image: GHCR](https://img.shields.io/badge/image-ghcr.io-blue?logo=docker)](https://github.com/aegisnir/A1111-unraid/pkgs/container/a1111-webui-aegisnir)
+[![Upstream: AUTOMATIC1111](https://img.shields.io/badge/upstream-AUTOMATIC1111-orange)](https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/dev)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Status: Pre-release](https://img.shields.io/badge/status-pre--release-yellow)](https://github.com/aegisnir/A1111-unraid/releases)
+
+This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, easy to use, and more security-conscious than a throwaway personal build.
 
 This is a personal hobby project. It is heavily AI-assisted, and it is also a learning experience for me. I care a lot about security and I am trying to make thoughtful choices, but I am not a programmer or security expert, so mistakes and weak assumptions are possible. If you notice something I could do better, I welcome constructive feedback.
 
@@ -357,7 +363,24 @@ The image includes a built-in `HEALTHCHECK` that probes whether the Gradio HTTP 
 
 ## Operational notes
 
-- Anyone who can reach the WebUI port may be able to interact with it.
+### Automatic restart
+
+The container automatically restarts the WebUI process if it exits — you do not need to restart the container itself.
+
+- **Apply and quit** (Settings → Apply and restart): the WebUI exits cleanly (code 0). The container waits `RESTART_DELAY` seconds (default 5 s) then relaunches it.
+- **Crash** (non-zero exit): exponential backoff starting at `RESTART_DELAY`, doubling each attempt up to `RESTART_DELAY_MAX` (default 60 s).
+- **Docker stop / Unraid stop container**: sends SIGTERM, which exits the container cleanly without restarting.
+
+Relevant env vars (all optional):
+
+| Variable | Default | Description |
+|---|---|---|
+| `RESTART_ON_EXIT` | `1` | Set to `0` to disable the restart loop |
+| `RESTART_DELAY` | `5` | Seconds to wait before a clean-exit restart |
+| `RESTART_DELAY_MAX` | `60` | Maximum backoff delay for crash restarts |
+| `RESTART_MAX_ATTEMPTS` | `0` | Max restart attempts; `0` = unlimited |
+
+### General
 - Host networking, public exposure, and relaxed runtime settings all change the risk profile.
 - Models, extensions, and other third-party content should be treated as untrusted inputs.
 - A healthy container only means the service responded on the expected port. It does **not** prove the application is safe or fully working.
@@ -443,16 +466,15 @@ chmod 775 /mnt/user/ai/data
 
 ## Using the dev branch
 
+This container tracks the `dev` branch of AUTOMATIC1111. The branch is baked in at image build time via the `WEBUI_REF` build argument (default: `dev`). You do not need to run any git commands inside the container — that is handled automatically when the image is built.
+
 Due to the removal of the original Stable Diffusion repository, you **must** use the `dev` branch of AUTOMATIC1111 for new installs. The `dev` branch includes a fix that points to a maintained fork for required dependencies. If you use the `main` branch, the container will fail to start.
 
-To update an existing install:
+If you are rebuilding the image and want to pin a specific A1111 commit, pass `WEBUI_REF=<commit-hash>` as a build argument:
 
-1. Enter your WebUI directory.
-2. Run:
-	```bash
-	git switch dev
-	git pull
-	```
+```bash
+docker build --build-arg WEBUI_REF=<commit-hash> -t a1111-webui-aegisnir:local .
+```
 
 ## Maintenance
 

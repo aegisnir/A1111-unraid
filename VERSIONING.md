@@ -27,23 +27,24 @@ If you choose to use something from this repo, I recommend reviewing changes for
 
 ## Tags
 
-The simplest tag I expect to use is:
+The current tagging strategy:
 
-- `latest` — the most recently published version from this repository
+- `:dev` — floating pre-release tag, always points to the latest commit on the `dev` branch. Use this if you want to track development.
+- `:vX.Y.Z` (e.g. `:v1.0.0`) — pinned version tags for specific tested states. Use these if you want reproducibility.
+- `:latest` — stable release tag, promoted from `dev` only after real-world validation. Not yet published.
 
-I may use additional release labels later if they feel useful, but I do not want to maintain a complicated tagging system unless there is a real reason for it.
+`main` branch and `:latest` are frozen until `dev` proves stable.
 
 ---
 
-## Optional version labels
+## Version labels
 
-If I end up using explicit release labels, they will likely be simple labels such as:
+I use simple semantic-style version labels:
 
-- `v1`
-- `v2`
-- `v3`
+- `v1.0.0`, `v1.1.0`, `v2.0.0`, etc.
 
-These labels would only be there to help refer to a specific published state. They should not be read as a promise of formal support, extended maintenance, or comprehensive testing.
+These are not a promise of SemVer compatibility or formal support.
+They are just a way to refer to a specific tested state.
 
 ---
 

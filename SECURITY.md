@@ -82,7 +82,7 @@ grep -n 'WEBUI_AUTH_FILE\|api-auth\|gradio-auth\|WEBUI_AUTH_SAMPLE_FILE\|no usab
 - [ ] PASS if README, template, and changelog describe the same hardening defaults.
 - [ ] PASS if Dockerfile HEALTHCHECK is present with a start-period of at least 300s.
 
-### Current baseline (as of 2026-03-23)
+### Current baseline (as of 2026-03-24)
 
 - Runtime hardening defaults: PASS
 - Startup privilege model: PASS

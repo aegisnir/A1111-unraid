@@ -10,6 +10,73 @@
   - `no-new-privileges`
   - `cap-drop=ALL` + minimal `cap-add` set (`CHOWN`, `FOWNER`, `SETUID`, `SETGID`)
   - default `--pids-limit=2048` with tuning guidance
+- Automatic WebUI restart loop:
+  - container restarts the WebUI process automatically on crash or clean exit ("Apply and quit")
+  - SIGTERM from Docker stop/Unraid exits the container cleanly without restart
+  - crash (non-zero exit): exponential backoff up to `RESTART_DELAY_MAX`
+  - clean exit (code 0): flat `RESTART_DELAY` before restart
+  - configurable via: `RESTART_ON_EXIT`, `RESTART_DELAY`, `RESTART_DELAY_MAX`, `RESTART_MAX_ATTEMPTS`
+- Appdata/data split:
+  - `/config/a1111/` holds A1111 config files (config.json, ui-config.json, styles.csv, config_states) — backed up with appdata
+  - `/data/` holds models, outputs, venv, extensions — large working set, outside appdata
+  - auth file at `/config/auth/webui-auth.txt`
+  - symlinks created at startup so A1111 finds everything at expected paths
+  - automatic migration from old `/data/` paths on first start with new image
+- Startup/bootstrap flow hardened:
+  - persistent `/data/venv` and `/data/repositories`
+  - read-only-safe symlink validation
+  - free-space checks and clearer startup errors
+  - `build-essential` + `python3-dev` in base image so C extension builds (e.g. hnswlib) work without workarounds
+- Authentication flow improved:
+  - default WebUI login enabled; auth-file seeded on first launch (`admin:changeme`)
+  - `WEBUI_AUTH_FILE` support
+  - API auth mirroring behavior controls
+  - runtime auth-file sanitizer prevents Gradio crash on comments/blank lines
+  - credential format validation with clear error messages
+- Documentation and template:
+  - template defaults to `ghcr.io/aegisnir/a1111-webui-aegisnir:dev`
+  - README Quick Start updated with manual template import instructions (not yet in CA)
+  - all `blob/main/` links in template.xml corrected to `blob/dev/`
+  - explicit notes for expected `No checkpoints found` behavior with `--no-download-sd-model`
+- Licensing/docs added:
+  - MIT repo license
+  - AGPL copy and third-party notices included
+- Log credential redaction:
+  - custom `launch.py` wrapper redacts sensitive auth flag values from log output
+- Docker healthcheck:
+  - `HEALTHCHECK` with conservative timers (10 min start grace, 2 min interval, 30 s timeout, 5 retries)
+- Console output:
+  - semantic color palette, pre-launch banner, inline annotations for known noisy messages
+  - independent background port poller for `[READY]` banner
+- Code quality:
+  - both shell scripts pass `shellcheck` cleanly
+- Pre-release security audit: all findings fixed (27/27 checks pass)
+- Release posture decided:
+  - `v1.0.0` pre-release on `dev` branch
+  - `main` and `:latest` frozen pending real-world validation
+
+## In Progress
+
+- Real-world validation of `v1.0.0` pre-release by users on Aether and beyond.
+
+## Remaining
+
+- Confirm `dev` pre-release is stable before promoting to `main` / `:latest`.
+- CA App Store submission (deferred until `:latest` is ready).
+- Potential future improvements:
+  - GitHub Actions CI workflow for automated build/lint/security checks
+
+## Notes
+
+- Published image: `ghcr.io/aegisnir/a1111-webui-aegisnir:dev` and `:v1.0.0`
+- For production-style deployments, use `WEBUI_AUTH_FILE` when possible and treat logs as sensitive.
+
+- Container/runtime hardening implemented and documented:
+  - read-only root filesystem
+  - tmpfs for `/tmp`
+  - `no-new-privileges`
+  - `cap-drop=ALL` + minimal `cap-add` set (`CHOWN`, `FOWNER`, `SETUID`, `SETGID`)
+  - default `--pids-limit=2048` with tuning guidance
 - Startup/bootstrap flow hardened:
   - persistent `/data/venv`
   - persistent `/data/repositories`
@@ -71,9 +138,3 @@
 - Potential future improvements:
   - GitHub Actions CI workflow for automated build/lint/security checks
   - template.xml audit against Unraid CA App Store requirements
-
-## Notes
-
-- Current local testing assumes users build on Unraid with:
-  - image: `a1111-webui-aegisnir:local`
-- For production-style deployments, use `WEBUI_AUTH_FILE` when possible and treat logs as sensitive.
