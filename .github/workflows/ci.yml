@@ -49,9 +49,13 @@ jobs:
         # Catches Dockerfile anti-patterns: unpinned base-image tags, missing
         # --no-install-recommends, insecure shell options, layer ordering, etc.
         # Suppressed rules are documented in .hadolint.yaml.
+        # failure-threshold: error — DL3008 (apt version pins) is accepted as a
+        # warning; only ERROR-level findings redden this step. The config file
+        # also sets this threshold but the action is more reliably picked up here.
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
+          failure-threshold: error
 
       - name: Python security scan (bandit)
         # Scans WebUI/launch.py for common Python security issues (unsafe

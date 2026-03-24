@@ -3,6 +3,14 @@
 # decisions or are impractical for this class of image. Each suppression
 # includes an explanation.
 
+# Only Dockerfile errors (not warnings) fail the build. This is intentional:
+# DL3008 (apt version pins) is the only warning produced by this Dockerfile
+# and is explicitly accepted below. New errors will still fail CI.
+# NOTE: the 'ignore' key is broken in hadolint 2.14.0 (config-file parsing
+# regression). The entry below is kept for documentation intent. The
+# failure-threshold above is what actually prevents DL3008 from reddening CI.
+failure-threshold: error
+
 ignore:
   # DL3008: Pin versions in apt-get install (e.g. python3=3.10.x).
   # Apt version strings are distribution-specific, change without notice, and
