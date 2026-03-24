@@ -50,7 +50,8 @@
   - independent background port poller for `[READY]` banner
 - Code quality:
   - both shell scripts pass `shellcheck` cleanly
-- Pre-release security audit: all findings fixed (27/27 checks pass)
+- GitHub Actions CI: automated shellcheck + security baseline checks run on push/PR to `dev` and `main`
+- Pre-release security audit: all findings fixed (26/26 checks pass)
 - Release posture decided:
   - `v1.0.0` pre-release on `dev` branch
   - `main` and `:latest` frozen pending real-world validation
@@ -63,8 +64,6 @@
 
 - Confirm `dev` pre-release is stable before promoting to `main` / `:latest`.
 - CA App Store submission (deferred until `:latest` is ready).
-- Potential future improvements:
-  - GitHub Actions CI workflow for automated build/lint/security checks
 
 ## Notes
 
@@ -101,7 +100,7 @@
   - template now uses `icon.png`
   - local-only folders (`.venv`, `.tmp-data`) cleaned up and ignored
 - Log credential redaction:
-  - custom `launch.py` wrapper redacts `--gradio-auth`, `--gradio-auth-path`, `--api-auth`, and `--api-auth-path` values from startup log output (values appear as `<redacted>`)
+  - custom `launch.py` wrapper redacts `--gradio-auth`, `--gradio-auth-path`, and `--api-auth` values from startup log output (values appear as `<redacted>`)
 - Docker healthcheck:
   - `HEALTHCHECK` instruction with conservative timers tuned for A1111 workloads (10 min start grace, 2 min interval, 30 s timeout, 5 retries)
   - requires ~12 min of total unresponsiveness to flag unhealthy; avoids false positives from model loading, extension installs, etc.
@@ -118,7 +117,7 @@
   - fixed auth file permission race: seed and runtime auth files written under `umask 077` + belt-and-suspenders `chmod 600` for upgrade safety
   - fixed stale "via runuser" comments in Dockerfile (code uses `setpriv`)
   - fixed syntax error in SECURITY.md python3 verification command
-  - `scripts/security-check.sh` expanded from 17 to 27 automated checks (added: shellcheck, HEALTHCHECK presence, SUID strip, log redaction, HTTPS-only URLs, umask protection)
+  - `scripts/security-check.sh` expanded from 17 to 26 automated checks (added: shellcheck, HEALTHCHECK presence, SUID strip, log redaction, HTTPS-only URLs, umask protection)
   - cleaned up stale variable names and clarified superseded items in CHANGELOG
 
 ## In Progress
@@ -136,5 +135,4 @@
   - continue local-image workflow, or
   - publish image/tag and re-point template repository for broader distribution.
 - Potential future improvements:
-  - GitHub Actions CI workflow for automated build/lint/security checks
   - template.xml audit against Unraid CA App Store requirements

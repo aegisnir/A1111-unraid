@@ -35,7 +35,7 @@ def _redact_cli_args(argv):
     To protect a new flag, add it to the sensitive_flags set below.
     """
     redacted = []
-    sensitive_flags = {"--gradio-auth", "--gradio-auth-path", "--api-auth", "--api-auth-path"}
+    sensitive_flags = {"--gradio-auth", "--gradio-auth-path", "--api-auth"}
     i = 0
 
     while i < len(argv):

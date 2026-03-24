@@ -3,7 +3,7 @@ name: CI
 # Runs on every push and pull request to dev or main.
 # The security baseline script (scripts/security-check.sh) is the single
 # source of truth for all checks: bash syntax, shellcheck, XML parse, and
-# the 27 security baseline gates. Keeping this workflow thin ensures the
+# the 26 security baseline gates. Keeping this workflow thin ensures the
 # automated gate stays in sync with what you can run locally.
 
 on:
@@ -31,6 +31,6 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends shellcheck
 
       - name: Security baseline checks
-        # Runs all 27 automated checks and exits non-zero on any failure.
+        # Runs all 26 automated checks and exits non-zero on any failure.
         # Output includes a per-check [PASS]/[FAIL] summary and a final count.
         run: bash scripts/security-check.sh

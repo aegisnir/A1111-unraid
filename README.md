@@ -131,9 +131,9 @@ The file is created with `chmod 600` (owner read/write only). This prevents othe
 nano /mnt/user/appdata/A1111-WebUI-Aegisnir/auth/webui-auth.txt
 ```
 
-**SMB share:** Unraid serves SMB authenticated with the root/admin password. If you access the share with your Unraid admin credentials, you can read and write `chmod 600` files normally. If the share is configured as **Public** (no auth), the file will appear inaccessible — Samba maps public connections to an unprivileged user that cannot read owner-only files.
+**SMB share:** Unraid serves SMB. If you access the share with your Unraid admin credentials, you can read and write `chmod 600` files normally. However, because the container runs as `nobody` (UID 99) and Unraid's Samba guest account is also `nobody` (UID 99), a **Public** or **Secure** share maps anonymous connections to the same UID that owns the auth file — meaning SMB guests can read it. Set the `appdata` share to **Private** if you want to restrict SMB access to this file.
 
-**In summary:** Unraid terminal or SSH is the simplest and most reliable method. Authenticated SMB works. Public/anonymous SMB does not.
+**In summary:** Unraid terminal or SSH is the simplest and most reliable method. Authenticated SMB (Private share) works. The `chmod 600` permission does **not** protect the auth file from SMB access on a Public or Secure share — the Samba guest account maps to the file's owner UID.
 
 #### Default login summary for end users
 
@@ -181,7 +181,7 @@ If `--api-auth` is provided without `--api`, startup logs now warn that API auth
 
 `COMMANDLINE_ARGS` is passed directly to `launch.py`.
 
-> **Log redaction:** Sensitive auth flags (`--gradio-auth`, `--gradio-auth-path`, `--api-auth`, `--api-auth-path`) have their values replaced with `<redacted>` in startup log output. The flag names remain visible so you can confirm they are active.
+> **Log redaction:** Sensitive auth flags (`--gradio-auth`, `--gradio-auth-path`, `--api-auth`) have their values replaced with `<redacted>` in startup log output. The flag names remain visible so you can confirm they are active.
 
 **Default:**
 
@@ -367,7 +367,7 @@ The image includes a built-in `HEALTHCHECK` that probes whether the Gradio HTTP 
 
 The container automatically restarts the WebUI process if it exits — you do not need to restart the container itself.
 
-- **Apply and quit** (Settings → Apply and restart): the WebUI exits cleanly (code 0). The container waits `RESTART_DELAY` seconds (default 5 s) then relaunches it.
+- **Apply and quit** (Extensions tab → Apply and quit): the WebUI exits cleanly (code 0). The container waits `RESTART_DELAY` seconds (default 5 s) then relaunches it.
 - **Crash** (non-zero exit): exponential backoff starting at `RESTART_DELAY`, doubling each attempt up to `RESTART_DELAY_MAX` (default 60 s).
 - **Docker stop / Unraid stop container**: sends SIGTERM, which exits the container cleanly without restarting.
 
