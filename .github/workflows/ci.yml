@@ -59,7 +59,7 @@ jobs:
         # failure-threshold: error — DL3008 (apt version pins) is accepted as a
         # warning; only ERROR-level findings redden this step. The config file
         # also sets this threshold but the action is more reliably picked up here.
-        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
+        uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
         with:
           dockerfile: Dockerfile
           failure-threshold: error
