@@ -76,7 +76,7 @@ jobs:
         # Scans Dockerfile and other config files for known misconfigurations
         # without requiring a built image. Accepted findings with explanatory
         # comments are listed in .trivyignore.
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: config
           scan-ref: .
