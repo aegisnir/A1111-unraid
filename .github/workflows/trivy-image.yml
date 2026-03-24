@@ -13,27 +13,27 @@ name: Trivy Image Scan
 # image with an updated base or patched packages, then re-run to confirm the fix.
 
 on:
-  schedule:
-    - cron: '0 6 * * 1'  # Every Monday at 06:00 UTC
-  workflow_dispatch:       # Allow manual runs from the Actions tab
+    schedule:
+        - cron: "0 6 * * 1" # Every Monday at 06:00 UTC
+    workflow_dispatch: # Allow manual runs from the Actions tab
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  scan:
-    name: CVE Scan (ghcr.io/:dev)
-    runs-on: ubuntu-latest
+    scan:
+        name: CVE Scan (ghcr.io/:dev)
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Scan image for CVEs
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          image-ref: ghcr.io/aegisnir/a1111-webui-aegisnir:dev
-          format: table
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: '0'
+            - name: Scan image for CVEs
+              uses: aquasecurity/trivy-action@0.30.0
+              with:
+                  image-ref: ghcr.io/aegisnir/a1111-webui-aegisnir:dev
+                  format: table
+                  severity: HIGH,CRITICAL
+                  ignore-unfixed: true
+                  exit-code: "0"
