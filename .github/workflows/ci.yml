@@ -2,9 +2,15 @@ name: CI
 
 # Runs on every push and pull request to dev or main.
 # The security baseline script (scripts/security-check.sh) is the single
-# source of truth for all checks: bash syntax, shellcheck, XML parse, and
-# the 26 security baseline gates. Keeping this workflow thin ensures the
-# automated gate stays in sync with what you can run locally.
+# source of truth for the container security gates: bash syntax, shellcheck,
+# XML parse, and the 26 security baseline checks.
+#
+# Additional static analysis steps in this workflow:
+#   hadolint  — Dockerfile best-practices lint (.hadolint.yaml for suppressions)
+#   bandit    — Python security scan of WebUI/launch.py (medium+ severity only)
+#   yamllint  — YAML syntax/style for .github/ files (.yamllint.yml for config)
+#   trivy     — Dockerfile misconfiguration scan (.trivyignore for suppressions)
+#   gitleaks  — Secret detection across git history (.gitleaks.toml for allowlist)
 
 on:
   push:
@@ -24,6 +30,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history is required for gitleaks to scan commits for secrets.
+          # A shallow clone would miss secrets that were added and later deleted.
+          fetch-depth: 0
 
       - name: Install shellcheck
         # shellcheck is not pre-installed on ubuntu-latest. The security
@@ -34,3 +44,46 @@ jobs:
         # Runs all 26 automated checks and exits non-zero on any failure.
         # Output includes a per-check [PASS]/[FAIL] summary and a final count.
         run: bash scripts/security-check.sh
+
+      - name: Lint Dockerfile (hadolint)
+        # Catches Dockerfile anti-patterns: unpinned base-image tags, missing
+        # --no-install-recommends, insecure shell options, layer ordering, etc.
+        # Suppressed rules are documented in .hadolint.yaml.
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      - name: Python security scan (bandit)
+        # Scans WebUI/launch.py for common Python security issues (unsafe
+        # subprocess calls, insecure temp files, injection risks, etc.).
+        # -ll: report only medium and high severity findings to reduce noise.
+        run: |
+          pip install --quiet bandit
+          bandit -r WebUI/ -ll
+
+      - name: YAML lint (.github/)
+        # Validates syntax and style for all workflow files and dependabot.yml.
+        # Style overrides are in .yamllint.yml (relaxes impractical defaults).
+        run: |
+          pip install --quiet yamllint
+          yamllint .github/
+
+      - name: Trivy config scan
+        # Scans Dockerfile and other config files for known misconfigurations
+        # without requiring a built image. Accepted findings with explanatory
+        # comments are listed in .trivyignore.
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          trivyignores: .trivyignore
+
+      - name: Secret scan (gitleaks)
+        # Scans git history and the working tree for accidentally committed
+        # secrets. webui-auth.txt is an intentional default-credentials
+        # placeholder and is allowlisted in .gitleaks.toml.
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

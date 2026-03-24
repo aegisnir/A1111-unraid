@@ -50,7 +50,13 @@
   - independent background port poller for `[READY]` banner
 - Code quality:
   - both shell scripts pass `shellcheck` cleanly
-- GitHub Actions CI: automated shellcheck + security baseline checks run on push/PR to `dev` and `main`
+- GitHub Actions CI:
+  - automated shellcheck + security baseline checks run on push/PR to `dev` and `main`
+  - extended with: `hadolint` (Dockerfile lint), `bandit` (Python security scan),
+    `yamllint` (YAML validation), `trivy config` (Dockerfile misconfiguration scan),
+    `gitleaks` (secret detection across git history)
+  - `trivy-image.yml`: weekly scheduled CVE scan of the published GHCR image (fixable HIGH/CRITICAL only)
+  - `.github/dependabot.yml`: automated version-bump PRs for GitHub Actions and Docker base image (weekly)
 - Pre-release security audit: all findings fixed (26/26 checks pass)
 - Release posture decided:
   - `v1.0.0` pre-release on `dev` branch

@@ -7,6 +7,18 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- CI: extended static analysis added to push/PR workflow: `hadolint` (Dockerfile lint),
+  `bandit` (Python security scan), `yamllint` (YAML validation), `trivy config`
+  (Dockerfile misconfiguration scan), `gitleaks` (secret detection across git history)
+  - `.hadolint.yaml`: suppresses DL3008 (apt version pins) — impractical for system packages
+  - `.gitleaks.toml`: allowlists `webui-auth.txt` as an intentional default-credentials placeholder
+  - `.trivyignore`: allowlists DS002 (run as root) — container uses entrypoint privilege-drop pattern
+  - `.yamllint.yml`: relaxes line-length to 120 and removes document-start requirement
+- CI: add `trivy-image.yml` — weekly scheduled CVE scan of the published `:dev` image;
+  filters to fixable HIGH/CRITICAL findings only to reduce base-image noise
+- Add `.github/dependabot.yml` — automated version-bump PRs for GitHub Actions and
+  Docker base image (weekly cadence)
+
 ---
 
 ## [v1.0.1] - 2026-03-24
