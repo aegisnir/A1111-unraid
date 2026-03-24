@@ -7,6 +7,20 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+---
+
+## [v1.0.0] - 2026-03-24
+
+> First pre-release. Published on the `dev` branch/tag. Not yet promoted to `main` or `:latest` — pending real-world validation.
+
+- Automatic WebUI restart loop:
+	- container now automatically restarts the WebUI process when it exits, instead of letting the container stop
+	- distinguishes deliberate stops (SIGTERM from Docker stop/Unraid) from crashes or clean exits ("Apply and quit")
+	- SIGTERM sets a flag that suppresses restart and lets the container exit cleanly
+	- clean exit (code 0, e.g. "Apply and quit"): flat delay before restart (`RESTART_DELAY`, default 5 s), resets crash backoff counter
+	- crash (non-zero exit code): exponential backoff starting at `RESTART_DELAY`, doubling each attempt up to `RESTART_DELAY_MAX` (default 60 s)
+	- new env vars: `RESTART_ON_EXIT` (default `1`), `RESTART_DELAY` (default `5`), `RESTART_DELAY_MAX` (default `60`), `RESTART_MAX_ATTEMPTS` (default `0` = unlimited)
+	- startup banner only printed on first start; subsequent restarts print a compact restart notice with attempt count and delay
 - Appdata split extended — A1111 user config files moved to `/config/a1111/` (appdata):
 	- `config.json` — all Settings tab values, including settings added by extensions via the A1111 opts API
 	- `ui-config.json` — UI component defaults (slider ranges, textbox sizes)
