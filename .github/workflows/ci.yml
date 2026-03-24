@@ -11,6 +11,13 @@ name: CI
 #   yamllint  — YAML syntax/style for .github/ files (.yamllint.yml for config)
 #   trivy     — Dockerfile misconfiguration scan (.trivyignore for suppressions)
 #   gitleaks  — Secret detection across git history (.gitleaks.toml for allowlist)
+#
+# All third-party Actions are pinned to immutable full commit SHAs.
+# Mutable version tags can be force-pushed by a compromised maintainer
+# (as happened with trivy-action in the March 2026 supply chain attack,
+# GHSA-69fq-xp46-6x23 / CVE-2026-33634). SHA pinning prevents that class
+# of attack. Dependabot will still propose SHA updates when new releases
+# ship. The human-readable version tag is noted in a comment on each line.
 
 on:
   push:
@@ -29,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
         with:
           # Full history is required for gitleaks to scan commits for secrets.
           # A shallow clone would miss secrets that were added and later deleted.
@@ -52,7 +59,7 @@ jobs:
         # failure-threshold: error — DL3008 (apt version pins) is accepted as a
         # warning; only ERROR-level findings redden this step. The config file
         # also sets this threshold but the action is more reliably picked up here.
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
         with:
           dockerfile: Dockerfile
           failure-threshold: error
@@ -81,18 +88,21 @@ jobs:
         # Scans Dockerfile and other config files for known misconfigurations
         # without requiring a built image. Accepted findings with explanatory
         # comments are listed in .trivyignore.
-        uses: aquasecurity/trivy-action@0.30.0
+        # Pinned to 0.35.0: the first version protected by GitHub immutable
+        # releases and unaffected by the March 2026 supply chain attack
+        # (GHSA-69fq-xp46-6x23 / CVE-2026-33634).
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           scan-type: config
           scan-ref: .
           severity: HIGH,CRITICAL
-          exit-code: '1'
+          exit-code: "1"
           trivyignores: .trivyignore
 
       - name: Secret scan (gitleaks)
         # Scans git history and the working tree for accidentally committed
         # secrets. webui-auth.txt is an intentional default-credentials
         # placeholder and is allowlisted in .gitleaks.toml.
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
