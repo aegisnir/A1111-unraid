@@ -63,6 +63,7 @@ VENV_PYTHON="${VENV_DIR}/bin/python"                               # Absolute pa
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"            # Marker file: first-run pip install already done
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"  # PyPI extra index for CUDA wheels
 RUNTIME_REPOS_DIR="/data/repositories"                             # Persistent upstream sub-repos (e.g. k-diffusion)
+RUNTIME_EXTENSIONS_DIR="/data/extensions"                          # Persistent user-installed extensions
 RUNTIME_CONFIG_STATES_DIR="/config/a1111/config_states"            # Persistent extension state snapshots (in appdata)
 MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"             # Abort first-run if /data has less than this free
 TORCH_VERSION="${TORCH_VERSION:-2.7.0}"                            # Pinned version — update alongside CUDA base image
@@ -151,6 +152,11 @@ cd "${WEBUI_DIR}"
 mkdir -p "${VENV_DIR}"
 mkdir -p "${RUNTIME_REPOS_DIR}"
 mkdir -p "${TMPDIR}"
+# Clean up any leftover temp files from previous crashed or interrupted runs.
+# Partial pip downloads and extracted archives can silently accumulate under
+# /data/tmp across restarts and eat disk on the persistent share.
+# ${TMPDIR:?} expands with a fatal error if unset, preventing a bare rm -rf /*.
+rm -rf "${TMPDIR:?}"/* 2>/dev/null || true
 mkdir -p "${PIP_CACHE_DIR}"
 # Ensure standard data subtrees exist so the WebUI finds expected paths on a
 # fresh or restored /data volume without requiring the user to re-create them.
@@ -259,6 +265,26 @@ if [[ -L "${WEBUI_DIR}/repositories" ]]; then
   fi
 else
   echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/repositories symlink is missing.${C_RESET}" >&2
+  echo "${C_WARN}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
+  exit 1
+fi
+
+if [[ -e "${WEBUI_DIR}/extensions" && ! -L "${WEBUI_DIR}/extensions" ]]; then
+  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/extensions exists and is not a symlink.${C_RESET}" >&2
+  echo "${C_CRIT}       On a read-only container filesystem, start.sh cannot replace it at runtime.${C_RESET}" >&2
+  echo "${C_WARN}       Rebuild the image with the symlink baked in, or remove that path before enabling --read-only.${C_RESET}" >&2
+  exit 1
+fi
+
+if [[ -L "${WEBUI_DIR}/extensions" ]]; then
+  existing_target="$(readlink "${WEBUI_DIR}/extensions")"
+  if [[ "${existing_target}" != "${RUNTIME_EXTENSIONS_DIR}" ]]; then
+    echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/extensions points to ${existing_target}, expected ${RUNTIME_EXTENSIONS_DIR}.${C_RESET}" >&2
+    echo "${C_WARN}       Rebuild the image so the extensions symlink matches the persistent runtime path.${C_RESET}" >&2
+    exit 1
+  fi
+else
+  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/extensions symlink is missing.${C_RESET}" >&2
   echo "${C_WARN}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
   exit 1
 fi
@@ -459,7 +485,10 @@ else
   # with a clear message instead of later crashing inside Gradio auth parsing.
   # The awk check ensures every entry has a non-empty username AND password
   # separated by a colon. Entries like ":password", "user:", or "nocolon" fail.
-  if echo "${auth_file_csv}" | tr ',' '\n' | awk -F: '($1=="" || $2=="" || NF<2){bad=1} END{exit bad?0:1}'; then
+  # awk exit convention: bad?1:0 means exit 1 (failure) when malformed entries are found.
+  # The outer `if !` then triggers the CRITICAL message.
+  # (Historically coded as bad?0:1 with a plain `if`, which worked but was counter-intuitive.)
+  if ! echo "${auth_file_csv}" | tr ',' '\n' | awk -F: '($1=="" || $2=="" || NF<2){bad=1} END{exit bad?1:0}'; then
     echo "${C_CRIT}${C_BOLD}CRITICAL:${C_RESET}${C_CRIT} WebUI auth file contains malformed credential entries: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
     echo "${C_CRIT}         Expected format is username:password (one per line or comma-separated).${C_RESET}" >&2
     echo "${C_CRIT}         Remove trailing commas and ensure every entry includes both username and password.${C_RESET}" >&2
@@ -651,8 +680,11 @@ monitor_webui_output() {
 # or Gradio version changes. Uses bash's built-in /dev/tcp — no external tools.
 _poll_for_ready() {
   local _port="7860"
-  # Extract --port value from COMMANDLINE_ARGS if the user overrode the default
+  # Extract --port value from COMMANDLINE_ARGS if the user overrode the default.
+  # Handles both space-separated (--port 7861) and equals-separated (--port=7861) forms.
   if [[ "${COMMANDLINE_ARGS:-}" =~ --port[[:space:]]+([0-9]+) ]]; then
+    _port="${BASH_REMATCH[1]}"
+  elif [[ "${COMMANDLINE_ARGS:-}" =~ --port=([0-9]+) ]]; then
     _port="${BASH_REMATCH[1]}"
   fi
 
@@ -774,9 +806,9 @@ _DELIBERATE_STOP=0   # set to 1 when SIGTERM/INT is received from Docker/Unraid
 
 # shellcheck disable=SC2317 # These are invoked by trap, not direct calls.
 _cleanup_monitor() {
-  [[ -n "${_POLLER_PID}" ]] && kill "${_POLLER_PID}" 2>/dev/null || true
+  if [[ -n "${_POLLER_PID}" ]]; then kill "${_POLLER_PID}" 2>/dev/null || true; fi
   _POLLER_PID=""
-  [[ -n "${_MONITOR_DIR:-}" && -d "${_MONITOR_DIR}" ]] && rm -rf "${_MONITOR_DIR}" || true
+  if [[ -n "${_MONITOR_DIR:-}" && -d "${_MONITOR_DIR}" ]]; then rm -rf "${_MONITOR_DIR}" || true; fi
   _MONITOR_DIR=""
   _LOG_PIPE=""
 }

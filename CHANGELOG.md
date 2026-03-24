@@ -9,6 +9,32 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ---
 
+## [v1.0.1] - 2026-03-24
+
+- Fix: SC2015 shellcheck warnings in `_cleanup_monitor` — `A && B || true` pattern
+  rewritten as explicit `if/fi`; logic was correct but non-idiomatic and caused the
+  automated security baseline to fail
+- Fix: `--port=NNNN` equals-separated form ignored by `_poll_for_ready` — was silently
+  falling back to port 7860; now handles both `--port 7861` and `--port=7861` forms
+- Fix: inverted awk exit codes in auth credential format validation — logic was correct
+  but coded as `bad?0:1` with a plain `if`, which is counter-intuitive and risky for
+  maintainers; corrected to `bad?1:0` with matching `if !` guard
+- Add: `extensions` symlink startup validation — validates presence and correct target,
+  consistent with the existing `repositories` and `config_states` checks
+- Add: `/data/tmp` purged on startup to prevent partial pip downloads and extracted
+  archives from accumulating silently across restarts and crashes
+- Dockerfile: OCI image labels added (`org.opencontainers.image.*`) — links the GHCR
+  package to the source repository, exposes license metadata, and gives vulnerability
+  scanners the source context they need
+- Dockerfile: `IMAGE_VERSION` build ARG added; pass `--build-arg IMAGE_VERSION=v1.0.1`
+  at build time to embed the version in the `org.opencontainers.image.version` label
+- Dockerfile: HEALTHCHECK section now documents the known hardcoded-port limitation
+  (Docker HEALTHCHECK CMD cannot read runtime env vars; port 7860 is baked in)
+- CI: added `.github/workflows/ci.yml` — runs `scripts/security-check.sh` on every
+  push and pull request to `dev` and `main`; installs shellcheck as a prerequisite
+
+---
+
 ## [v1.0.0] - 2026-03-24
 
 > First pre-release. Published on the `dev` branch/tag. Not yet promoted to `main` or `:latest` — pending real-world validation.

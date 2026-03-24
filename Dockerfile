@@ -73,6 +73,25 @@ ARG APP_UID=99
 ARG APP_GID=100
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128
 
+# Build argument for embedding the image version in OCI labels.
+# Pass at build time: docker build --build-arg IMAGE_VERSION=v1.0.1 ...
+# Defaults to "dev" for local/untagged builds.
+ARG IMAGE_VERSION=dev
+
+# ------------------------------------------------------------------------------
+# OCI image labels — links the GHCR package to this repository, exposes the
+# license, and gives vulnerability scanners (Trivy, Grype, etc.) the source
+# context they need to correlate findings back to the project.
+# Reference: https://github.com/opencontainers/image-spec/blob/main/annotations.md
+# ------------------------------------------------------------------------------
+LABEL org.opencontainers.image.title="A1111 Stable Diffusion WebUI (Unraid)" \
+      org.opencontainers.image.description="AUTOMATIC1111 Stable Diffusion WebUI packaged for Unraid with NVIDIA GPU support" \
+      org.opencontainers.image.source="https://github.com/aegisnir/A1111-unraid" \
+      org.opencontainers.image.url="https://github.com/aegisnir/A1111-unraid" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.vendor="aegisnir" \
+      org.opencontainers.image.version="${IMAGE_VERSION}"
+
 # ------------------------------------------------------------------------------
 # Runtime defaults
 # NOTE: --listen binds to all interfaces. On a trusted LAN this is often OK,
@@ -209,6 +228,13 @@ EXPOSE 7860
 # Normal heavy workloads (ControlNet preprocessors, batch generation,
 # thousands of thumbnails) do NOT block the HTTP server that long because
 # Gradio handles requests in separate threads.
+#
+# Known limitation: the port 7860 below is baked in at build time. Docker's
+# HEALTHCHECK CMD runs at the daemon level and cannot read runtime env vars
+# (including COMMANDLINE_ARGS). If you change --port in COMMANDLINE_ARGS at
+# runtime, this probe will target the wrong port and always report unhealthy.
+# Keep your runtime --port set to 7860, or accept that the healthcheck will
+# be inaccurate if you use a non-default port.
 # ------------------------------------------------------------------------------
 HEALTHCHECK --interval=120s --timeout=30s --start-period=600s --retries=5 \
   CMD python3 -c "import socket; s=socket.socket(); s.settimeout(5); s.connect(('127.0.0.1', 7860)); s.close()" || exit 1

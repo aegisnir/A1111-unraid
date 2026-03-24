@@ -1,0 +1,36 @@
+name: CI
+
+# Runs on every push and pull request to dev or main.
+# The security baseline script (scripts/security-check.sh) is the single
+# source of truth for all checks: bash syntax, shellcheck, XML parse, and
+# the 27 security baseline gates. Keeping this workflow thin ensures the
+# automated gate stays in sync with what you can run locally.
+
+on:
+  push:
+    branches: ["dev", "main"]
+  pull_request:
+    branches: ["dev", "main"]
+
+# Minimal permissions — this workflow only reads repository contents.
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Lint & Security Baseline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        # shellcheck is not pre-installed on ubuntu-latest. The security
+        # baseline script calls it internally, so it must be present first.
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends shellcheck
+
+      - name: Security baseline checks
+        # Runs all 27 automated checks and exits non-zero on any failure.
+        # Output includes a per-check [PASS]/[FAIL] summary and a final count.
+        run: bash scripts/security-check.sh
