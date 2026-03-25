@@ -7,6 +7,10 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- Pin `torch` 2.11.0→2.10.0 and `torchvision` 0.26.0→0.25.0: `xformers` 0.0.35's cu130
+  wheel was compiled against PyTorch 2.10.0; mismatched versions prevent CUDA extensions
+  from loading and disable memory-efficient attention
+
 ---
 
 ## [v1.0.2] - 2026-03-25
