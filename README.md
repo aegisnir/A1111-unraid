@@ -57,7 +57,7 @@ Before you start, make sure you have:
 
 ### GPU sanity check
 
-Before installing the container, confirm your Unraid host can see the GPU through Docker. Open the Unraid terminal (or SSH in) and run:
+**Optional:** Before installing the container, you can confirm your Unraid host can see the GPU through Docker. Open the Unraid terminal (or SSH in) and run:
 
 ```bash
 docker run --rm --gpus all nvidia/cuda:13.0.2-runtime-ubuntu22.04 nvidia-smi
