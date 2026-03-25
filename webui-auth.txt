@@ -1,5 +1,5 @@
 # Default WebUI auth file template
-# This file is auto-seeded to /data/auth/webui-auth.txt on first launch if missing.
+# This file is auto-seeded to /config/auth/webui-auth.txt on first launch if missing.
 #
 # IMPORTANT:
 # - Default first-launch login is admin:changeme.

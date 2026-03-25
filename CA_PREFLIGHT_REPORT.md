@@ -13,7 +13,7 @@ Scope note: This report covers the pre-release (`:dev` / `v1.0.3`) path. `:lates
 - PASS: `scripts/security-check.sh` shell syntax validation (`bash -n scripts/security-check.sh`)
 - PASS: `template.xml` XML parse validation
 - PASS: all GitHub Actions workflow YAML files parse cleanly (`yamllint`)
-- PASS: security baseline (`bash scripts/security-check.sh`) — 26/26 checks
+- PASS: security baseline (`bash scripts/security-check.sh`) — 29/29 checks
 - PASS: Dockerfile lint (`hadolint`) — no actionable warnings
 - PASS: Python security scan (`bandit`) — no findings
 - PASS: Dockerfile misconfiguration scan (`trivy config`) — no actionable findings

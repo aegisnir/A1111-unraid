@@ -19,7 +19,7 @@ This is a personal hobby project. It is heavily AI-assisted, and it is also a le
 ## Performance and Security Notes
 
 - For best performance, use SSD storage for your `/data` directory. This speeds up model loading, image generation, and cache operations.
-- Keep your Unraid host OS and NVIDIA drivers up to date for maximum compatibility, performance, and security.
+- Keep your Unraid host OS and NVIDIA drivers up to date for maximum compatibility, performance, and security. This image requires a **minimum host driver version of 580** (CUDA 13.0 requirement). Driver 595.45.04 (shipped with CUDA 13.2) is confirmed compatible.
 - Only install extensions and models from trusted sources. Third-party code can compromise the security of your system.
 
 ## Quick start
@@ -77,7 +77,7 @@ Replace `tower.local` with your Unraid hostname or IP if needed.
 On the Unraid host, a quick way to confirm Docker can see the GPU is:
 
 ```bash
-docker run --rm --gpus all nvidia/cuda:12.9.1-runtime-ubuntu22.04 nvidia-smi
+docker run --rm --gpus all nvidia/cuda:13.0.2-runtime-ubuntu22.04 nvidia-smi
 ```
 
 If that fails, troubleshoot the host NVIDIA setup before troubleshooting this container.

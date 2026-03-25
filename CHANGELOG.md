@@ -22,7 +22,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 - Upgrade CUDA base image from `nvidia/cuda:12.9.1-runtime-ubuntu22.04` to `13.0.2`;
   update PyTorch index URL from `cu128` to `cu130`; bump pinned dependency versions:
   `torch` 2.7.0→2.11.0, `torchvision` 0.22.0→0.26.0, `xformers` 0.0.30→0.0.35
-  - Requires host driver ≥ 570 (confirmed compatible with driver 595.45.04)
+  - Requires host driver ≥ 580 (CUDA 13.0.2 official minimum: ≥ 580.95.05; confirmed compatible with driver 595.45.04)
   - `cu130` wheels are the highest available for both PyTorch 2.10 and 2.11
   - xformers 0.0.34+ uses stable PyTorch ABI — binary built for 2.10 runs on 2.11+
   - CUDA 13.0.2 is 5+ months old and battle-tested; chosen over 13.2.0 (8 days old, zero driver headroom at ≥595)

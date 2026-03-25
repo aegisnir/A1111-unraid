@@ -57,7 +57,7 @@
     `gitleaks` (secret detection across git history)
   - `trivy-image.yml`: weekly scheduled CVE scan of the published GHCR image (fixable HIGH/CRITICAL only)
   - `.github/dependabot.yml`: automated version-bump PRs for GitHub Actions and Docker base image (weekly)
-- Pre-release security audit: all findings fixed (26/26 checks pass)
+- Pre-release security audit: all findings fixed (29/29 checks pass)
 - CUDA base upgraded from `nvidia/cuda:12.9.1-runtime-ubuntu22.04` to `13.0.2`;
   PyTorch index updated from `cu128` to `cu130`; pinned versions bumped:
   `torch` 2.7.0→2.10.0, `torchvision` 0.22.0→0.25.0, `xformers` 0.0.30→0.0.35
