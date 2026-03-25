@@ -47,7 +47,7 @@
 # Base image: NVIDIA CUDA runtime (Ubuntu 22.04), pinned by digest.
 # Update this digest intentionally whenever you choose to refresh the base image.
 # ------------------------------------------------------------------------------
-FROM nvidia/cuda:12.9.1-runtime-ubuntu22.04@sha256:d90541b92124899904e0860a4ac1955606b3bc45ad6cc9dab16567fd1111e326
+FROM nvidia/cuda:13.0.2-runtime-ubuntu22.04@sha256:cc28faec68e3dffcf6803683d34a03dcd62fe29e58a0b34b710b800a3d7b73b3
 
 # Use bash with pipefail for safer RUN pipelines.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -71,7 +71,7 @@ ARG WEBUI_REF=dev
 # Unraid-friendly defaults (nobody/users). Adjust if you use a different strategy.
 ARG APP_UID=99
 ARG APP_GID=100
-ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu130
 
 # Build argument for embedding the image version in OCI labels.
 # Pass at build time: docker build --build-arg IMAGE_VERSION=v1.0.1 ...

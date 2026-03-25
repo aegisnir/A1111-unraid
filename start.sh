@@ -66,9 +66,9 @@ RUNTIME_REPOS_DIR="/data/repositories"                             # Persistent 
 RUNTIME_EXTENSIONS_DIR="/data/extensions"                          # Persistent user-installed extensions
 RUNTIME_CONFIG_STATES_DIR="/config/a1111/config_states"            # Persistent extension state snapshots (in appdata)
 MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"             # Abort first-run if /data has less than this free
-TORCH_VERSION="${TORCH_VERSION:-2.7.0}"                            # Pinned version — update alongside CUDA base image
-TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.22.0}"
-XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.30}"
+TORCH_VERSION="${TORCH_VERSION:-2.11.0}"                           # Pinned version — update alongside CUDA base image
+TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.26.0}"
+XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.35}"
 RESTART_ON_EXIT="${RESTART_ON_EXIT:-1}"            # 1 = restart WebUI after any exit; 0 = exit container cleanly
 RESTART_DELAY="${RESTART_DELAY:-5}"                # Seconds to wait before restarting after a clean exit
 RESTART_DELAY_MAX="${RESTART_DELAY_MAX:-60}"       # Backoff ceiling for crash restarts (seconds)
