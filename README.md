@@ -5,6 +5,11 @@
 [![Upstream: AUTOMATIC1111](https://img.shields.io/badge/upstream-AUTOMATIC1111-orange)](https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/dev)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Status: Pre-release](https://img.shields.io/badge/status-pre--release-yellow)](https://github.com/aegisnir/A1111-unraid/releases)
+[![Platform: Unraid](https://img.shields.io/badge/platform-Unraid-F15A2C?logo=unraid&logoColor=white)](https://unraid.net/)
+[![GPU: NVIDIA](https://img.shields.io/badge/GPU-NVIDIA-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
+[![CUDA 13.0.2](https://img.shields.io/badge/CUDA-13.0.2-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit-archive)
+[![CI](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml)
+[![Security Hardened](https://img.shields.io/badge/security-hardened-informational)](SECURITY.md)
 
 This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, easy to use, and more security-conscious than a throwaway personal build.
 
@@ -175,15 +180,31 @@ After the container starts, you will see a login page. Log in with `admin` / `ch
 
 You need at least one Stable Diffusion model (checkpoint) to generate images. Models are `.safetensors` or `.ckpt` files, typically 2–7 GB each.
 
-### Recommended: use the CivitAI Browser+ extension
+### Recommended: install a CivitAI browser extension
 
-The easiest way to browse and download models is with the **CivitAI Browser+** extension, which lets you search and download models from [CivitAI](https://civitai.com/) directly inside the WebUI.
+The easiest way to browse and download models is with a CivitAI browser extension, which lets you search and download models from [CivitAI](https://civitai.com/) directly inside the WebUI.
+
+**Recommended:** [CivBrowser](https://github.com/SignalFlagZ/sd-webui-civbrowser) by SignalFlagZ — actively maintained, supports searching and downloading models across multiple tabs.
+
+**Alternative:** [CivitAI Browser+](https://github.com/BlafKing/sd-civitai-browser-plus) by BlafKing — feature-rich (download, delete, scan for updates, tag management, multi-threaded downloads). Note: this repository is **archived** and no longer receiving updates, but the extension still works.
+
+#### Installing from the Available tab (easiest)
 
 1. In the WebUI, go to the **Extensions** tab.
-2. Click **Install from URL**.
-3. Paste the extension URL and click **Install**. (Search for "CivitAI Browser+" on GitHub for the current URL.)
-4. Go to **Installed** → click **Apply and restart UI**.
-5. A new **CivitAI Browser+** tab will appear. Browse models and click download — they are saved directly to the right folder.
+2. Click the **Available** sub-tab.
+3. Click **Load from:** to load the extension index.
+4. Use the search box to filter by name (e.g. `CivBrowser` or `CivitAI Browser+`).
+5. Click **Install** next to the extension you want.
+6. Go to **Installed** → click **Apply and restart UI**.
+7. A new tab will appear for the extension. Browse models and click download — they are saved directly to the right folder.
+
+#### Alternative: Install from URL
+
+If you prefer, you can paste a GitHub URL directly:
+
+1. In the **Extensions** tab, click **Install from URL**.
+2. Paste the repository URL (e.g., `https://github.com/SignalFlagZ/sd-webui-civbrowser.git`).
+3. Click **Install**, then go to **Installed** → **Apply and restart UI**.
 
 ### Manual download
 
@@ -323,15 +344,19 @@ If `--api-auth` is provided without `--api`, startup logs now warn that API auth
 
 > **Log redaction:** Sensitive auth flags (`--gradio-auth`, `--gradio-auth-path`, `--api-auth`) have their values replaced with `<redacted>` in startup log output. The flag names remain visible so you can confirm they are active.
 
-**Default:**
+**Default** (from the Unraid template):
 
 ```
 --listen --port 7860 --data-dir /data --xformers --no-download-sd-model --enable-insecure-extension-access
 ```
 
+> **Note:** The container automatically appends `--gradio-auth-path <runtime-auth-file>` at launch (see [Authentication](#authentication-defaults)). You do not need to add auth flags yourself — they are injected by `start.sh` based on your `WEBUI_AUTH_FILE`.
+
 API is intentionally not part of the default args. Add `--api` only when you explicitly need API access.
 
 Some defaults (e.g., `--xformers`) are chosen because they work well for my hardware setup. Use these as a starting point, then tune for your own hardware, risk tolerance, and workflow.
+
+For a complete list of supported arguments, see the [AUTOMATIC1111 Command Line Arguments wiki page](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Command-Line-Arguments-and-Settings).
 
 <details>
 <summary><strong>Flag details and security considerations</strong></summary>
@@ -373,6 +398,26 @@ You can mount certificate files into the container and add the TLS flags to `COM
 - Certificate renewal is easier to manage outside the app.
 - Reverse proxies handle TLS, redirects, and hostname routing better than the WebUI itself.
 - Certificate management is highly environment-specific and easy to get wrong.
+
+</details>
+
+<details>
+<summary><strong>Auto TLS-HTTPS extension (zero-config option)</strong></summary>
+
+The [Auto TLS-HTTPS](https://github.com/papuSpartan/stable-diffusion-webui-auto-tls-https) extension by papuSpartan can automatically generate a self-signed certificate and enable HTTPS with zero configuration. When installed, it:
+
+1. Generates a key/certificate pair automatically.
+2. Fuses the certificate with Python's trust store so internal WebUI requests succeed.
+3. Starts serving over HTTPS without manual certificate management.
+
+You can also bring your own certificate by passing `--tls-keyfile` and `--tls-certfile` — the extension will incorporate it into the trust bundle.
+
+**Caveats:**
+- Self-signed certificates will trigger browser warnings. You can add a browser exception or import the generated `webui.cert` into your OS trust store.
+- The extension has not been updated in ~2 years (last commit May 2024), though it remains functional.
+- A reverse proxy is still the more robust long-term solution, especially if you need certificate renewal, hostname routing, or multi-service TLS.
+
+Install it from the **Extensions** → **Available** tab (search for `Auto TLS-HTTPS`) or via **Install from URL** with `https://github.com/papuSpartan/stable-diffusion-webui-auto-tls-https.git`.
 
 </details>
 
@@ -426,7 +471,11 @@ This container uses the following security options by default (set in the Unraid
 
 - The container will refuse to start as root (UID 0) for safety.
 - All SUID/SGID bits are removed from binaries at build time.
-- If you use `--read-only`, provide explicit writable mounts for anything that needs to persist (models, outputs, extensions under `/data`).
+- If you use `--read-only`, provide explicit writable mounts for anything that needs to persist. The template already maps `/data` and `/config` as writable volumes. If you add custom paths outside those mounts, you will need additional `-v` volume mounts or `--tmpfs` entries. For example, to add a writable scratch directory:
+  ```
+  -v /mnt/user/ai/scratch:/scratch:rw
+  ```
+  Without writable mounts, any write operation to the read-only filesystem will fail with `Read-only file system`.
 
 For the full security baseline regression checklist, see `SECURITY.md`. To run the automated checks: `./scripts/security-check.sh`
 
@@ -614,7 +663,7 @@ The bootstrap pins `torch`, `torchvision`, and `xformers` as a tested set so the
 
 This repository's original project files are licensed under MIT (see `LICENSE`), unless otherwise noted.
 
-This project packages and runs upstream `AUTOMATIC1111/stable-diffusion-webui`, which is licensed under AGPL-3.0.
+This project packages and runs upstream [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui), which is licensed under AGPL-3.0.
 
 For third-party license details, see:
 
