@@ -80,14 +80,53 @@ grep -n 'WEBUI_AUTH_FILE\|api-auth\|gradio-auth\|WEBUI_AUTH_SAMPLE_FILE\|no usab
 - [ ] PASS if template XML parses:
 	`python3 -c "import xml.etree.ElementTree as ET; ET.parse('template.xml')"`
 - [ ] PASS if README, template, and changelog describe the same hardening defaults.
-- [ ] PASS if Dockerfile HEALTHCHECK is present with a start-period of at least 300s.
 
-### Current baseline (as of 2026-03-24)
+### Build hardening
+
+- [ ] PASS if Dockerfile `HEALTHCHECK` is present with `--start-period` of at least 300s.
+- [ ] PASS if Dockerfile strips all SUID/SGID bits from binaries at build time.
+- [ ] PASS if `WebUI/launch.py` contains credential redaction logic (`_redact_cli_args`).
+
+Verification command:
+
+```bash
+grep -n 'HEALTHCHECK\|chmod a-s' Dockerfile
+grep -n '_redact_cli_args' WebUI/launch.py
+```
+
+### Credential file permissions
+
+- [ ] PASS if auth file writes in `start.sh` use `umask 077` so credentials are created mode 600 and are never world-readable.
+
+Verification command:
+
+```bash
+grep -n 'umask 077' start.sh
+```
+
+### Supply chain integrity
+
+- [ ] PASS if the Dockerfile base image is pinned by SHA256 digest (not a mutable version tag).
+- [ ] PASS if all GitHub Actions `uses:` references are pinned to full immutable commit SHAs.
+- [ ] PASS if `.github/dependabot.yml` is present and configured for Actions and Docker base image.
+
+Verification commands:
+
+```bash
+grep -E '^FROM .+@sha256:' Dockerfile
+grep -rn 'uses:' .github/workflows/ | grep -vE '@[0-9a-f]{40}'  # should return nothing
+```
+
+### Current baseline (as of 2026-03-25)
 
 - Runtime hardening defaults: PASS
 - Startup privilege model: PASS
 - Authentication guardrails: PASS
 - Safety checks/docs consistency: PASS
+- Build hardening: PASS
+- Credential file permissions: PASS
+- Supply chain integrity: PASS
+
 
 ## What you should assume
 

@@ -193,6 +193,35 @@ check_credential_handling() {
 
 }
 
+check_supply_chain() {
+  # Base image must be pinned by digest (not just a mutable tag).
+  # Mutable tags can be silently redirected by a compromised upstream maintainer.
+  if grep -qE '^FROM .+@sha256:[0-9a-f]{64}' Dockerfile; then
+    pass "Dockerfile base image is pinned by SHA256 digest"
+  else
+    fail "Dockerfile base image is not pinned by SHA256 digest"
+  fi
+
+  # All GitHub Actions 'uses:' references must be pinned to full commit SHAs.
+  # Mutable version tags (e.g. @v4) can be force-pushed by a compromised upstream
+  # maintainer (as happened with trivy-action in the March 2026 supply chain
+  # attack, CVE-2026-33634). SHA pinning prevents that class of attack.
+  local unpinned
+  unpinned="$(grep -rE '^\s+uses:\s+\S+@' .github/workflows/ | grep -vE '@[0-9a-f]{40}' || true)"
+  if [[ -z "${unpinned}" ]]; then
+    pass "All GitHub Actions are pinned to immutable commit SHAs"
+  else
+    fail "GitHub Actions found without full SHA pins:"$'\n'"${unpinned}"
+  fi
+
+  # Dependabot must be configured to catch Actions and base image drift.
+  if [[ -f ".github/dependabot.yml" ]]; then
+    pass ".github/dependabot.yml present (automated dependency update coverage)"
+  else
+    fail ".github/dependabot.yml missing — no automated dependency update coverage"
+  fi
+}
+
 printf 'Running security baseline checks in %s\n\n' "${ROOT_DIR}"
 
 check_runtime_defaults
@@ -201,6 +230,7 @@ check_auth_guardrails
 check_syntax_and_template
 check_build_hardening
 check_credential_handling
+check_supply_chain
 
 printf '\nSummary: %d passed, %d failed\n' "${PASS_COUNT}" "${FAIL_COUNT}"
 
