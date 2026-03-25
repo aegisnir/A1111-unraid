@@ -7,6 +7,10 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+---
+
+## [v1.0.2] - 2026-03-25
+
 - Upgrade CUDA base image from `nvidia/cuda:12.9.1-runtime-ubuntu22.04` to `13.0.2`;
   update PyTorch index URL from `cu128` to `cu130`; bump pinned dependency versions:
   `torch` 2.7.0→2.11.0, `torchvision` 0.22.0→0.26.0, `xformers` 0.0.30→0.0.35
