@@ -60,9 +60,12 @@
 - Pre-release security audit: all findings fixed (26/26 checks pass)
 - CUDA base upgraded from `nvidia/cuda:12.9.1-runtime-ubuntu22.04` to `13.0.2`;
   PyTorch index updated from `cu128` to `cu130`; pinned versions bumped:
-  `torch` 2.7.0→2.11.0, `torchvision` 0.22.0→0.26.0, `xformers` 0.0.30→0.0.35
+  `torch` 2.7.0→2.10.0, `torchvision` 0.22.0→0.25.0, `xformers` 0.0.30→0.0.35
+- xformers 0.0.35 CUDA extension fix: `torch` pinned back from 2.11.0→2.10.0 and
+  `torchvision` from 0.26.0→0.25.0 — the cu130 wheel was compiled against 2.10.0;
+  mismatched versions silently disabled memory-efficient attention
 - Release posture decided:
-  - `v1.0.2` pre-release on `dev` branch
+  - `v1.0.3` pre-release on `dev` branch (supersedes broken `v1.0.2`)
   - `main` and `:latest` frozen pending real-world validation
 
 ## In Progress
@@ -76,5 +79,5 @@
 
 ## Notes
 
-- Published image: `ghcr.io/aegisnir/a1111-webui-aegisnir:dev` and `:v1.0.2`
+- Published image: `ghcr.io/aegisnir/a1111-webui-aegisnir:dev` and `:v1.0.3` (`:v1.0.2` superseded — broken xformers)
 - For production-style deployments, use `WEBUI_AUTH_FILE` when possible and treat logs as sensitive.

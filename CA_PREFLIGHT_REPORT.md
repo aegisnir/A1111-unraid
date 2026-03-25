@@ -4,7 +4,7 @@ Date: 2026-03-25
 Repository: aegisnir/A1111-unraid
 Branch: dev
 
-Scope note: This report covers the pre-release (`:dev` / `v1.0.2`) path. `:latest` is not yet published and is deferred until `dev` proves stable in the wild.
+Scope note: This report covers the pre-release (`:dev` / `v1.0.3`) path. `:latest` is not yet published and is deferred until `dev` proves stable in the wild.
 
 ## Gate Summary
 
@@ -29,7 +29,7 @@ Scope note: This report covers the pre-release (`:dev` / `v1.0.2`) path. `:lates
 
 ## Blocking Issues
 
-None at this time for the `:dev` / `v1.0.2` pre-release tag.
+None at this time for the `:dev` / `v1.0.3` pre-release tag.
 
 The `:latest` tag (`ghcr.io/aegisnir/a1111-webui-aegisnir:latest`) is intentionally not yet published.
 Release strategy: `dev` branch / `:dev` tag is the pre-release used for real-world testing.
