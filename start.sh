@@ -613,9 +613,6 @@ print_launch_notice() {
   echo "  ${INFO}Inline notes marked [NOTE] or [KNOWN WARNING] are added by this container${RESET}"
   echo "  ${INFO}and are not part of the upstream WebUI output.${RESET}"
   echo ""
-  echo "  ${INFO}WebUI will be available at: ${BOLD}${ACCENT}http://<your-unraid-ip>:7860${RESET}"
-  echo "  ${ACCENT}(Use your Unraid hostname or IP and the port you mapped in the template)${RESET}"
-  echo ""
   echo "${ACCENT}─────────────────────────────────────────────────────────────────────────${RESET}"
   echo ""
   echo "  ${WARN}⏳ Starting up — there may be a pause of 30–60 seconds here while Python${RESET}"
@@ -629,34 +626,8 @@ print_launch_notice() {
 # Runs in a subshell reading from the WebUI output pipe.
 monitor_webui_output() {
   local _saw_timm=0 _saw_storage=0 _saw_checkpoint=0
-  # _saw_first_line: 0 until the WebUI writes its first line; used to gate the ticker.
-  # _tick_elapsed:   cumulative seconds spent waiting, printed in each tick message.
-  # _tick_interval:  how often (in seconds) to print a tick while waiting.
-  local _saw_first_line=0 _tick_elapsed=0 _tick_interval=5
-  local line _rc
 
-  while true; do
-    IFS= read -r -t "${_tick_interval}" line
-    _rc=$?
-
-    if [[ $_rc -gt 128 ]]; then
-      # bash returns >128 when read -t times out before a full line arrives.
-      # Only print ticks during the silent gap before the first line of WebUI output.
-      if [[ $_saw_first_line -eq 0 ]]; then
-        _tick_elapsed=$(( _tick_elapsed + _tick_interval ))
-        echo "  ${C_WARN}⏳  Still starting up... ${_tick_elapsed} seconds elapsed — hang tight.${C_RESET}"
-      fi
-      continue
-    elif [[ $_rc -ne 0 ]]; then
-      # EOF (rc=1): the WebUI process closed the pipe. Drain any partial line and exit.
-      [[ -n "${line}" ]] && printf '%s\n' "${line}"
-      break
-    fi
-
-    # rc=0: received a complete line.
-    if [[ $_saw_first_line -eq 0 ]]; then
-      _saw_first_line=1
-    fi
+  while IFS= read -r line; do
     printf '%s\n' "${line}"
 
     # timm FutureWarning — appears on every start, always harmless
