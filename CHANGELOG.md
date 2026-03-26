@@ -7,6 +7,10 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+---
+
+## [v1.0.3] - 2026-03-25
+
 - fix: add `--extra-index-url` to xformers pip install so the cu130 wheel is pulled from
   the PyTorch index instead of PyPI; without this flag pip resolved the cu128 PyPI wheel
   even when torch was correctly at cu130, causing `xFormers was built for: PyTorch 2.10.0+cu128`
@@ -40,11 +44,6 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
   color-set + color-reset, causing Unraid's Docker log viewer to render interior lines
   in default white while only the header line appeared colored; affected boxes:
   `[KNOWN WARNING]`, `[XFORMERS MISMATCH]`, `[GPU MEMORY ERROR]`, `[GPU NOT DETECTED]`, `[READY]`
-
----
-
-## [v1.0.3] - 2026-03-25
-
 - Pin `torch` 2.11.0→2.10.0 and `torchvision` 0.26.0→0.25.0: `xformers` 0.0.35's cu130
   wheel was compiled against PyTorch 2.10.0; mismatched versions prevent CUDA extensions
   from loading and disable memory-efficient attention
