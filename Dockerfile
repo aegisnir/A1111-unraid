@@ -174,7 +174,7 @@ RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMAT
 RUN mkdir -p /config/a1111 && chown -R sdwebui:sdwebui /config
 
 # Overlay the custom launch.py wrapper that redacts sensitive CLI arguments
-# (--gradio-auth, --gradio-auth-path, --api-auth, --api-auth-path) from
+# (--gradio-auth, --gradio-auth-path, --api-auth) from
 # startup log output. See WebUI/launch.py for the full redaction logic.
 COPY WebUI/launch.py "${WEBUI_DIR}/launch.py"
 RUN chown sdwebui:sdwebui "${WEBUI_DIR}/launch.py"
