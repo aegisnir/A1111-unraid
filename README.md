@@ -8,7 +8,7 @@
 [![Orange badge with Unraid logo indicating platform compatibility, clickable to visit Unraid website](https://img.shields.io/badge/platform-Unraid-F15A2C?logo=unraid&logoColor=white)](https://unraid.net/)
 [![Green badge with NVIDIA logo indicating GPU support functionality, clickable to view CUDA toolkit documentation](https://img.shields.io/badge/GPU-NVIDIA-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
 [![Green badge with NVIDIA logo displaying CUDA version 13.0.2 requirement, clickable to view CUDA toolkit archive](https://img.shields.io/badge/CUDA-13.0.2-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit-archive)
-[![Badge showing Continuous Integration workflow status passing, clickable to view CI actions page](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml)
+[![Badge showing Continuous Integration workflow status passing, clickable to view CI actions page](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml)
 [![Light blue badge indicating security hardening with best practices implemented, clickable to view security details](https://img.shields.io/badge/security-hardened-informational)](SECURITY.md)
 
 This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, easy to use, and more security-conscious than a throwaway personal build.
@@ -78,7 +78,7 @@ The included Unraid template sets `--runtime=nvidia` in Extra Parameters by defa
 2. **Import the template into Unraid.** SSH into your Unraid host and run:
    ```bash
    wget -P /boot/config/plugins/dockerMan/templates-user/ \
-     https://raw.githubusercontent.com/aegisnir/A1111-unraid/dev/template.xml
+     https://raw.githubusercontent.com/aegisnir/A1111-unraid/main/template.xml
    ```
    Then go to the **Docker** tab → **Add Container** and select `a1111-webui-aegisnir` from the template list.
 
@@ -622,9 +622,9 @@ docker build --build-arg WEBUI_REF=<commit-hash> -t a1111-webui-aegisnir:local .
 
 The included `template.xml` defaults to the published GHCR image:
 
-- Repository: `ghcr.io/aegisnir/a1111-webui-aegisnir:dev`
+- Repository: `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`
 
-For local builds, change the repository to `a1111-webui-aegisnir:local`. When a stable release is promoted, switch to `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`.
+For local builds, change the repository to `a1111-webui-aegisnir:local`. To track pre-release development, use `ghcr.io/aegisnir/a1111-webui-aegisnir:dev`.
 
 ### Maintenance
 

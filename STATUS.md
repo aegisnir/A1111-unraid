@@ -1,6 +1,6 @@
 # Project Status
 
-> For change history and last updated date, see [git log](../../commits/dev).
+> For change history and last updated date, see [git log](../../commits/main).
 
 ## Completed
 
@@ -34,9 +34,9 @@
   - runtime auth-file sanitizer prevents Gradio crash on comments/blank lines
   - credential format validation with clear error messages
 - Documentation and template:
-  - template defaults to `ghcr.io/aegisnir/a1111-webui-aegisnir:dev`
+  - template defaults to `ghcr.io/aegisnir/a1111-webui-aegisnir:latest`
   - README Quick Start updated with manual template import instructions (not yet in CA)
-  - all `blob/main/` links in template.xml corrected to `blob/dev/`
+  - all template.xml links point to `blob/main/`
   - explicit notes for expected `No checkpoints found` behavior with `--no-download-sd-model`
 - Licensing/docs added:
   - MIT repo license
@@ -82,18 +82,16 @@
   - Startup pause notice added after banner (gap lasts several minutes; prevents premature restarts)
   - All annotation box colors fixed: color set once on `┌` line, reset once on `└` line
 - Release posture decided:
-  - `v1.0.3` pre-release on `dev` branch (supersedes broken `v1.0.2`)
-  - `main` and `:latest` frozen pending real-world validation
+  - `v1.0.3` stable release on `main` branch (promoted from `dev` after real-world validation)
+  - `:latest` image to be published from `main`
+- `dev` → `main` promotion completed via fast-forward push (PR #6 closed, direct push used due to `required_linear_history` ruleset)
 
 ## In Progress
 
-- Merging `dev` → `main` via PR #6. All CI checks pass. Blocked by branch protection:
-  unresolved Copilot review conversations must be dismissed before PR can be merged.
-  Required approving review count set to 0. Resolve open threads in PR #6 Files view, then merge.
+None.
 
 ## Remaining
 
-- Resolve open conversations on PR #6 and complete the merge.
 - Build and push `:latest` + `:v1.0.3` from `main` on Aether (`git pull && bash scripts/build-push.sh`).
 - Re-run fresh install, persistence, and read-only smoke tests against `:latest`.
 - CA App Store submission (deferred until `:latest` is ready).
@@ -104,9 +102,19 @@
 - `template.xml`: all `dev` branch refs updated to `main`/`latest`
   (`<Repository>`, `<Icon>`, Description image tag, Overview image/README links, `<Changelog>`, `<TemplateURL>`)
 - `scripts/build-push.sh`: now branch-aware — pushes `:latest` + `:<version>` on `main`, `:dev` + `:<version>` on dev
-- PR #6 opened: dev → main, all CI checks pass
+
+## Session 14 Changes (dev → main promotion)
+
+- Fast-forward pushed `dev` → `origin/main` (b8c885d..b9bb836)
+- Updated all refs on `main` branch: dev/:dev → main/:latest
+  - `template.xml`: 8 ref changes (Repository, Icon, Description, Overview, Changelog, TemplateURL)
+  - `README.md`: CI badge branch, wget URL, Quick Reference image tag
+  - `trivy-image.yml`: comment, job name, image-ref all → `:latest`
+  - `CA_PREFLIGHT_REPORT.md`: rewritten for main/:latest release posture
+  - `VERSIONING.md`: updated to reflect `:latest` is now the stable tag
+  - `STATUS.md`: updated for main branch context
 
 ## Notes
 
-- Published image: `ghcr.io/aegisnir/a1111-webui-aegisnir:dev` and `:v1.0.3` (`:v1.0.2` superseded — broken xformers)
+- Published image: `ghcr.io/aegisnir/a1111-webui-aegisnir:dev` and `:v1.0.3` (`:latest` pending build+push from `main`)
 - For production-style deployments, use `WEBUI_AUTH_FILE` when possible and treat logs as sensitive.
