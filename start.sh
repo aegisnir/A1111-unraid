@@ -601,6 +601,12 @@ print_launch_notice() {
   echo "    ${INFO}→ Upstream library deprecation notice. Safe to ignore.${RESET}"
   echo "  ${ACCENT}▸ 'UserWarning: TypedStorage is deprecated'${RESET}"
   echo "    ${INFO}→ Internal PyTorch notice. Safe to ignore.${RESET}"
+  echo "  ${ACCENT}▸ 'FutureWarning: resume_download is deprecated'${RESET}"
+  echo "    ${INFO}→ huggingface_hub deprecation notice during model or extension loading. Safe to ignore.${RESET}"
+  echo "  ${ACCENT}▸ '[ERROR]: Config states .../civitai_subfolders.json, \"created_at\" does not exist'${RESET}"
+  echo "    ${INFO}→ CivitAI Shortcut extension schema notice. Safe to ignore.${RESET}"
+  echo "  ${ACCENT}▸ 'CivitAI Browser+: Basemodel fetch error'${RESET}"
+  echo "    ${INFO}→ CivitAI network API call failed at startup. Safe to ignore; retried on demand.${RESET}"
   echo "  ${ACCENT}▸ 'Stable diffusion model failed to load' (only when no checkpoint exists)${RESET}"
   echo "    ${WARN}→ Expected until a model is placed in /data/models/Stable-diffusion/.${RESET}"
   echo ""
@@ -648,6 +654,26 @@ monitor_webui_output() {
       echo "  ${C_WARN}│  then restart the container, or use Settings → Refresh in the UI.   │${C_RESET}"
       echo "  ${C_WARN}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
+    fi
+
+    # xformers CUDA build mismatch — stale venv has cu128 wheel but torch is cu130
+    # This can survive a container update if venv was not deleted before rebuild.
+    if [[ "${line}" == *"xFormers was built for:"* && "${line}" == *"cu128"* ]]; then
+      echo ""
+      echo "  ${C_CRIT}┌─ [XFORMERS MISMATCH] ───────────────────────────────────────────────┐${C_RESET}"
+      echo "  ${C_CRIT}│  xformers was installed from PyPI (cu128 build) but torch is cu130.  │${C_RESET}"
+      echo "  ${C_CRIT}│  CUDA extensions will not load and performance will be reduced.      │${C_RESET}"
+      echo "  ${C_CRIT}│                                                                     │${C_RESET}"
+      echo "  ${C_CRIT}│  Fix: delete the stale venv so the container rebuilds it cleanly:   │${C_RESET}"
+      echo "  ${C_CRIT}│    rm -rf /mnt/user/ai/data/venv                                   │${C_RESET}"
+      echo "  ${C_CRIT}│  (adjust path to match your data share), then restart container.    │${C_RESET}"
+      echo "  ${C_CRIT}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
+      echo ""
+    fi
+
+    # CivitAI Shortcut 'created_at' schema notice — shows as [ERROR] but is harmless
+    if [[ "${line}" == *"Config states"* && "${line}" == *'"created_at" does not exist'* ]]; then
+      echo "  ${C_INFO}[NOTE] ↑ CivitAI Shortcut extension schema notice. Safe to ignore.${C_RESET}"
     fi
 
     # CUDA out of memory — actionable GPU issue
