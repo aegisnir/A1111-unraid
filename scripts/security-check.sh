@@ -121,15 +121,15 @@ check_auth_guardrails() {
 }
 
 check_syntax_and_template() {
-  if bash -n entrypoint.sh && bash -n start.sh; then
-    pass "Bash syntax checks passed (entrypoint.sh, start.sh)"
+  if bash -n entrypoint.sh && bash -n start.sh && bash -n scripts/build-push.sh && bash -n scripts/security-check.sh; then
+    pass "Bash syntax checks passed (entrypoint.sh, start.sh, scripts/build-push.sh, scripts/security-check.sh)"
   else
     fail "Bash syntax check failed"
   fi
 
   if command -v shellcheck >/dev/null 2>&1; then
-    if shellcheck -s bash entrypoint.sh start.sh >/dev/null 2>&1; then
-      pass "shellcheck passed (entrypoint.sh, start.sh)"
+    if shellcheck -s bash entrypoint.sh start.sh scripts/build-push.sh scripts/security-check.sh >/dev/null 2>&1; then
+      pass "shellcheck passed (entrypoint.sh, start.sh, scripts/build-push.sh, scripts/security-check.sh)"
     else
       fail "shellcheck reported issues in startup scripts"
     fi
