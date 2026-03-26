@@ -615,9 +615,9 @@ print_launch_notice() {
   echo ""
   echo "${ACCENT}─────────────────────────────────────────────────────────────────────────${RESET}"
   echo ""
-  echo "  ${WARN}⏳ Starting up — there may be a pause of 30–60 seconds here while Python${RESET}"
+  echo "  ${WARN}⏳ Starting up — there may be a pause of several minutes here while Python${RESET}"
   echo "  ${WARN}   initialises, extensions load, and the model is read into VRAM.${RESET}"
-  echo "  ${WARN}   This is normal. The [READY] banner will appear when the WebUI is live.${RESET}"
+  echo "  ${WARN}   Time varies by system performance. The [READY] banner will appear when the WebUI is live.${RESET}"
   echo ""
 }
 
