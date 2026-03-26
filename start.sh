@@ -618,6 +618,10 @@ print_launch_notice() {
   echo ""
   echo "${ACCENT}─────────────────────────────────────────────────────────────────────────${RESET}"
   echo ""
+  echo "  ${WARN}⏳ Starting up — there may be a pause of 30–60 s here while Python${RESET}"
+  echo "  ${WARN}   initialises, extensions load, and the model is read into VRAM.${RESET}"
+  echo "  ${WARN}   This is normal. The [READY] banner will appear when the WebUI is live.${RESET}"
+  echo ""
 }
 
 # monitor_webui_output: pass all WebUI stdout/stderr through unchanged, and
