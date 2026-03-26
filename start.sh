@@ -311,7 +311,13 @@ if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
   # Try to install xformers (optional, non-fatal if it fails).
   # Pin to a version compatible with the torch/torchvision versions above so pip
   # does not upgrade torch to an incompatible release.
-  if ! "${VENV_PYTHON}" -m pip install --prefer-binary "xformers==${XFORMERS_VERSION}"; then
+  # IMPORTANT: --extra-index-url is required here. The PyPI xformers wheel is compiled
+  # against cu128; installing without the PyTorch index causes CUDA extension load
+  # failures even when the torch version is correct. The cu130 build lives on the
+  # PyTorch wheel index alongside torch and torchvision.
+  if ! "${VENV_PYTHON}" -m pip install --prefer-binary \
+      --extra-index-url "${TORCH_INDEX_URL}" \
+      "xformers==${XFORMERS_VERSION}"; then
     echo "[WARNING] xformers install failed for version ${XFORMERS_VERSION}. WebUI will run without it."
   fi
   "${VENV_PYTHON}" - <<'PY'
