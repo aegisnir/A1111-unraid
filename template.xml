@@ -53,7 +53,7 @@
     Add a <b>.safetensors</b> or <b>.ckpt</b> file under <b>/data/models/Stable-diffusion</b>.
 
     <b>Log safety:</b>
-    Sensitive auth flags (<b>--gradio-auth</b>, <b>--gradio-auth-path</b>, <b>--api-auth</b>, <b>--api-auth-path</b>) have their values replaced with <b>&lt;redacted&gt;</b> in startup log output, so logs are safe to share.
+    Sensitive auth flags (<b>--gradio-auth</b>, <b>--gradio-auth-path</b>, <b>--api-auth</b>) have their values replaced with <b>&lt;redacted&gt;</b> in startup log output, so logs are safe to share.
 
     <b>Built-in healthcheck:</b>
     The image includes a Docker HEALTHCHECK that probes port 7860. It uses generous timers (10 min start grace, 5 retries) to avoid false positives during bootstrap, model loading, or heavy extension operations. Unhealthy status is informational only and does not auto-restart the container.
