@@ -1,15 +1,15 @@
 # Stable Diffusion WebUI (AUTOMATIC1111) for Unraid
 
-[![GitHub release](https://img.shields.io/github/v/release/aegisnir/A1111-unraid?include_prereleases&label=release&color=blue)](https://github.com/aegisnir/A1111-unraid/releases)
-[![Image: GHCR](https://img.shields.io/badge/image-ghcr.io-blue?logo=docker)](https://github.com/aegisnir/A1111-unraid/pkgs/container/a1111-webui-aegisnir)
-[![Upstream: AUTOMATIC1111](https://img.shields.io/badge/upstream-AUTOMATIC1111-orange)](https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/dev)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Status: Pre-release](https://img.shields.io/badge/status-pre--release-yellow)](https://github.com/aegisnir/A1111-unraid/releases)
-[![Platform: Unraid](https://img.shields.io/badge/platform-Unraid-F15A2C?logo=unraid&logoColor=white)](https://unraid.net/)
-[![GPU: NVIDIA](https://img.shields.io/badge/GPU-NVIDIA-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
-[![CUDA 13.0.2](https://img.shields.io/badge/CUDA-13.0.2-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit-archive)
-[![CI](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml)
-[![Security Hardened](https://img.shields.io/badge/security-hardened-informational)](SECURITY.md)
+[![Cyan badge displaying latest GitHub release version for A1111-unraid, clickable to view release history](https://img.shields.io/github/v/release/aegisnir/A1111-unraid?include_prereleases&label=release&color=cyan)](https://github.com/aegisnir/A1111-unraid/releases)
+[![Blue badge with Docker logo indicating container image hosted on GitHub Container Registry, clickable to view packages](https://img.shields.io/badge/image-ghcr.io-blue?logo=docker)](https://github.com/aegisnir/A1111-unraid/pkgs/container/a1111-webui-aegisnir)
+[![Orange badge identifying upstream source as AUTOMATIC1111 stable-diffusion-webui dev branch, clickable to view repository](https://img.shields.io/badge/upstream-AUTOMATIC1111-orange)](https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/dev)
+[![Green badge indicating MIT License, clickable to view license file](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Yellow badge displaying pre-release status, clickable to view releases page](https://img.shields.io/badge/status-pre--release-yellow)](https://github.com/aegisnir/A1111-unraid/releases)
+[![Orange badge with Unraid logo indicating platform compatibility, clickable to visit Unraid website](https://img.shields.io/badge/platform-Unraid-F15A2C?logo=unraid&logoColor=white)](https://unraid.net/)
+[![Green badge with NVIDIA logo indicating GPU support functionality, clickable to view CUDA toolkit documentation](https://img.shields.io/badge/GPU-NVIDIA-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
+[![Green badge with NVIDIA logo displaying CUDA version 13.0.2 requirement, clickable to view CUDA toolkit archive](https://img.shields.io/badge/CUDA-13.0.2-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit-archive)
+[![Badge showing Continuous Integration workflow status passing, clickable to view CI actions page](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml)
+[![Light blue badge indicating security hardening with best practices implemented, clickable to view security details](https://img.shields.io/badge/security-hardened-informational)](SECURITY.md)
 
 This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, easy to use, and more security-conscious than a throwaway personal build.
 
