@@ -609,6 +609,9 @@ print_launch_notice() {
   echo "    ${INFO}→ CivitAI network API call failed at startup. Safe to ignore; retried on demand.${RESET}"
   echo "  ${ACCENT}▸ 'Stable diffusion model failed to load' (only when no checkpoint exists)${RESET}"
   echo "    ${WARN}→ Expected until a model is placed in /data/models/Stable-diffusion/.${RESET}"
+  echo "  ${ACCENT}▸ 'ERROR: Exception in ASGI application' with 'WebSocketDisconnect: 1001'${RESET}"
+  echo "    ${INFO}→ Browser dropped its WebSocket when the server shut down (Apply and quit / stop).${RESET}"
+  echo "    ${INFO}  Code 1001 = 'Going Away' — the normal browser close. Not a real error.${RESET}"
   echo ""
   echo "  ${INFO}Inline notes marked [NOTE] or [KNOWN WARNING] are added by this container${RESET}"
   echo "  ${INFO}and are not part of the upstream WebUI output.${RESET}"
@@ -675,6 +678,14 @@ monitor_webui_output() {
     # CivitAI Shortcut 'created_at' schema notice — shows as [ERROR] but is harmless
     if [[ "${line}" == *"Config states"* && "${line}" == *'"created_at" does not exist'* ]]; then
       echo "  ${C_INFO}[NOTE] ↑ CivitAI Shortcut extension schema notice. Safe to ignore.${C_RESET}"
+    fi
+
+    # Uvicorn WebSocket disconnect on graceful shutdown (Apply and quit / container stop).
+    # The browser drops its WebSocket connection while the server is shutting down.
+    # Uvicorn logs this as "Exception in ASGI application" with WebSocketDisconnect: 1001.
+    # 1001 = "Going Away" — the normal browser-initiated close code. Not a real error.
+    if [[ "${line}" == *"Exception in ASGI application"* ]]; then
+      echo "  ${C_INFO}[NOTE] ↑ Browser WebSocket disconnected during shutdown (code 1001 = normal 'Going Away'). Safe to ignore.${C_RESET}"
     fi
 
     # CUDA out of memory — actionable GPU issue
