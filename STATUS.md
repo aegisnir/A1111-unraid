@@ -87,15 +87,24 @@
 
 ## In Progress
 
-- Preparing to promote `dev` → `main` / `:latest` following successful real-world validation.
+- Merging `dev` → `main` via PR #6. All CI checks pass. Blocked by branch protection:
+  unresolved Copilot review conversations must be dismissed before PR can be merged.
+  Required approving review count set to 0. Resolve open threads in PR #6 Files view, then merge.
 
 ## Remaining
 
-- Merge `dev` → `main` and push `:latest` tag to GHCR.
-- Update `template.xml` `<Icon>` and `<TemplateURL>` refs from `dev` → `main`.
+- Resolve open conversations on PR #6 and complete the merge.
+- Build and push `:latest` + `:v1.0.3` from `main` on Aether (`git pull && bash scripts/build-push.sh`).
 - Re-run fresh install, persistence, and read-only smoke tests against `:latest`.
 - CA App Store submission (deferred until `:latest` is ready).
 - Close remaining Dependabot PRs (#1, #2, #4).
+
+## Session 13 Changes (dev → main promotion prep)
+
+- `template.xml`: all `dev` branch refs updated to `main`/`latest`
+  (`<Repository>`, `<Icon>`, Description image tag, Overview image/README links, `<Changelog>`, `<TemplateURL>`)
+- `scripts/build-push.sh`: now branch-aware — pushes `:latest` + `:<version>` on `main`, `:dev` + `:<version>` on dev
+- PR #6 opened: dev → main, all CI checks pass
 
 ## Notes
 
