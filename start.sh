@@ -677,14 +677,21 @@ monitor_webui_output() {
     fi
 
     # CUDA out of memory — actionable GPU issue
-    if [[ "${line}" == *"CUDA out of memory"* ]]; then
+    # Match both "CUDA out of memory" and "OutOfMemoryError: CUDA out of memory"
+    if [[ "${line}" == *"CUDA out of memory"* || "${line}" == *"OutOfMemoryError"* ]]; then
       echo ""
       echo "  ${C_CRIT}┌─ [GPU MEMORY ERROR] ────────────────────────────────────────────────┐${C_RESET}"
       echo "  ${C_CRIT}│  Your GPU ran out of VRAM during this operation.                    │${C_RESET}"
-      echo "  ${C_CRIT}│  Tips:                                                              │${C_RESET}"
+      echo "  ${C_CRIT}│                                                                     │${C_RESET}"
+      echo "  ${C_CRIT}│  Quick fix (add as container env var, then restart):                │${C_RESET}"
+      echo "  ${C_CRIT}│    PYTORCH_ALLOC_CONF = expandable_segments:True                   │${C_RESET}"
+      echo "  ${C_CRIT}│    Reduces fragmentation; often resolves marginal OOM.              │${C_RESET}"
+      echo "  ${C_CRIT}│                                                                     │${C_RESET}"
+      echo "  ${C_CRIT}│  Other tips:                                                        │${C_RESET}"
+      echo "  ${C_CRIT}│    • Disable Hires. fix or reduce its scale (biggest VRAM saver)    │${C_RESET}"
       echo "  ${C_CRIT}│    • Reduce image resolution or batch size                          │${C_RESET}"
-      echo "  ${C_CRIT}│    • Enable xformers (--xformers in COMMANDLINE_ARGS)               │${C_RESET}"
-      echo "  ${C_CRIT}│    • Try a smaller or lower-precision model                         │${C_RESET}"
+      echo "  ${C_CRIT}│    • Add --medvram to COMMANDLINE_ARGS (slower, uses less VRAM)     │${C_RESET}"
+      echo "  ${C_CRIT}│    • xformers is already enabled — good                             │${C_RESET}"
       echo "  ${C_CRIT}└─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
     fi
