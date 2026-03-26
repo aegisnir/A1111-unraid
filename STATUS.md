@@ -64,18 +64,38 @@
 - xformers 0.0.35 CUDA extension fix: `torch` pinned back from 2.11.0→2.10.0 and
   `torchvision` from 0.26.0→0.25.0 — the cu130 wheel was compiled against 2.10.0;
   mismatched versions silently disabled memory-efficient attention
+- xformers pip install fix: added `--extra-index-url` to the xformers install in `start.sh`
+  so pip resolves the cu130 wheel from the PyTorch index instead of the cu128 wheel from PyPI;
+  without this flag the correct torch version alone is not enough — CUDA extensions still fail
+- Real-world validation of v1.0.3 completed on RTX 4090 hardware:
+  - `torch=2.10.0+cu130`, `torchvision=0.25.0+cu130`, `xformers=0.0.35` all confirmed loading
+  - xformers CUDA extensions confirmed: no `xFormers can't load C++/CUDA extensions` warning
+  - `[READY]` banner confirmed firing; WebUI confirmed reachable
+- Log/monitor improvements (all from real-hardware validation findings):
+  - `scripts/build-push.sh` added — repeatable build+push helper for both `:dev` and `:v1.0.3` tags
+  - pre-launch known-harmless table expanded: `resume_download` FutureWarning, CivitAI Shortcut
+    `[ERROR]` schema notice, CivitAI Browser+ Basemodel fetch error
+  - `[XFORMERS MISMATCH]` inline handler added: fires when stale cu128 wheel is detected,
+    shows explicit venv-delete remediation
+  - `[GPU MEMORY ERROR]` box updated with `PYTORCH_ALLOC_CONF=expandable_segments:True` as lead tip,
+    Hires. fix callout, `--medvram` fallback; stale xformers tip replaced
+  - Startup pause notice added after banner (gap lasts several minutes; prevents premature restarts)
+  - All annotation box colors fixed: color set once on `┌` line, reset once on `└` line
 - Release posture decided:
   - `v1.0.3` pre-release on `dev` branch (supersedes broken `v1.0.2`)
   - `main` and `:latest` frozen pending real-world validation
 
 ## In Progress
 
-- Real-world validation of the `dev` pre-release.
+- Preparing to promote `dev` → `main` / `:latest` following successful real-world validation.
 
 ## Remaining
 
-- Confirm `dev` pre-release is stable before promoting to `main` / `:latest`.
+- Merge `dev` → `main` and push `:latest` tag to GHCR.
+- Update `template.xml` `<Icon>` and `<TemplateURL>` refs from `dev` → `main`.
+- Re-run fresh install, persistence, and read-only smoke tests against `:latest`.
 - CA App Store submission (deferred until `:latest` is ready).
+- Close remaining Dependabot PRs (#1, #2, #4).
 
 ## Notes
 

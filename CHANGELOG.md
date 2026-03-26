@@ -7,6 +7,40 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
+- fix: add `--extra-index-url` to xformers pip install so the cu130 wheel is pulled from
+  the PyTorch index instead of PyPI; without this flag pip resolved the cu128 PyPI wheel
+  even when torch was correctly at cu130, causing `xFormers was built for: PyTorch 2.10.0+cu128`
+  CUDA extension load failures at runtime even with a correctly pinned torch version
+- chore: add `scripts/build-push.sh` — repeatable helper to `docker buildx build` and push
+  both `:dev` and `:v1.0.3` tags to GHCR; excluded from `.dockerignore` so it is not shipped in
+  the image; shellcheck and syntax coverage added to `scripts/security-check.sh`
+- fix: add inline monitor handlers and pre-launch known-harmless entries for patterns observed
+  during real-hardware validation:
+  - `print_launch_notice`: three new known-harmless entries:
+    - `FutureWarning: resume_download is deprecated` (huggingface_hub deprecation during model/extension load)
+    - `[ERROR]: Config states .../civitai_subfolders.json, "created_at" does not exist`
+      (CivitAI Shortcut extension schema notice; tagged `[ERROR]` upstream but harmless)
+    - `CivitAI Browser+: Basemodel fetch error` (startup network API call, benign; retried on demand)
+  - `monitor_webui_output`: two new inline handlers:
+    - xformers CUDA build mismatch (`cu128` wheel vs `cu130` torch) — `[XFORMERS MISMATCH]`
+      box with explicit venv-delete remediation (`rm -rf /mnt/user/ai/data/venv`)
+    - CivitAI Shortcut config_states `[ERROR]` line — `[NOTE]` tag immediately after the
+      line to defuse the alarming label in context
+- fix: `[GPU MEMORY ERROR]` box updated with `PYTORCH_ALLOC_CONF=expandable_segments:True`
+  as the first and easiest mitigation (PyTorch's own recommendation; reduces fragmentation,
+  often resolves marginal OOM without quality tradeoff); added Hires. fix callout as the
+  biggest per-generation VRAM consumer on SDXL; `--medvram` tip added as fallback;
+  replaced stale `Enable xformers` tip with `xformers is already enabled — good`
+  (xformers is on by default in this image)
+- fix: add `⏳ Starting up` notice after the pre-launch banner; the log is silent for several
+  minutes while Python initialises, extensions load, and the model is read into VRAM;
+  without a notice users assume the container has hung and restart it prematurely
+- fix: all multi-line annotation boxes now set color once on the opening `┌` line and reset
+  only on the closing `└` line; previously each interior `│` line had its own ANSI
+  color-set + color-reset, causing Unraid's Docker log viewer to render interior lines
+  in default white while only the header line appeared colored; affected boxes:
+  `[KNOWN WARNING]`, `[XFORMERS MISMATCH]`, `[GPU MEMORY ERROR]`, `[GPU NOT DETECTED]`, `[READY]`
+
 ---
 
 ## [v1.0.3] - 2026-03-25
