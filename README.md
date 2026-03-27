@@ -17,7 +17,8 @@ Other containers for AUTOMATIC1111 on Unraid exist, but I wasn't happy with any 
 
 This is a personal hobby project and it is heavily AI-assisted. This is also a learning experience for me as I have never made my own container before or produced anything on this scale for others. I care a lot about security and I am trying to make thoughtful choices, but I am not a programmer or security expert, so mistakes and inaccuracies are likely. If you notice something I could do better, please let me know. I welcome constructive criticism and feedback, and I am willing to learn and correct my mistakes. Thank you for your interest and I hope you find this useful.
 
-> ⚠️ Public internet exposure is **not** the intended use case.
+> [!CAUTION]
+> Public internet exposure is **not** the intended use case.
 > If you expose this beyond a trusted network, the risk profile changes significantly and you should make those decisions carefully for your own environment.
 
 ---
@@ -73,7 +74,8 @@ The included Unraid template sets `--runtime=nvidia` in Extra Parameters by defa
 
 ## Quick Start
 
-> **Note:** This project is not yet in the Unraid Community Applications store. Use the manual template import steps below.
+> [!NOTE]
+> This project is not yet in the Unraid Community Applications store. Use the manual template import steps below.
 
 1. **Confirm your GPU works.** Run the [GPU sanity check](#gpu-sanity-check) above if you have not already.
 
@@ -323,8 +325,10 @@ If API is enabled (`--api`), the container mirrors auth-file credentials into `-
 - `API_AUTH_FILE_MODE=mirror-webui-file`
 - `API_AUTH_FILE_MODE=disabled`
 
-> **Security note on API auth:** AUTOMATIC1111's `--api-auth` flag accepts credentials as a plain string (not a file path). When mirroring is active, the container appends `--api-auth user:password` to the `COMMANDLINE_ARGS` environment variable. This means credentials are readable via `docker inspect` and `/proc/<pid>/environ` by any process or user that can inspect the container. This is a known upstream limitation of the A1111 API auth mechanism. There is no file-based equivalent for `--api-auth`. If this exposure is unacceptable for your environment, set `API_AUTH_FILE_MODE=disabled` and do not enable the API, or place the entire service behind a reverse proxy that handles API auth at the network layer.
+> [!WARNING]
+> **API auth exposure:** AUTOMATIC1111's `--api-auth` flag accepts credentials as a plain string (not a file path). When mirroring is active, the container appends `--api-auth user:password` to the `COMMANDLINE_ARGS` environment variable. This means credentials are readable via `docker inspect` and `/proc/<pid>/environ` by any process or user that can inspect the container. This is a known upstream limitation of the A1111 API auth mechanism. There is no file-based equivalent for `--api-auth`. If this exposure is unacceptable for your environment, set `API_AUTH_FILE_MODE=disabled` and do not enable the API, or place the entire service behind a reverse proxy that handles API auth at the network layer.
 
+> [!IMPORTANT]
 > **Why `WEBUI_USERNAME` / `WEBUI_PASSWORD` were removed:** Passing credentials via template/env variables exposes them in the same way. Auth-file based login (`--gradio-auth-path`) is safer because the credential string never appears in env vars or command-line arguments.
 
 #### Manual auth flags
@@ -344,6 +348,7 @@ If `--api-auth` is provided without `--api`, startup logs now warn that API auth
 
 `COMMANDLINE_ARGS` is passed directly to `launch.py`.
 
+> [!NOTE]
 > **Log redaction:** Sensitive auth flags (`--gradio-auth`, `--gradio-auth-path`, `--api-auth`) have their values replaced with `<redacted>` in startup log output. The flag names remain visible so you can confirm they are active.
 
 **Default** (from the Unraid template):
@@ -352,7 +357,8 @@ If `--api-auth` is provided without `--api`, startup logs now warn that API auth
 --listen --port 7860 --data-dir /data --xformers --no-download-sd-model --enable-insecure-extension-access
 ```
 
-> **Note:** The container automatically appends `--gradio-auth-path <runtime-auth-file>` at launch (see [Authentication](#authentication-defaults)). You do not need to add auth flags yourself. They are injected by `start.sh` based on your `WEBUI_AUTH_FILE`.
+> [!TIP]
+> The container automatically appends `--gradio-auth-path <runtime-auth-file>` at launch (see [Authentication](#authentication-defaults)). You do not need to add auth flags yourself. They are injected by `start.sh` based on your `WEBUI_AUTH_FILE`.
 
 API is intentionally not part of the default args. Add `--api` only when you explicitly need API access.
 
@@ -512,7 +518,8 @@ The image includes a built-in `HEALTHCHECK` that probes whether the Gradio HTTP 
 | `--timeout` | 30 s | Absorbs brief pauses during model swaps and extension installs |
 | `--retries` | 5 | Requires ~12 min of total unresponsiveness before marking unhealthy |
 
-**Important:** Unhealthy status is **informational only**. Docker/Unraid will not auto-restart the container. It just shows a red dot vs green dot. Normal heavy operations (model loading, ControlNet preprocessing, image browser scanning) do **not** cause false positives because Gradio handles HTTP requests in separate threads.
+> [!IMPORTANT]
+> Unhealthy status is **informational only**. Docker/Unraid will not auto-restart the container. It just shows a red dot vs green dot. Normal heavy operations (model loading, ControlNet preprocessing, image browser scanning) do **not** cause false positives because Gradio handles HTTP requests in separate threads.
 
 ## Operational Notes
 
