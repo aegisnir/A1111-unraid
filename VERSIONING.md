@@ -29,9 +29,9 @@ If you choose to use something from this repo, I recommend reviewing changes for
 
 The current tagging strategy:
 
-- `:dev` — floating pre-release tag, always points to the latest commit on the `dev` branch. Use this if you want to track development.
-- `:vX.Y.Z` (e.g. `:v1.0.0`) — pinned version tags for specific tested states. Use these if you want reproducibility.
-- `:latest` — stable release tag, promoted from `dev` only after real-world validation. Not yet published.
+- `:dev`: floating pre-release tag, always points to the latest commit on the `dev` branch. Use this if you want to track development.
+- `:vX.Y.Z` (e.g. `:v1.0.0`): pinned version tags for specific tested states. Use these if you want reproducibility.
+- `:latest`: stable release tag, promoted from `dev` only after real-world validation. Not yet published.
 
 `main` branch and `:latest` are frozen until `dev` proves stable.
 

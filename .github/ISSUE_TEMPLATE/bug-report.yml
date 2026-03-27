@@ -87,4 +87,4 @@ body:
     id: extra
     attributes:
       label: Additional context
-      description: "Anything else that might help — screenshots, custom COMMANDLINE_ARGS, extra parameters, etc."
+      description: "Anything else that might help -- screenshots, custom COMMANDLINE_ARGS, extra parameters, etc."

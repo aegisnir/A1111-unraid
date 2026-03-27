@@ -218,7 +218,7 @@ check_supply_chain() {
   if [[ -f ".github/dependabot.yml" ]]; then
     pass ".github/dependabot.yml present (automated dependency update coverage)"
   else
-    fail ".github/dependabot.yml missing — no automated dependency update coverage"
+    fail ".github/dependabot.yml missing -- no automated dependency update coverage"
   fi
 }
 

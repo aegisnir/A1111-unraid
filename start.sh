@@ -66,7 +66,7 @@ RUNTIME_REPOS_DIR="/data/repositories"                             # Persistent 
 RUNTIME_EXTENSIONS_DIR="/data/extensions"                          # Persistent user-installed extensions
 RUNTIME_CONFIG_STATES_DIR="/config/a1111/config_states"            # Persistent extension state snapshots (in appdata)
 MIN_BOOTSTRAP_FREE_MB="${MIN_BOOTSTRAP_FREE_MB:-8192}"             # Abort first-run if /data has less than this free
-TORCH_VERSION="${TORCH_VERSION:-2.10.0}"                           # Pinned version — must match what xformers was compiled against
+TORCH_VERSION="${TORCH_VERSION:-2.10.0}"                           # Pinned version -- must match what xformers was compiled against
 TORCHVISION_VERSION="${TORCHVISION_VERSION:-0.25.0}"
 XFORMERS_VERSION="${XFORMERS_VERSION:-0.0.35}"
 RESTART_ON_EXIT="${RESTART_ON_EXIT:-1}"            # 1 = restart WebUI after any exit; 0 = exit container cleanly
@@ -589,7 +589,7 @@ print_launch_notice() {
 
   if [[ "${model_count}" -eq 0 ]]; then
     echo "  ${WARN}⚠  No model checkpoints found in /data/models/Stable-diffusion/"
-    echo "     You will see a 'No checkpoints found' warning below — this is expected"
+    echo "     You will see a 'No checkpoints found' warning below -- this is expected"
     echo "     until you add a model. The WebUI will still start."
     echo "     Fix: add a .safetensors or .ckpt file to:"
     echo "            /data/models/Stable-diffusion/"
@@ -614,7 +614,7 @@ print_launch_notice() {
   echo "    ${WARN}→ Expected until a model is placed in /data/models/Stable-diffusion/.${RESET}"
   echo "  ${ACCENT}▸ 'ERROR: Exception in ASGI application' with 'WebSocketDisconnect: 1001'${RESET}"
   echo "    ${INFO}→ Browser dropped its WebSocket when the server shut down (Apply and quit / stop).${RESET}"
-  echo "    ${INFO}  Code 1001 = 'Going Away' — the normal browser close. Not a real error.${RESET}"
+  echo "    ${INFO}  Code 1001 = 'Going Away' -- the normal browser close. Not a real error.${RESET}"
   echo ""
   echo "  ${INFO}Inline notes marked [NOTE] or [KNOWN WARNING] are added by this container${RESET}"
   echo "  ${INFO}and are not part of the upstream WebUI output.${RESET}"
@@ -638,19 +638,19 @@ monitor_webui_output() {
   while IFS= read -r line; do
     printf '%s\n' "${line}"
 
-    # timm FutureWarning — appears on every start, always harmless
+    # timm FutureWarning -- appears on every start, always harmless
     if [[ $_saw_timm -eq 0 && "${line}" == *"Importing from timm.models.layers is deprecated"* ]]; then
       _saw_timm=1
       echo "  ${C_INFO}[NOTE] ↑ Harmless upstream deprecation warning from the timm library. Safe to ignore.${C_RESET}"
     fi
 
-    # PyTorch TypedStorage deprecation — common internal notice, harmless
+    # PyTorch TypedStorage deprecation -- common internal notice, harmless
     if [[ $_saw_storage -eq 0 && "${line}" == *"TypedStorage is deprecated"* ]]; then
       _saw_storage=1
       echo "  ${C_INFO}[NOTE] ↑ Harmless internal PyTorch deprecation notice. Safe to ignore.${C_RESET}"
     fi
 
-    # No checkpoints found — needs action if user intends to generate images
+    # No checkpoints found -- needs action if user intends to generate images
     if [[ $_saw_checkpoint -eq 0 && "${line}" == *"No checkpoints found"* ]]; then
       _saw_checkpoint=1
       echo ""
@@ -665,7 +665,7 @@ monitor_webui_output() {
       echo ""
     fi
 
-    # xformers CUDA build mismatch — stale venv has cu128 wheel but torch is cu130
+    # xformers CUDA build mismatch -- stale venv has cu128 wheel but torch is cu130
     # This can survive a container update if venv was not deleted before rebuild.
     if [[ "${line}" == *"xFormers was built for:"* && "${line}" == *"cu128"* ]]; then
       echo ""
@@ -680,7 +680,7 @@ monitor_webui_output() {
       echo ""
     fi
 
-    # CivitAI Shortcut 'created_at' schema notice — shows as [ERROR] but is harmless
+    # CivitAI Shortcut 'created_at' schema notice -- shows as [ERROR] but is harmless
     if [[ "${line}" == *"Config states"* && "${line}" == *'"created_at" does not exist'* ]]; then
       echo "  ${C_INFO}[NOTE] ↑ CivitAI Shortcut extension schema notice. Safe to ignore.${C_RESET}"
     fi
@@ -688,12 +688,12 @@ monitor_webui_output() {
     # Uvicorn WebSocket disconnect on graceful shutdown (Apply and quit / container stop).
     # The browser drops its WebSocket connection while the server is shutting down.
     # Uvicorn logs this as "Exception in ASGI application" with WebSocketDisconnect: 1001.
-    # 1001 = "Going Away" — the normal browser-initiated close code. Not a real error.
+    # 1001 = "Going Away" -- the normal browser-initiated close code. Not a real error.
     if [[ "${line}" == *"Exception in ASGI application"* ]]; then
       echo "  ${C_INFO}[NOTE] ↑ Browser WebSocket disconnected during shutdown (code 1001 = normal 'Going Away'). Safe to ignore.${C_RESET}"
     fi
 
-    # CUDA out of memory — actionable GPU issue
+    # CUDA out of memory -- actionable GPU issue
     # Match both "CUDA out of memory" and "OutOfMemoryError: CUDA out of memory"
     if [[ "${line}" == *"CUDA out of memory"* || "${line}" == *"OutOfMemoryError"* ]]; then
       echo ""
@@ -708,12 +708,12 @@ monitor_webui_output() {
       echo "  │    • Disable Hires. fix or reduce its scale (biggest VRAM saver)    │"
       echo "  │    • Reduce image resolution or batch size                          │"
       echo "  │    • Add --medvram to COMMANDLINE_ARGS (slower, uses less VRAM)     │"
-      echo "  │    • xformers is already enabled — good                             │"
+      echo "  │    • xformers is already enabled -- good                             │"
       echo "  └─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
     fi
 
-    # GPU not visible to PyTorch — likely missing --runtime=nvidia or NVIDIA plugin issue
+    # GPU not visible to PyTorch -- likely missing --runtime=nvidia or NVIDIA plugin issue
     if [[ "${line}" == *"torch.cuda.is_available() = False"* || "${line}" == *"Torch is not able to use GPU"* ]]; then
       echo ""
       echo "  ${C_CRIT}┌─ [GPU NOT DETECTED] ────────────────────────────────────────────────┐"
@@ -733,7 +733,7 @@ monitor_webui_output() {
 # _poll_for_ready: independent background poller that prints the READY banner
 # once the WebUI port is confirmed accepting TCP connections.
 # Runs completely outside the log monitor so it is not affected by log content
-# or Gradio version changes. Uses bash's built-in /dev/tcp — no external tools.
+# or Gradio version changes. Uses bash's built-in /dev/tcp -- no external tools.
 _poll_for_ready() {
   local _port="7860"
   # Extract --port value from COMMANDLINE_ARGS if the user overrode the default.
@@ -744,10 +744,10 @@ _poll_for_ready() {
     _port="${BASH_REMATCH[1]}"
   fi
 
-  # Determine the URL host — checked in order:
+  # Determine the URL host -- checked in order:
   #   1. WEBUI_HOST_IP env var (explicit override; required in bridge/NAT mode)
   #   2. Container's own outbound IP if it is a real LAN address
-  #      (macvlan / Unraid br0 / --network=host — container IP is directly reachable)
+  #      (macvlan / Unraid br0 / --network=host -- container IP is directly reachable)
   #   3. Placeholder with hint to set WEBUI_HOST_IP
   local _host_ip=""
   if [[ -n "${WEBUI_HOST_IP:-}" ]]; then
@@ -759,7 +759,7 @@ _poll_for_ready() {
     _own_ip="$(python3 -c 'import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.connect(("8.8.8.8",80)); print(s.getsockname()[0]); s.close()' 2>/dev/null || true)"
     # Docker allocates bridge subnets from 172.16.0.0/12 (172.16–172.31.x.x).
     # If the container's IP is outside that range it has a real LAN address and
-    # IS directly reachable by browsers — use it.  In bridge/NAT mode the container
+    # IS directly reachable by browsers -- use it.  In bridge/NAT mode the container
     # only sees a 172.x.x.x address; the host's real LAN IP is not discoverable
     # from inside the container without WEBUI_HOST_IP being set.
     if [[ -n "${_own_ip}" && ! "${_own_ip}" =~ ^172\.(1[6-9]|2[0-9]|3[01])\. ]]; then
@@ -774,7 +774,7 @@ _poll_for_ready() {
   while [[ $_elapsed -lt $_timeout ]]; do
     sleep "${_interval}"
     _elapsed=$(( _elapsed + _interval ))
-    # /dev/tcp is a bash built-in — opens a TCP connection without any external binary
+    # /dev/tcp is a bash built-in -- opens a TCP connection without any external binary
     # shellcheck disable=SC2188
     if (: < /dev/tcp/127.0.0.1/"${_port}") 2>/dev/null; then
       local _url
@@ -785,14 +785,14 @@ _poll_for_ready() {
       fi
       echo ""
       echo "  ${C_ACCENT}${C_BOLD}┌─ [READY] ───────────────────────────────────────────────────────────┐"
-      echo "  │  WebUI is LIVE — open it in your browser:                           │"
+      echo "  │  WebUI is LIVE -- open it in your browser:                           │"
       printf  "  │  %-67s│\n" "${_url}"
       echo "  └─────────────────────────────────────────────────────────────────────┘${C_RESET}"
       echo ""
       return 0
     fi
   done
-  # Timed out without confirming — silently give up (HEALTHCHECK will flag unhealthy)
+  # Timed out without confirming -- silently give up (HEALTHCHECK will flag unhealthy)
 }
 
 # is_truthy: Accepts common boolean-like env var values (1, true, yes, on)
@@ -835,7 +835,7 @@ fi
 #   recognised log lines without buffering or modifying the WebUI process.
 #
 # Restart policy:
-#   RESTART_ON_EXIT=1 (default): restart the WebUI after any exit — whether
+#   RESTART_ON_EXIT=1 (default): restart the WebUI after any exit -- whether
 #     the user clicked "Apply and quit" in the Extensions tab, or the process
 #     crashed.  A deliberate container stop (docker stop / Unraid Stop) sends
 #     SIGTERM, which sets _DELIBERATE_STOP=1 and suppresses the restart so the
@@ -848,7 +848,7 @@ fi
 #
 # Note on "Restart UI" (footer button vs "Apply and quit"):
 #   "Restart UI" is an in-process operation handled entirely inside A1111's
-#   Python while-loop — the Python process never exits and this bash loop is
+#   Python while-loop -- the Python process never exits and this bash loop is
 #   not involved.  In some Gradio versions the in-process restart has a
 #   port-release timing bug that prevents the browser from reconnecting; if
 #   that happens, "Apply and quit" + automatic restart here is the reliable
@@ -895,7 +895,7 @@ while true; do
     print_launch_notice
   fi
 
-  # Start the output monitor first — the reader must open the pipe before the
+  # Start the output monitor first -- the reader must open the pipe before the
   # writer, otherwise the writer blocks indefinitely waiting for a reader.
   monitor_webui_output < "${_LOG_PIPE}" &
   _MONITOR_PID=$!
@@ -905,7 +905,7 @@ while true; do
   "${VENV_PYTHON}" launch.py > "${_LOG_PIPE}" 2>&1 &
   _WEBUI_PID=$!
 
-  # Start the background poller — runs independently, prints READY banner when
+  # Start the background poller -- runs independently, prints READY banner when
   # port is confirmed live. Killed between restarts via _cleanup_monitor.
   _poll_for_ready &
   _POLLER_PID=$!
@@ -923,7 +923,7 @@ while true; do
   _WEBUI_EXIT_FINAL="${_WEBUI_EXIT}"
 
   # ── Restart decision ───────────────────────────────────────────────────────
-  # 1. Deliberate stop — docker stop, Unraid Stop button, etc.
+  # 1. Deliberate stop -- docker stop, Unraid Stop button, etc.
   if [[ "${_DELIBERATE_STOP}" == "1" ]]; then
     echo "${C_INFO}Container stop signal received. Exiting cleanly.${C_RESET}" >&2
     _WEBUI_EXIT_FINAL=0
@@ -933,9 +933,9 @@ while true; do
   # 2. Restart policy disabled via env var.
   if ! is_truthy "${RESTART_ON_EXIT}"; then
     if [[ "${_WEBUI_EXIT}" -eq 0 ]]; then
-      echo "${C_INFO}WebUI exited cleanly. RESTART_ON_EXIT is off — container exiting.${C_RESET}" >&2
+      echo "${C_INFO}WebUI exited cleanly. RESTART_ON_EXIT is off -- container exiting.${C_RESET}" >&2
     else
-      echo "${C_CRIT}WebUI exited with code ${_WEBUI_EXIT}. RESTART_ON_EXIT is off — container exiting.${C_RESET}" >&2
+      echo "${C_CRIT}WebUI exited with code ${_WEBUI_EXIT}. RESTART_ON_EXIT is off -- container exiting.${C_RESET}" >&2
     fi
     break
   fi
@@ -950,12 +950,12 @@ while true; do
 
   # 4. Choose restart delay and print reason.
   if [[ "${_WEBUI_EXIT}" -eq 0 ]]; then
-    # Clean exit ("Apply and quit") — flat delay, reset crash backoff.
+    # Clean exit ("Apply and quit") -- flat delay, reset crash backoff.
     _delay="${RESTART_DELAY}"
     _CRASH_DELAY="${RESTART_DELAY}"
     echo "${C_WARN}WebUI exited cleanly (Apply and quit?). Restarting in ${_delay}s...${C_RESET}" >&2
   else
-    # Crash or unexpected exit — exponential backoff.
+    # Crash or unexpected exit -- exponential backoff.
     _delay="${_CRASH_DELAY}"
     _next=$(( _CRASH_DELAY * 2 ))
     if [[ "${_next}" -gt "${RESTART_DELAY_MAX}" ]]; then

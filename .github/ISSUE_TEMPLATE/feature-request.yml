@@ -33,4 +33,4 @@ body:
     id: context
     attributes:
       label: Additional context
-      description: "Anything else — screenshots, links, related projects, etc."
+      description: "Anything else -- screenshots, links, related projects, etc."
