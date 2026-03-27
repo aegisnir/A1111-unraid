@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Discussions
+    url: https://github.com/aegisnir/A1111-unraid/discussions
+    about: Ask questions, share ideas, or get help from the community.
+  - name: AUTOMATIC1111 Upstream Issues
+    url: https://github.com/AUTOMATIC1111/stable-diffusion-webui/issues
+    about: For bugs or feature requests related to the WebUI itself (not this container).
