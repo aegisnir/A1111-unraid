@@ -11,7 +11,7 @@
 [![Badge showing Continuous Integration workflow status passing, clickable to view CI actions page](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml)
 [![Light blue badge indicating security hardening with best practices implemented, clickable to view security details](https://img.shields.io/badge/security-hardened-informational)](SECURITY.md)
 
-This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, easy to use, and security-conscious.
+This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, easy to use, and security-conscious. Other containers for Automatic1111 on Unraid exist, but I did not like them very much so I decided to try and make my own. One didnt expose the correct files to change arguments, another didnt answer my support requests, and another was just unstable. I resorted to using a docker image from a source I found online but because it was native for Unraid, i ran into issues with managing updates and other little quirks here and there. I am making this repo public in the hopes that this project will be of use to some of you.
 
 This is a personal hobby project. It is heavily AI-assisted, and it is also a learning experience for me. I care a lot about security and I am trying to make thoughtful choices, but I am not a programmer or security expert, so mistakes and weak assumptions are possible. If you notice something I could do better, I welcome constructive feedback.
 
