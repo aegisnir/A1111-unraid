@@ -17,8 +17,8 @@
   - clean exit (code 0): flat `RESTART_DELAY` before restart
   - configurable via: `RESTART_ON_EXIT`, `RESTART_DELAY`, `RESTART_DELAY_MAX`, `RESTART_MAX_ATTEMPTS`
 - Appdata/data split:
-  - `/config/a1111/` holds A1111 config files (config.json, ui-config.json, styles.csv, config_states) — backed up with appdata
-  - `/data/` holds models, outputs, venv, extensions — large working set, outside appdata
+  - `/config/a1111/` holds A1111 config files (config.json, ui-config.json, styles.csv, config_states): backed up with appdata
+  - `/data/` holds models, outputs, venv, extensions: large working set, outside appdata
   - auth file at `/config/auth/webui-auth.txt`
   - symlinks created at startup so A1111 finds everything at expected paths
   - automatic migration from old `/data/` paths on first start with new image
@@ -62,17 +62,17 @@
   PyTorch index updated from `cu128` to `cu130`; pinned versions bumped:
   `torch` 2.7.0→2.10.0, `torchvision` 0.22.0→0.25.0, `xformers` 0.0.30→0.0.35
 - xformers 0.0.35 CUDA extension fix: `torch` pinned back from 2.11.0→2.10.0 and
-  `torchvision` from 0.26.0→0.25.0 — the cu130 wheel was compiled against 2.10.0;
+  `torchvision` from 0.26.0→0.25.0: the cu130 wheel was compiled against 2.10.0;
   mismatched versions silently disabled memory-efficient attention
 - xformers pip install fix: added `--extra-index-url` to the xformers install in `start.sh`
   so pip resolves the cu130 wheel from the PyTorch index instead of the cu128 wheel from PyPI;
-  without this flag the correct torch version alone is not enough — CUDA extensions still fail
+  without this flag the correct torch version alone is not enough: CUDA extensions still fail
 - Real-world validation of v1.0.3 completed on RTX 4090 hardware:
   - `torch=2.10.0+cu130`, `torchvision=0.25.0+cu130`, `xformers=0.0.35` all confirmed loading
   - xformers CUDA extensions confirmed: no `xFormers can't load C++/CUDA extensions` warning
   - `[READY]` banner confirmed firing; WebUI confirmed reachable
 - Log/monitor improvements (all from real-hardware validation findings):
-  - `scripts/build-push.sh` added — repeatable build+push helper for both `:dev` and `:v1.0.3` tags
+  - `scripts/build-push.sh` added: repeatable build+push helper for both `:dev` and `:v1.0.3` tags
   - pre-launch known-harmless table expanded: `resume_download` FutureWarning, CivitAI Shortcut
     `[ERROR]` schema notice, CivitAI Browser+ Basemodel fetch error
   - `[XFORMERS MISMATCH]` inline handler added: fires when stale cu128 wheel is detected,
@@ -101,7 +101,7 @@ None.
 
 - `template.xml`: all `dev` branch refs updated to `main`/`latest`
   (`<Repository>`, `<Icon>`, Description image tag, Overview image/README links, `<Changelog>`, `<TemplateURL>`)
-- `scripts/build-push.sh`: now branch-aware — pushes `:latest` + `:<version>` on `main`, `:dev` + `:<version>` on dev
+- `scripts/build-push.sh`: now branch-aware: pushes `:latest` + `:<version>` on `main`, `:dev` + `:<version>` on dev
 
 ## Session 14 Changes (dev → main promotion)
 

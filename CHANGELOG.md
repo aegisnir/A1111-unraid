@@ -11,7 +11,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
   the PyTorch index instead of PyPI; without this flag pip resolved the cu128 PyPI wheel
   even when torch was correctly at cu130, causing `xFormers was built for: PyTorch 2.10.0+cu128`
   CUDA extension load failures at runtime even with a correctly pinned torch version
-- chore: add `scripts/build-push.sh` — repeatable helper to `docker buildx build` and push
+- chore: add `scripts/build-push.sh`: repeatable helper to `docker buildx build` and push
   both `:dev` and `:v1.0.3` tags to GHCR; excluded from `.dockerignore` so it is not shipped in
   the image; shellcheck and syntax coverage added to `scripts/security-check.sh`
 - fix: add inline monitor handlers and pre-launch known-harmless entries for patterns observed
@@ -22,15 +22,15 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
       (CivitAI Shortcut extension schema notice; tagged `[ERROR]` upstream but harmless)
     - `CivitAI Browser+: Basemodel fetch error` (startup network API call, benign; retried on demand)
   - `monitor_webui_output`: two new inline handlers:
-    - xformers CUDA build mismatch (`cu128` wheel vs `cu130` torch) — `[XFORMERS MISMATCH]`
+    - xformers CUDA build mismatch (`cu128` wheel vs `cu130` torch): `[XFORMERS MISMATCH]`
       box with explicit venv-delete remediation (`rm -rf /mnt/user/ai/data/venv`)
-    - CivitAI Shortcut config_states `[ERROR]` line — `[NOTE]` tag immediately after the
+    - CivitAI Shortcut config_states `[ERROR]` line: `[NOTE]` tag immediately after the
       line to defuse the alarming label in context
 - fix: `[GPU MEMORY ERROR]` box updated with `PYTORCH_ALLOC_CONF=expandable_segments:True`
   as the first and easiest mitigation (PyTorch's own recommendation; reduces fragmentation,
   often resolves marginal OOM without quality tradeoff); added Hires. fix callout as the
   biggest per-generation VRAM consumer on SDXL; `--medvram` tip added as fallback;
-  replaced stale `Enable xformers` tip with `xformers is already enabled — good`
+  replaced stale `Enable xformers` tip with `xformers is already enabled: good`
   (xformers is on by default in this image)
 - fix: add `⏳ Starting up` notice after the pre-launch banner; the log is silent for several
   minutes while Python initialises, extensions load, and the model is read into VRAM;
@@ -58,52 +58,52 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
   `torch` 2.7.0→2.11.0, `torchvision` 0.22.0→0.26.0, `xformers` 0.0.30→0.0.35
   - Requires host driver ≥ 580 (CUDA 13.0.2 official minimum: ≥ 580.95.05; confirmed compatible with driver 595.45.04)
   - `cu130` wheels are the highest available for both PyTorch 2.10 and 2.11
-  - xformers 0.0.34+ uses stable PyTorch ABI — binary built for 2.10 runs on 2.11+
+  - xformers 0.0.34+ uses stable PyTorch ABI: binary built for 2.10 runs on 2.11+
   - CUDA 13.0.2 is 5+ months old and battle-tested; chosen over 13.2.0 (8 days old, zero driver headroom at ≥595)
 
 - CI: extended static analysis added to push/PR workflow: `hadolint` (Dockerfile lint),
   `bandit` (Python security scan), `yamllint` (YAML validation), `trivy config`
   (Dockerfile misconfiguration scan), `gitleaks` (secret detection across git history)
-  - `.hadolint.yaml`: suppresses DL3008 (apt version pins) — impractical for system packages
+  - `.hadolint.yaml`: suppresses DL3008 (apt version pins): impractical for system packages
   - `.gitleaks.toml`: allowlists `webui-auth.txt` as an intentional default-credentials placeholder
-  - `.trivyignore`: allowlists DS002 (run as root) — container uses entrypoint privilege-drop pattern
+  - `.trivyignore`: allowlists DS002 (run as root): container uses entrypoint privilege-drop pattern
   - `.yamllint.yml`: relaxes line-length to 120 and removes document-start requirement
-- CI: add `trivy-image.yml` — weekly scheduled CVE scan of the published `:dev` image;
+- CI: add `trivy-image.yml`: weekly scheduled CVE scan of the published `:dev` image;
   filters to fixable HIGH/CRITICAL findings only to reduce base-image noise
-- Add `.github/dependabot.yml` — automated version-bump PRs for GitHub Actions and
+- Add `.github/dependabot.yml`: automated version-bump PRs for GitHub Actions and
   Docker base image (weekly cadence)
 
 ---
 
 ## [v1.0.1] - 2026-03-24
 
-- Fix: SC2015 shellcheck warnings in `_cleanup_monitor` — `A && B || true` pattern
+- Fix: SC2015 shellcheck warnings in `_cleanup_monitor`: `A && B || true` pattern
   rewritten as explicit `if/fi`; logic was correct but non-idiomatic and caused the
   automated security baseline to fail
-- Fix: `--port=NNNN` equals-separated form ignored by `_poll_for_ready` — was silently
+- Fix: `--port=NNNN` equals-separated form ignored by `_poll_for_ready`: was silently
   falling back to port 7860; now handles both `--port 7861` and `--port=7861` forms
-- Fix: inverted awk exit codes in auth credential format validation — logic was correct
+- Fix: inverted awk exit codes in auth credential format validation: logic was correct
   but coded as `bad?0:1` with a plain `if`, which is counter-intuitive and risky for
   maintainers; corrected to `bad?1:0` with matching `if !` guard
-- Add: `extensions` symlink startup validation — validates presence and correct target,
+- Add: `extensions` symlink startup validation: validates presence and correct target,
   consistent with the existing `repositories` and `config_states` checks
 - Add: `/data/tmp` purged on startup to prevent partial pip downloads and extracted
   archives from accumulating silently across restarts and crashes
-- Dockerfile: OCI image labels added (`org.opencontainers.image.*`) — links the GHCR
+- Dockerfile: OCI image labels added (`org.opencontainers.image.*`): links the GHCR
   package to the source repository, exposes license metadata, and gives vulnerability
   scanners the source context they need
 - Dockerfile: `IMAGE_VERSION` build ARG added; pass `--build-arg IMAGE_VERSION=v1.0.1`
   at build time to embed the version in the `org.opencontainers.image.version` label
 - Dockerfile: HEALTHCHECK section now documents the known hardcoded-port limitation
   (Docker HEALTHCHECK CMD cannot read runtime env vars; port 7860 is baked in)
-- CI: added `.github/workflows/ci.yml` — runs `scripts/security-check.sh` on every
+- CI: added `.github/workflows/ci.yml`: runs `scripts/security-check.sh` on every
   push and pull request to `dev` and `main`; installs shellcheck as a prerequisite
 
 ---
 
 ## [v1.0.0] - 2026-03-24
 
-> First pre-release. Published on the `dev` branch/tag. Not yet promoted to `main` or `:latest` — pending real-world validation.
+> First pre-release. Published on the `dev` branch/tag. Not yet promoted to `main` or `:latest`: pending real-world validation.
 
 - Automatic WebUI restart loop:
 	- container now automatically restarts the WebUI process when it exits, instead of letting the container stop
@@ -113,20 +113,20 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 	- crash (non-zero exit code): exponential backoff starting at `RESTART_DELAY`, doubling each attempt up to `RESTART_DELAY_MAX` (default 60 s)
 	- new env vars: `RESTART_ON_EXIT` (default `1`), `RESTART_DELAY` (default `5`), `RESTART_DELAY_MAX` (default `60`), `RESTART_MAX_ATTEMPTS` (default `0` = unlimited)
 	- startup banner only printed on first start; subsequent restarts print a compact restart notice with attempt count and delay
-- Appdata split extended — A1111 user config files moved to `/config/a1111/` (appdata):
-	- `config.json` — all Settings tab values, including settings added by extensions via the A1111 opts API
-	- `ui-config.json` — UI component defaults (slider ranges, textbox sizes)
-	- `styles.csv` — saved prompt styles
-	- `config_states/` — extension enable/disable snapshots
+- Appdata split extended: A1111 user config files moved to `/config/a1111/` (appdata):
+	- `config.json`: all Settings tab values, including settings added by extensions via the A1111 opts API
+	- `ui-config.json`: UI component defaults (slider ranges, textbox sizes)
+	- `styles.csv`: saved prompt styles
+	- `config_states/`: extension enable/disable snapshots
 	- Symlinks are created at startup so A1111 finds everything at its expected paths under `/data`
 	- Automatic migration: any existing files/directories at the old `/data/` locations are moved on first start with the new image; appdata copy wins if both exist
-	- Extension-specific standalone state files (e.g. civitai browser favourites/ban lists) remain under `/data/extensions/<name>/` — covered by `/data` persistence, not appdata backup
+	- Extension-specific standalone state files (e.g. civitai browser favourites/ban lists) remain under `/data/extensions/<name>/`: covered by `/data` persistence, not appdata backup
 	- Combined with the existing auth file split, the full `/data` volume can now be wiped and the container rebuilt without losing any settings; only models need to be re-downloaded
 
 - Image: added `build-essential` and `python3-dev` to the base image apt packages so that Python extensions requiring C/C++ compilation (e.g. `hnswlib` used by `sd-webui-infinite-image-browsing`) build successfully without needing `IIB_SKIP_OPTIONAL_DEPS=1`
 
 - Console output revisions:
-	- Color detection changed from `[[ -t 2 ]]` tty guard to always-on ANSI; suppress with `NO_COLOR=1` or `TERM=dumb` (the tty check returned false in Docker when no TTY is attached, which is the normal case in Unraid's log viewer — all colors were being stripped silently)
+	- Color detection changed from `[[ -t 2 ]]` tty guard to always-on ANSI; suppress with `NO_COLOR=1` or `TERM=dumb` (the tty check returned false in Docker when no TTY is attached, which is the normal case in Unraid's log viewer: all colors were being stripped silently)
 	- `C_INFO` changed from `\e[95m` (bright magenta, rendered poorly or invisibly in some terminals) to `\e[35m` (regular magenta/violet, reliably visible)
 	- All annotation boxes fully closed: content lines are now padded to exact inner width and have a right-side `│` border; previous implementation left the right side open
 	- READY banner replaced log-line match on `Running on local URL` with an independent background poller (`_poll_for_ready`) that uses bash's `/dev/tcp` built-in to probe the port every 5 seconds; the log-line approach was silently failing across Gradio versions
@@ -216,7 +216,7 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 - Docker healthcheck:
 	- added `HEALTHCHECK` instruction to Dockerfile with conservative timers tuned for A1111 workloads
 	- 10 min start-period grace for first-run bootstrap, 2 min interval, 30 s timeout, 5 retries
-	- requires ~12 min of total unresponsiveness to flag unhealthy — avoids false positives from model loading, extension installs, image browser, etc.
+	- requires ~12 min of total unresponsiveness to flag unhealthy: avoids false positives from model loading, extension installs, image browser, etc.
 	- healthcheck is informational only; Docker/Unraid will not auto-restart the container
 - Code quality:
 	- both shell scripts pass `shellcheck` cleanly (fixed SC2295 quoting bug, suppressed SC2317 false positives on trap callbacks, fixed SC2015 `A && B || C` pattern)

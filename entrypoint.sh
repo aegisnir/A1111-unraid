@@ -94,7 +94,7 @@ warn_repair_blocked() {
 }
 
 # fatal_priv_drop_blocked: Called when setpriv cannot switch from root to the
-# app user. This is unrecoverable — we cannot run the WebUI as root — so we
+# app user. This is unrecoverable -- we cannot run the WebUI as root -- so we
 # print host-side fix instructions and exit.
 fatal_priv_drop_blocked() {
   echo "${C_CRIT}[entrypoint] Cannot drop privileges to uid=${EXPECTED_UID}:gid=${EXPECTED_GID}.${C_RESET}" >&2
@@ -104,7 +104,7 @@ fatal_priv_drop_blocked() {
   echo "${C_WARN}[entrypoint] Host-side actions to resolve:${C_RESET}" >&2
   echo "${C_ACCENT}  1) Ensure the container is not forced into a mode that strips setuid/setgid transitions.${C_RESET}" >&2
   echo "${C_ACCENT}  2) Verify /data is writable by UID 99 on the host (adjust the path to match${C_RESET}" >&2
-  echo "${C_ACCENT}     your Unraid container template — check the /data bind-mount path):${C_RESET}" >&2
+  echo "${C_ACCENT}     your Unraid container template -- check the /data bind-mount path):${C_RESET}" >&2
   echo "${C_ACCENT}       chown nobody:users <your-data-path>${C_RESET}" >&2
   echo "${C_ACCENT}       chmod 775 <your-data-path>${C_RESET}" >&2
   echo "${C_ACCENT}  3) Restart the container after applying the host fixes.${C_RESET}" >&2
@@ -117,7 +117,7 @@ fatal_priv_drop_blocked() {
 
 # exec_as_app_user: Drop from root to the unprivileged app user (sdwebui) and
 # exec start.sh. Uses setpriv rather than su/sudo to avoid spawning an extra
-# process — exec replaces PID 1 so Docker signals reach start.sh directly.
+# process -- exec replaces PID 1 so Docker signals reach start.sh directly.
 exec_as_app_user() {
   # Probe first so we can print a clear remediation message rather than failing
   # with a terse setpriv error when the runtime forbids setuid/setgid operations.
@@ -134,10 +134,10 @@ exec_as_app_user() {
 # and repairs ownership/permissions so the unprivileged app user can read and
 # write to it. There are two repair scenarios:
 #
-#   1) Wrong owner  — /data is owned by a different UID (e.g. root created it).
+#   1) Wrong owner  -- /data is owned by a different UID (e.g. root created it).
 #                     We chown everything to uid 99:gid 100 and fix modes.
 #
-#   2) Right owner, wrong modes — /data is owned by uid 99 but the permission
+#   2) Right owner, wrong modes -- /data is owned by uid 99 but the permission
 #                     bits are too restrictive (e.g. someone ran chmod 700 on
 #                     the host). We restore mode 775 and fix child modes.
 #
@@ -179,7 +179,7 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
     #   Unraid host, the directories and files would be locked to the original
     #   owner. Even after we chown them to uid 99 above, the permission bits
     #   still say "owner can read/write/execute, nobody else can do anything."
-    #   That's fine for the owner — but directories also need the execute bit
+    #   That's fine for the owner -- but directories also need the execute bit
     #   (u+x) to be *traversable* (you can't cd into or list a directory
     #   without it), and files need the read bit (u+r) to be readable.
     #
@@ -199,7 +199,7 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
     # Ownership is correct (uid 99 owns /data), but the permission *bits* are
     # too restrictive for the app to work. This can happen if someone ran
     # something like "chmod 000 <your-data-path>" or "chmod 700 ..." on the
-    # Unraid host — the directory ends up owned by the right user but with
+    # Unraid host -- the directory ends up owned by the right user but with
     # modes that block writing (-w) or traversal (-x).
     #
     # We restore mode 775 on /data itself (owner + group can read/write/traverse,
@@ -245,14 +245,14 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 # Drop privileges and exec start.sh as the application user.
 # Using exec preserves the PID so Docker signals (stop/kill) reach start.sh
-# correctly — there is no intermediate shell process to eat the signal.
+# correctly -- there is no intermediate shell process to eat the signal.
 
 if [[ "$(id -u)" == "0" ]]; then
   echo "${C_ACCENT}[entrypoint] /data is healthy. Dropping to unprivileged user (uid=${EXPECTED_UID}).${C_RESET}" >&2
   exec_as_app_user
 else
   # Already running as the app user (e.g. container started with --user 99:100).
-  # No privilege drop needed — exec start.sh directly.
+  # No privilege drop needed -- exec start.sh directly.
   echo "${C_ACCENT}[entrypoint] Already running as uid=$(id -u). Skipping privilege drop.${C_RESET}" >&2
   exec /start.sh
 fi

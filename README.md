@@ -24,7 +24,7 @@ This is a personal hobby project. It is heavily AI-assisted, and it is also a le
 
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
-- [First Launch — What to Expect](#first-launch--what-to-expect)
+- [First Launch: What to Expect](#first-launch-what-to-expect)
 - [Getting Your First Model](#getting-your-first-model)
 - [Directory Layout](#directory-layout)
 - [Configuration](#configuration)
@@ -51,7 +51,7 @@ Before you start, make sure you have:
 | **Unraid** | Version 6.12+ recommended |
 | **NVIDIA GPU** | Turing architecture or newer (RTX 20-series, GTX 16-series, or later). Maxwell, Pascal, and Volta are no longer supported by CUDA 13. |
 | **NVIDIA driver** | **≥ 580** on the host (CUDA 13.0 requirement). Install the [Nvidia-Driver plugin](https://forums.unraid.net/topic/98978-plugin-nvidia-driver/) from Community Applications if you have not already. |
-| **Disk space** | At least **25 GB free** on the path you map to `/data` — the Python environment alone uses ~10 GB, and a single model can be 2–7 GB. SSD storage is strongly recommended. |
+| **Disk space** | At least **25 GB free** on the path you map to `/data`: the Python environment alone uses ~10 GB, and a single model can be 2–7 GB. SSD storage is strongly recommended. |
 | **RAM** | 16 GB minimum for basic SD 1.5 workflows. 32 GB+ recommended for SDXL or heavy extension use. |
 | **Internet** | Required for first launch (downloads ~3.5 GB of Python dependencies). Not required for subsequent starts. |
 
@@ -63,7 +63,7 @@ Before you start, make sure you have:
 docker run --rm --gpus all nvidia/cuda:13.0.2-runtime-ubuntu22.04 nvidia-smi
 ```
 
-You should see your GPU name, driver version, and CUDA version in the output. If this fails, troubleshoot the host NVIDIA setup (driver install, plugin configuration) before proceeding — the container will not work without GPU access.
+You should see your GPU name, driver version, and CUDA version in the output. If this fails, troubleshoot the host NVIDIA setup (driver install, plugin configuration) before proceeding: the container will not work without GPU access.
 
 The included Unraid template sets `--runtime=nvidia` in Extra Parameters by default. This gives the container access to the NVIDIA runtime when the NVIDIA Container Toolkit / Unraid NVIDIA plugin is set up correctly.
 
@@ -73,7 +73,7 @@ The included Unraid template sets `--runtime=nvidia` in Extra Parameters by defa
 
 > **Note:** This project is not yet in the Unraid Community Applications store. Use the manual template import steps below.
 
-1. **Confirm your GPU works** — run the [GPU sanity check](#gpu-sanity-check) above if you have not already.
+1. **Confirm your GPU works** run the [GPU sanity check](#gpu-sanity-check) above if you have not already.
 
 2. **Import the template into Unraid.** SSH into your Unraid host and run:
    ```bash
@@ -89,14 +89,14 @@ The included Unraid template sets `--runtime=nvidia` in Extra Parameters by defa
    | Network Type | What It Does | When to Use |
    |---|---|---|
    | **Bridge** (default) | The container gets its own internal IP. You map container ports to host ports (e.g., container `7860` → host `7860`). Other devices reach it via `http://<unraid-ip>:<host-port>`. | Most users. Simple, isolated, works out of the box. |
-   | **Host** | The container shares the Unraid host's network directly. No port mapping needed — the WebUI is available on port 7860 at Unraid's IP automatically. | When you want the simplest network path or need the container to see all host network interfaces. Slightly less isolation. |
+   | **Host** | The container shares the Unraid host's network directly. No port mapping needed: the WebUI is available on port 7860 at Unraid's IP automatically. | When you want the simplest network path or need the container to see all host network interfaces. Slightly less isolation. |
    | **Custom (br0, etc.)** | The container gets its own IP on your physical LAN, separate from Unraid's IP. You assign it a static or DHCP address. No port mapping needed. | When you want the container to appear as its own device on the network, or when you need it accessible at a dedicated IP. Common for services like Plex, Home Assistant, etc. |
 
    **If you choose Bridge** (recommended for most users), map container port `7860` to a host port of your choice (default: `7860`).
 
-4. **Review the default login credentials.** The container seeds `admin` / `changeme` on first launch. Change this after your first login — see [Authentication](#authentication-defaults).
+4. **Review the default login credentials.** The container seeds `admin` / `changeme` on first launch. Change this after your first login: see [Authentication](#authentication-defaults).
 
-5. **Start the container.** The first launch will take 10–20 minutes to download and install dependencies. See [First Launch — What to Expect](#first-launch--what-to-expect) for details on what is happening and what healthy logs look like.
+5. **Start the container.** The first launch will take 10–20 minutes to download and install dependencies. See [First Launch: What to Expect](#first-launch-what-to-expect) for details on what is happening and what healthy logs look like.
 
 6. **Access the WebUI** from a trusted device on your LAN:
    - Bridge: `http://<unraid-ip>:7860`
@@ -109,9 +109,9 @@ If you build your own image, the Dockerfile tracks upstream `AUTOMATIC1111` `dev
 
 ---
 
-## First Launch — What to Expect
+## First Launch: What to Expect
 
-The first time you start the container, it needs to build a Python environment and download several gigabytes of dependencies. **This is a one-time operation** — subsequent starts skip this and boot in under a minute.
+The first time you start the container, it needs to build a Python environment and download several gigabytes of dependencies. **This is a one-time operation** subsequent starts skip this and boot in under a minute.
 
 ### How long will it take?
 
@@ -127,10 +127,10 @@ These estimates assume SSD storage for `/data`. HDD storage adds time due to pip
 ### What is happening?
 
 1. **Python venv created** at `/data/venv` (~5 seconds)
-2. **Core dependencies downloaded and installed** — `torch` (~612 MB), NVIDIA CUDA libraries (~2.5 GB total), `torchvision`, `xformers`, and supporting packages (~3.5 GB total download, ~8 GB installed)
-3. **A1111 repositories cloned** — Stable Diffusion, K-diffusion, BLIP, and other support repos (~100 MB)
-4. **A1111 pip requirements installed** — Gradio, transformers, and ~35 other packages (~165 MB)
-5. **WebUI starts** — Gradio server binds to port 7860
+2. **Core dependencies downloaded and installed** `torch` (~612 MB), NVIDIA CUDA libraries (~2.5 GB total), `torchvision`, `xformers`, and supporting packages (~3.5 GB total download, ~8 GB installed)
+3. **A1111 repositories cloned** Stable Diffusion, K-diffusion, BLIP, and other support repos (~100 MB)
+4. **A1111 pip requirements installed** Gradio, transformers, and ~35 other packages (~165 MB)
+5. **WebUI starts** Gradio server binds to port 7860
 
 ### What healthy logs look like
 
@@ -142,7 +142,7 @@ Installing first-start Python dependencies (this may take a while)...
 Bootstrap dependency targets: torch=2.10.0, torchvision=0.25.0, xformers=0.0.35
 ```
 
-Then pip progress bars as packages download (the NVIDIA libraries are the slowest — `nvidia-cudnn` alone is ~665 MB):
+Then pip progress bars as packages download (the NVIDIA libraries are the slowest: `nvidia-cudnn` alone is ~665 MB):
 
 ```
 Collecting torch==2.10.0
@@ -164,7 +164,7 @@ And finally, the WebUI becomes available:
 Running on local URL: http://0.0.0.0:7860
 ```
 
-If you see `No model checkpoint was found`, that is **normal** — you just need to add a model. See [Getting Your First Model](#getting-your-first-model).
+If you see `No model checkpoint was found`, that is **normal** you just need to add a model. See [Getting Your First Model](#getting-your-first-model).
 
 ### What if something goes wrong?
 
@@ -176,7 +176,7 @@ If you see `No model checkpoint was found`, that is **normal** — you just need
 
 ## Getting Your First Model
 
-After the container starts, you will see a login page. Log in with `admin` / `changeme` (the default credentials). You will likely see a warning about no model checkpoint being found — this is expected.
+After the container starts, you will see a login page. Log in with `admin` / `changeme` (the default credentials). You will likely see a warning about no model checkpoint being found: this is expected.
 
 You need at least one Stable Diffusion model (checkpoint) to generate images. Models are `.safetensors` or `.ckpt` files, typically 2–7 GB each.
 
@@ -184,9 +184,9 @@ You need at least one Stable Diffusion model (checkpoint) to generate images. Mo
 
 The easiest way to browse and download models is with a CivitAI browser extension, which lets you search and download models from [CivitAI](https://civitai.com/) directly inside the WebUI.
 
-**Recommended:** [CivBrowser](https://github.com/SignalFlagZ/sd-webui-civbrowser) by SignalFlagZ — actively maintained, supports searching and downloading models across multiple tabs.
+**Recommended:** [CivBrowser](https://github.com/SignalFlagZ/sd-webui-civbrowser) by SignalFlagZ: actively maintained, supports searching and downloading models across multiple tabs.
 
-**Alternative:** [CivitAI Browser+](https://github.com/BlafKing/sd-civitai-browser-plus) by BlafKing — feature-rich (download, delete, scan for updates, tag management, multi-threaded downloads). Note: this repository is **archived** and no longer receiving updates, but the extension still works.
+**Alternative:** [CivitAI Browser+](https://github.com/BlafKing/sd-civitai-browser-plus) by BlafKing: feature-rich (download, delete, scan for updates, tag management, multi-threaded downloads). Note: this repository is **archived** and no longer receiving updates, but the extension still works.
 
 #### Installing from the Available tab (easiest)
 
@@ -196,7 +196,7 @@ The easiest way to browse and download models is with a CivitAI browser extensio
 4. Use the search box to filter by name (e.g. `CivBrowser` or `CivitAI Browser+`).
 5. Click **Install** next to the extension you want.
 6. Go to **Installed** → click **Apply and restart UI**.
-7. A new tab will appear for the extension. Browse models and click download — they are saved directly to the right folder.
+7. A new tab will appear for the extension. Browse models and click download: they are saved directly to the right folder.
 
 #### Alternative: Install from URL
 
@@ -261,7 +261,7 @@ The container uses two main mount points. Here is where everything lives:
 └── tmp/                          Temporary files (cleaned on start)
 ```
 
-**Why two paths?** `/config` holds small configuration files that belong in your appdata backup. `/data` holds large, fast-growing content (models, outputs, Python environment) that should live on a drive with plenty of space — preferably an SSD.
+**Why two paths?** `/config` holds small configuration files that belong in your appdata backup. `/data` holds large, fast-growing content (models, outputs, Python environment) that should live on a drive with plenty of space: preferably an SSD.
 
 ---
 
@@ -292,7 +292,7 @@ Change this as soon as possible after first login.
 nano /mnt/user/appdata/A1111-WebUI-Aegisnir/auth/webui-auth.txt
 ```
 
-Auth file format — one credential per line as `username:password`:
+Auth file format: one credential per line as `username:password`:
 
 ```text
 admin:replace-with-strong-password
@@ -302,7 +302,7 @@ viewer:another-password
 Lines starting with `#` are comments. Blank lines are ignored.
 
 <details>
-<summary><strong>Auth file details — permissions, SMB access, API mirroring</strong></summary>
+<summary><strong>Auth file details: permissions, SMB access, API mirroring</strong></summary>
 
 #### File permissions
 
@@ -310,9 +310,9 @@ The auth file is created with `chmod 600` (owner read/write only). This prevents
 
 **Unraid terminal (recommended):** The Unraid terminal runs as `root`, so root always has access regardless of permissions.
 
-**SMB share:** Unraid serves SMB. If you access the share with your Unraid admin credentials, you can read and write `chmod 600` files normally. However, because the container runs as `nobody` (UID 99) and Unraid's Samba guest account is also `nobody` (UID 99), a **Public** or **Secure** share maps anonymous connections to the same UID that owns the auth file — meaning SMB guests can read it. Set the `appdata` share to **Private** if you want to restrict SMB access to this file.
+**SMB share:** Unraid serves SMB. If you access the share with your Unraid admin credentials, you can read and write `chmod 600` files normally. However, because the container runs as `nobody` (UID 99) and Unraid's Samba guest account is also `nobody` (UID 99), a **Public** or **Secure** share maps anonymous connections to the same UID that owns the auth file: meaning SMB guests can read it. Set the `appdata` share to **Private** if you want to restrict SMB access to this file.
 
-**In summary:** Unraid terminal or SSH is the simplest and most reliable method. Authenticated SMB (Private share) works. The `chmod 600` permission does **not** protect the auth file from SMB access on a Public or Secure share — the Samba guest account maps to the file's owner UID.
+**In summary:** Unraid terminal or SSH is the simplest and most reliable method. Authenticated SMB (Private share) works. The `chmod 600` permission does **not** protect the auth file from SMB access on a Public or Secure share: the Samba guest account maps to the file's owner UID.
 
 #### API auth mirroring
 
@@ -321,7 +321,7 @@ If API is enabled (`--api`), the container mirrors auth-file credentials into `-
 - `API_AUTH_FILE_MODE=mirror-webui-file`
 - `API_AUTH_FILE_MODE=disabled`
 
-> **Security note on API auth:** AUTOMATIC1111's `--api-auth` flag accepts credentials as a plain string (not a file path). When mirroring is active, the container appends `--api-auth user:password` to the `COMMANDLINE_ARGS` environment variable. This means credentials are readable via `docker inspect` and `/proc/<pid>/environ` by any process or user that can inspect the container. This is a known upstream limitation of the A1111 API auth mechanism — there is no file-based equivalent for `--api-auth`. If this exposure is unacceptable for your environment, set `API_AUTH_FILE_MODE=disabled` and do not enable the API, or place the entire service behind a reverse proxy that handles API auth at the network layer.
+> **Security note on API auth:** AUTOMATIC1111's `--api-auth` flag accepts credentials as a plain string (not a file path). When mirroring is active, the container appends `--api-auth user:password` to the `COMMANDLINE_ARGS` environment variable. This means credentials are readable via `docker inspect` and `/proc/<pid>/environ` by any process or user that can inspect the container. This is a known upstream limitation of the A1111 API auth mechanism: there is no file-based equivalent for `--api-auth`. If this exposure is unacceptable for your environment, set `API_AUTH_FILE_MODE=disabled` and do not enable the API, or place the entire service behind a reverse proxy that handles API auth at the network layer.
 
 > **Why `WEBUI_USERNAME` / `WEBUI_PASSWORD` were removed:** Passing credentials via template/env variables exposes them in the same way. Auth-file based login (`--gradio-auth-path`) is safer because the credential string never appears in env vars or command-line arguments.
 
@@ -350,7 +350,7 @@ If `--api-auth` is provided without `--api`, startup logs now warn that API auth
 --listen --port 7860 --data-dir /data --xformers --no-download-sd-model --enable-insecure-extension-access
 ```
 
-> **Note:** The container automatically appends `--gradio-auth-path <runtime-auth-file>` at launch (see [Authentication](#authentication-defaults)). You do not need to add auth flags yourself — they are injected by `start.sh` based on your `WEBUI_AUTH_FILE`.
+> **Note:** The container automatically appends `--gradio-auth-path <runtime-auth-file>` at launch (see [Authentication](#authentication-defaults)). You do not need to add auth flags yourself: they are injected by `start.sh` based on your `WEBUI_AUTH_FILE`.
 
 API is intentionally not part of the default args. Add `--api` only when you explicitly need API access.
 
@@ -361,11 +361,11 @@ For a complete list of supported arguments, see the [AUTOMATIC1111 Command Line 
 <details>
 <summary><strong>Flag details and security considerations</strong></summary>
 
-- **`--xformers`**: Enables memory-efficient attention and faster image generation on supported GPUs (RTX 20-series and newer). Enabled by default. Remove it if you run into compatibility issues.
+- **`--xformers`** Enables memory-efficient attention and faster image generation on supported GPUs (RTX 20-series and newer). Enabled by default. Remove it if you run into compatibility issues.
 
-- **`--no-download-sd-model`**: Prevents first startup from automatically downloading a multi-gigabyte checkpoint. Makes container behavior predictable and avoids unexpected bandwidth/storage use.
+- **`--no-download-sd-model`** Prevents first startup from automatically downloading a multi-gigabyte checkpoint. Makes container behavior predictable and avoids unexpected bandwidth/storage use.
 
-- **`--enable-insecure-extension-access`**: Allows installing/updating extensions from the WebUI. Enabled by default for convenience in a home-lab workflow. Risk: extension code runs with full container privileges and increases supply-chain risk. Remove this flag for a safer posture and manage extensions manually on disk.
+- **`--enable-insecure-extension-access`** Allows installing/updating extensions from the WebUI. Enabled by default for convenience in a home-lab workflow. Risk: extension code runs with full container privileges and increases supply-chain risk. Remove this flag for a safer posture and manage extensions manually on disk.
 
 - **`--allow-code`** (not set by default): Permits custom script/code execution paths through the WebUI. Useful for advanced local workflows but meaningfully increases remote code execution risk if credentials are weak or the UI is exposed. Keeping it unset blocks those code-execution features and reduces attack surface.
 
@@ -410,7 +410,7 @@ The [Auto TLS-HTTPS](https://github.com/papuSpartan/stable-diffusion-webui-auto-
 2. Fuses the certificate with Python's trust store so internal WebUI requests succeed.
 3. Starts serving over HTTPS without manual certificate management.
 
-You can also bring your own certificate by passing `--tls-keyfile` and `--tls-certfile` — the extension will incorporate it into the trust bundle.
+You can also bring your own certificate by passing `--tls-keyfile` and `--tls-certfile`: the extension will incorporate it into the trust bundle.
 
 **Caveats:**
 - Self-signed certificates will trigger browser warnings. You can add a browser exception or import the generated `webui.cert` into your OS trust store.
@@ -430,7 +430,7 @@ This container uses AUTOMATIC1111's `--data-dir` so the large, fast-growing work
 | Container path | `/data` |
 | Default host path | `/mnt/user/ai/data/` |
 
-**Why not `/appdata`?** This directory can grow very large very quickly with models, outputs, extensions, caches, and the Python venv. If you store it in `appdata`, it may fill that area much faster than expected, especially if your Docker-related storage is limited. You can absolutely use `appdata` if that fits your setup — just be aware of the growth.
+**Why not `/appdata`?** This directory can grow very large very quickly with models, outputs, extensions, caches, and the Python venv. If you store it in `appdata`, it may fill that area much faster than expected, especially if your Docker-related storage is limited. You can absolutely use `appdata` if that fits your setup: just be aware of the growth.
 
 The `/data` mapping includes the persistent Python environment (`/data/venv`) and runtime-cloned A1111 support repositories (`/data/repositories`). This means you do not need to redownload heavy Python packages every time you recreate the container, as long as you keep the same host data path.
 
@@ -482,14 +482,14 @@ For the full security baseline regression checklist, see `SECURITY.md`. To run t
 <details>
 <summary><strong>What each security flag does</strong></summary>
 
-- **`--read-only`**: Reduces write access to the container filesystem, limiting persistence for attackers.
-- **`--tmpfs /tmp:...`**: Provides a safe, writable /tmp for runtime needs.
-- **`no-new-privileges:true`**: Prevents processes from gaining new privileges, reducing escalation risk.
-- **`--cap-drop=ALL` + targeted `--cap-add`**: Keeps a least-privilege capability profile while preserving required startup operations:
+- **`--read-only`** Reduces write access to the container filesystem, limiting persistence for attackers.
+- **`--tmpfs /tmp:...`** Provides a safe, writable /tmp for runtime needs.
+- **`no-new-privileges:true`** Prevents processes from gaining new privileges, reducing escalation risk.
+- **`--cap-drop=ALL` + targeted `--cap-add`** Keeps a least-privilege capability profile while preserving required startup operations:
 	- `CHOWN`: required when `/data` ownership must be repaired
 	- `FOWNER`: required to fix mode bits on host-mounted paths not owned by uid 0
 	- `SETUID` / `SETGID`: required to drop from root to uid 99/gid 100 before launching WebUI
-- **`--pids-limit=2048`**: Contains runaway process spawning without being overly restrictive.
+- **`--pids-limit=2048`** Contains runaway process spawning without being overly restrictive.
 
 To change the PID limit in Unraid:
 
@@ -510,17 +510,17 @@ The image includes a built-in `HEALTHCHECK` that probes whether the Gradio HTTP 
 | `--timeout` | 30 s | Absorbs brief pauses during model swaps and extension installs |
 | `--retries` | 5 | Requires ~12 min of total unresponsiveness before marking unhealthy |
 
-**Important:** Unhealthy status is **informational only**. Docker/Unraid will not auto-restart the container — it just shows a red dot vs green dot. Normal heavy operations (model loading, ControlNet preprocessing, image browser scanning) do **not** cause false positives because Gradio handles HTTP requests in separate threads.
+**Important:** Unhealthy status is **informational only**. Docker/Unraid will not auto-restart the container: it just shows a red dot vs green dot. Normal heavy operations (model loading, ControlNet preprocessing, image browser scanning) do **not** cause false positives because Gradio handles HTTP requests in separate threads.
 
 ## Operational Notes
 
 ### Automatic restart
 
-The container automatically restarts the WebUI process if it exits — you do not need to restart the container itself.
+The container automatically restarts the WebUI process if it exits: you do not need to restart the container itself.
 
 - **Apply and quit** (Extensions tab → Apply and quit): the WebUI exits cleanly (code 0). The container waits `RESTART_DELAY` seconds (default 5 s) then relaunches it.
 - **Crash** (non-zero exit): exponential backoff starting at `RESTART_DELAY`, doubling each attempt up to `RESTART_DELAY_MAX` (default 60 s).
-- **Docker stop / Unraid stop container**: sends SIGTERM, which exits the container cleanly without restarting.
+- **Docker stop / Unraid stop container** sends SIGTERM, which exits the container cleanly without restarting.
 
 | Variable | Default | Description |
 |---|---|---|
@@ -539,10 +539,10 @@ The container automatically restarts the WebUI process if it exits — you do no
 ## Troubleshooting
 
 ### The WebUI does not load
-- Check the container logs — the container prints a pre-launch summary and annotates known harmless warnings inline, so look past those to find real errors.
+- Check the container logs: the container prints a pre-launch summary and annotates known harmless warnings inline, so look past those to find real errors.
 - Confirm the port mapping is correct (Bridge mode) or that you are using the right IP (custom network mode).
 - Confirm the container is still running.
-- On first launch, allow extra time for the Python environment bootstrap under `/data/venv`. See [First Launch — What to Expect](#first-launch--what-to-expect).
+- On first launch, allow extra time for the Python environment bootstrap under `/data/venv`. See [First Launch: What to Expect](#first-launch-what-to-expect).
 - Make sure you have provided a model checkpoint under `/data/models/Stable-diffusion` if you keep the default `--no-download-sd-model` behavior.
 
 ### Error: "No checkpoints found"
@@ -564,7 +564,7 @@ If you are using the template defaults, that means removing:
 
 ### I am seeing permission errors
 - Check that your mapped host folders are writable by the configured UID/GID.
-- If `/data` ended up owned by root (e.g., after deleting and Docker recreating the host directory), the container self-heals this automatically — see below.
+- If `/data` ended up owned by root (e.g., after deleting and Docker recreating the host directory), the container self-heals this automatically: see below.
 - If using `--read-only`, make sure required writable paths are explicitly mounted.
 
 ### Error: `Operation not permitted` in entrypoint (`chmod`, `runuser`, or `setpriv`)
@@ -598,9 +598,9 @@ chmod 775 /mnt/user/ai/data
 ```
 
 ### The container is unhealthy
-- The healthcheck is deliberately generous — the container must be completely unresponsive for ~12 minutes straight before Docker marks it unhealthy.
+- The healthcheck is deliberately generous: the container must be completely unresponsive for ~12 minutes straight before Docker marks it unhealthy.
 - Normal heavy operations (model loading, extension installs, image browser scanning) do **not** cause false positives.
-- Unhealthy status is informational only — Docker/Unraid will **not** auto-restart the container.
+- Unhealthy status is informational only: Docker/Unraid will **not** auto-restart the container.
 - If you see unhealthy status, check the container logs for crash output.
 - If you changed the port in `COMMANDLINE_ARGS`, the healthcheck still probes 7860. Either keep the default port or rebuild the image with a matching `HEALTHCHECK`.
 
@@ -608,9 +608,9 @@ chmod 775 /mnt/user/ai/data
 
 ### Using the dev branch
 
-This container tracks the `dev` branch of AUTOMATIC1111. The branch is baked in at image build time via the `WEBUI_REF` build argument (default: `dev`). You do not need to run any git commands inside the container — that is handled automatically when the image is built.
+This container tracks the `dev` branch of AUTOMATIC1111. The branch is baked in at image build time via the `WEBUI_REF` build argument (default: `dev`). You do not need to run any git commands inside the container: that is handled automatically when the image is built.
 
-**Important:** As of March 2026, new installs require the `dev` branch of AUTOMATIC1111 due to a missing dependency repository. The main branch will fail to start. This container already uses `dev` by default — no action needed on your part.
+**Important:** As of March 2026, new installs require the `dev` branch of AUTOMATIC1111 due to a missing dependency repository. The main branch will fail to start. This container already uses `dev` by default: no action needed on your part.
 
 If you are rebuilding the image and want to pin a specific A1111 commit, pass `WEBUI_REF=<commit-hash>` as a build argument:
 

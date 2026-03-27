@@ -1,5 +1,5 @@
 """
-launch.py — Custom wrapper for AUTOMATIC1111's launch.py.
+launch.py: Custom wrapper for AUTOMATIC1111's launch.py.
 
 This file replaces the upstream launch.py inside the Docker image. It exists
 for one reason: to prevent sensitive CLI arguments (auth credentials and auth
@@ -21,7 +21,7 @@ If you need to add new sensitive flags in the future, add them to the
 
 import sys
 import shlex
-from modules.launch_utils import *  # noqa: F403 — upstream modules expect launch.args, launch.list_extensions, etc.
+from modules.launch_utils import *  # noqa: F403: upstream modules expect launch.args, launch.list_extensions, etc.
 import modules.launch_utils as launch_utils
 
 
@@ -43,7 +43,7 @@ def _redact_cli_args(argv):
         # Check if this arg matches any sensitive flag (exact or --flag=value form).
         matched_flag = next((flag for flag in sensitive_flags if arg == flag or arg.startswith(flag + "=")), None)
         if matched_flag is None:
-            # Not sensitive — pass through unchanged.
+            # Not sensitive -- pass through unchanged.
             redacted.append(arg)
             i += 1
             continue
@@ -63,7 +63,7 @@ def _redact_cli_args(argv):
 
 
 def main() -> None:
-    # Install/update Python dependencies (torch, repos, etc.) — same as upstream.
+    # Install/update Python dependencies (torch, repos, etc.) -- same as upstream.
     launch_utils.prepare_environment()
 
     # Replace the default start() with our redacted version so the "Launching

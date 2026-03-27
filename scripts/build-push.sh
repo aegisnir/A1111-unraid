@@ -34,7 +34,7 @@ else
   ROLLING_TAG="dev"
 fi
 
-echo "Branch: ${BRANCH} — pushing ${IMAGE}:${ROLLING_TAG} and ${IMAGE}:${VERSION} ..."
+echo "Branch: ${BRANCH} -- pushing ${IMAGE}:${ROLLING_TAG} and ${IMAGE}:${VERSION} ..."
 
 docker buildx build \
   --platform linux/amd64 \

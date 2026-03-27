@@ -6,11 +6,11 @@ name: CI
 # XML parse, and the 26 security baseline checks.
 #
 # Additional static analysis steps in this workflow:
-#   hadolint  — Dockerfile best-practices lint (.hadolint.yaml for suppressions)
-#   bandit    — Python security scan of WebUI/launch.py (medium+ severity only)
-#   yamllint  — YAML syntax/style for .github/ files (.yamllint.yml for config)
-#   trivy     — Dockerfile misconfiguration scan (.trivyignore for suppressions)
-#   gitleaks  — Secret detection across git history (.gitleaks.toml for allowlist)
+#   hadolint  -- Dockerfile best-practices lint (.hadolint.yaml for suppressions)
+#   bandit    -- Python security scan of WebUI/launch.py (medium+ severity only)
+#   yamllint  -- YAML syntax/style for .github/ files (.yamllint.yml for config)
+#   trivy     -- Dockerfile misconfiguration scan (.trivyignore for suppressions)
+#   gitleaks  -- Secret detection across git history (.gitleaks.toml for allowlist)
 #
 # All third-party Actions are pinned to immutable full commit SHAs.
 # Mutable version tags can be force-pushed by a compromised maintainer
@@ -25,7 +25,7 @@ on:
   pull_request:
     branches: ["dev", "main"]
 
-# Minimal permissions — this workflow only reads repository contents.
+# Minimal permissions -- this workflow only reads repository contents.
 permissions:
   contents: read
 
@@ -56,7 +56,7 @@ jobs:
         # Catches Dockerfile anti-patterns: unpinned base-image tags, missing
         # --no-install-recommends, insecure shell options, layer ordering, etc.
         # Suppressed rules are documented in .hadolint.yaml.
-        # failure-threshold: error — DL3008 (apt version pins) is accepted as a
+        # failure-threshold: error -- DL3008 (apt version pins) is accepted as a
         # warning; only ERROR-level findings redden this step. The config file
         # also sets this threshold but the action is more reliably picked up here.
         # NOTE: v3.3.0 bundles hadolint v2.14.0 which has the ignore-key config
