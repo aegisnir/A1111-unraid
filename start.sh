@@ -24,7 +24,7 @@
 set -euo pipefail
 
 # ── Color palette ────────────────────────────────────────────────────────────
-# C_INFO   (violet)  → informational / status messages
+# C_INFO   (magenta) → informational / status messages
 # C_WARN   (orange)  → caution / warnings that need attention but are not fatal
 # C_CRIT   (scarlet) → critical errors requiring user action
 # C_ACCENT (cyan)    → accent / highlights (URLs, commands, structural chrome)
@@ -32,7 +32,7 @@ set -euo pipefail
 # Set NO_COLOR=1 or TERM=dumb in the container environment to suppress them.
 if [[ "${NO_COLOR:-}" == "" && "${TERM:-}" != "dumb" ]]; then
   C_RESET=$'\e[0m'; C_BOLD=$'\e[1m'; C_ACCENT=$'\e[96m'
-  C_INFO=$'\e[35m'; C_WARN=$'\e[93m'; C_CRIT=$'\e[91m'
+  C_INFO=$'\e[95m'; C_WARN=$'\e[93m'; C_CRIT=$'\e[91m'
 else
   C_RESET='' C_BOLD='' C_ACCENT='' C_INFO='' C_WARN='' C_CRIT=''
 fi
