@@ -13,7 +13,7 @@ This repository packages and runs AUTOMATIC1111 in a containerized Unraid workfl
 
 ## License Scope in This Repository
 
-- The repository's original project files are licensed under MIT (see LICENSE), unless otherwise noted.
-- Third-party components keep their original licenses.
+- This repository is licensed under AGPL-3.0 (see LICENSE), consistent with the upstream AUTOMATIC1111 license.
+- Third-party components retain their original licenses.
 
 This notice is provided for transparency and maintainability and is not legal advice.

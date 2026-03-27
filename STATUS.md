@@ -39,7 +39,7 @@
   - all template.xml links point to `blob/main/`
   - explicit notes for expected `No checkpoints found` behavior with `--no-download-sd-model`
 - Licensing/docs added:
-  - MIT repo license
+  - AGPL-3.0 repo license
   - AGPL copy and third-party notices included
 - Log credential redaction:
   - custom `launch.py` wrapper redacts sensitive auth flag values from log output
