@@ -25,11 +25,12 @@ If you are planning to suggest a larger change, it may be helpful to open an iss
 
 ## Security-related changes
 
-If you are suggesting a security-related improvement, context is especially helpful:
-- what the concern is
-- what risk it may create
-- how your proposed change helps
-- any tradeoffs it introduces
+> [!IMPORTANT]
+> If you are suggesting a security-related improvement, context is especially helpful:
+> - what the concern is
+> - what risk it may create
+> - how your proposed change helps
+> - any tradeoffs it introduces
 
 ## Scope
 
