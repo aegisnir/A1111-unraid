@@ -11,9 +11,11 @@
 [![Badge showing Continuous Integration workflow status passing, clickable to view CI actions page](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/aegisnir/A1111-unraid/actions/workflows/ci.yml)
 [![Light blue badge indicating security hardening with best practices implemented, clickable to view security details](https://img.shields.io/badge/security-hardened-informational)](SECURITY.md)
 
-This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, easy to use, and more security-conscious than a throwaway personal build.
+This repository packages AUTOMATIC1111 Stable Diffusion WebUI for Unraid with NVIDIA GPU support in mind. The goal is to keep it practical, easy to use, and security-conscious.
 
-This is a personal hobby project. It is heavily AI-assisted, and it is also a learning experience for me. I care a lot about security and I am trying to make thoughtful choices, but I am not a programmer or security expert, so mistakes and weak assumptions are possible. If you notice something I could do better, I welcome constructive feedback.
+Other containers for AUTOMATIC1111 on Unraid exist, but I wasn't happy with any of them -- limited file access, ignored support requests, or just general instability. I ended up using a generic Docker image I found online, but since it wasn't built for Unraid, I ran into issues with automatic updates and other quirks. So I decided to build my own. I'm making this repo public in the hopes that it will be useful to others.
+
+This is a personal hobby project and it is heavily AI-assisted. This is also a learning experience for me as I have never made my own container before or produced anything on this scale for others. I care a lot about security and I am trying to make thoughtful choices, but I am not a programmer or security expert, so mistakes and inaccuracies are likely. If you notice something I could do better, please let me know. I welcome constructive criticism and feedback, and I am willing to learn and correct my mistakes. Thank you for your interest and I hope you find this useful.
 
 > ⚠️ Public internet exposure is **not** the intended use case.
 > If you expose this beyond a trusted network, the risk profile changes significantly and you should make those decisions carefully for your own environment.
