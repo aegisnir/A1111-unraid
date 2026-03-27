@@ -570,7 +570,7 @@ print_launch_notice() {
     model_count="$(find /data/models/Stable-diffusion -maxdepth 1 \( -name '*.safetensors' -o -name '*.ckpt' \) 2>/dev/null | wc -l | tr -d ' ')"
   fi
 
-  local ACCENT="${C_ACCENT}" INFO="${C_INFO}" WARN="${C_WARN}" RESET="${C_RESET}" BOLD="${C_BOLD}"
+  local ACCENT="${C_ACCENT}" INFO="${C_INFO}" WARN="${C_WARN}" RESET="${C_RESET}"
 
   echo ""
   echo "${ACCENT}┌─────────────────────────────────────────────────────────────────────┐"
@@ -579,8 +579,11 @@ print_launch_notice() {
   echo ""
 
   if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
-    echo "  ${WARN}${BOLD}► FIRST RUN:${RESET}${WARN} Installing Python dependencies under /data/venv.${RESET}"
-    echo "  ${WARN}  This can take several minutes. Subsequent starts will be much faster.${RESET}"
+    echo ""
+    echo "  ${WARN}┌─ [FIRST RUN] ───────────────────────────────────────────────────────┐"
+    echo "  │  Installing Python dependencies under /data/venv.                   │"
+    echo "  │  This can take several minutes. Subsequent starts are faster.       │"
+    echo "  └─────────────────────────────────────────────────────────────────────┘${RESET}"
     echo ""
   fi
 
@@ -618,9 +621,11 @@ print_launch_notice() {
   echo ""
   echo "${ACCENT}─────────────────────────────────────────────────────────────────────────${RESET}"
   echo ""
-  echo "  ${WARN}⏳ Starting up — there may be a pause of several minutes here while Python${RESET}"
-  echo "  ${WARN}   initialises, extensions load, and the model is read into VRAM.${RESET}"
-  echo "  ${WARN}   Time varies by system performance. The [READY] banner will appear when the WebUI is live.${RESET}"
+  echo "  ${WARN}┌─ [STARTING UP] ─────────────────────────────────────────────────────┐"
+  echo "  │  There may be a pause of several minutes while Python initialises,  │"
+  echo "  │  extensions load, and the model is read into VRAM.                  │"
+  echo "  │  Time varies by system. The [READY] banner appears when live.       │"
+  echo "  └─────────────────────────────────────────────────────────────────────┘${RESET}"
   echo ""
 }
 
