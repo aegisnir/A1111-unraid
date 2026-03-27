@@ -3,7 +3,7 @@
 [![Cyan badge displaying latest GitHub release version for A1111-unraid, clickable to view release history](https://img.shields.io/github/v/release/aegisnir/A1111-unraid?include_prereleases&label=release&color=cyan)](https://github.com/aegisnir/A1111-unraid/releases)
 [![Blue badge with Docker logo indicating container image hosted on GitHub Container Registry, clickable to view packages](https://img.shields.io/badge/image-ghcr.io-blue?logo=docker)](https://github.com/aegisnir/A1111-unraid/pkgs/container/a1111-webui-aegisnir)
 [![Orange badge identifying upstream source as AUTOMATIC1111 stable-diffusion-webui dev branch, clickable to view repository](https://img.shields.io/badge/upstream-AUTOMATIC1111-orange)](https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/dev)
-[![Green badge indicating MIT License, clickable to view license file](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Green badge indicating AGPL-3.0 License, clickable to view license file](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Yellow badge displaying pre-release status, clickable to view releases page](https://img.shields.io/badge/status-pre--release-yellow)](https://github.com/aegisnir/A1111-unraid/releases)
 [![Orange badge with Unraid logo indicating platform compatibility, clickable to visit Unraid website](https://img.shields.io/badge/platform-Unraid-F15A2C?logo=unraid&logoColor=white)](https://unraid.net/)
 [![Green badge with NVIDIA logo indicating GPU support functionality, clickable to view CUDA toolkit documentation](https://img.shields.io/badge/GPU-NVIDIA-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
@@ -670,9 +670,7 @@ The bootstrap pins `torch`, `torchvision`, and `xformers` as a tested set so the
 
 ## Licensing and Third-Party Notices
 
-This repository's original project files are licensed under MIT (see `LICENSE`), unless otherwise noted.
-
-This project packages and runs upstream [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui), which is licensed under AGPL-3.0.
+This repository is licensed under AGPL-3.0 (see `LICENSE`), consistent with the upstream AUTOMATIC1111 license.
 
 For third-party license details, see:
 

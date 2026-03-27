@@ -88,7 +88,7 @@ LABEL org.opencontainers.image.title="A1111 Stable Diffusion WebUI (Unraid)" \
       org.opencontainers.image.description="AUTOMATIC1111 Stable Diffusion WebUI packaged for Unraid with NVIDIA GPU support" \
       org.opencontainers.image.source="https://github.com/aegisnir/A1111-unraid" \
       org.opencontainers.image.url="https://github.com/aegisnir/A1111-unraid" \
-      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.licenses="AGPL-3.0-only" \
       org.opencontainers.image.vendor="aegisnir" \
       org.opencontainers.image.version="${IMAGE_VERSION}"
 
