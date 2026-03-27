@@ -130,11 +130,12 @@ grep -rn 'uses:' .github/workflows/ | grep -vE '@[0-9a-f]{40}'  # should return 
 
 ## What you should assume
 
-If you choose to use anything from this repository, I recommend assuming that:
-- mistakes are possible
-- important security considerations may still be missing
-- your environment may have different risks than mine
-- you should validate the setup against your own threat model and risk tolerance
+> [!WARNING]
+> If you choose to use anything from this repository, I recommend assuming that:
+> - mistakes are possible
+> - important security considerations may still be missing
+> - your environment may have different risks than mine
+> - you should validate the setup against your own threat model and risk tolerance
 
 ## Reporting security concerns
 
@@ -142,7 +143,8 @@ If you notice a security issue, risky assumption, or something that looks clearl
 
 For now, the simplest approach is to open an issue **only if you are comfortable discussing it publicly**.
 
-If the concern is sensitive and should not be posted publicly, please use your judgment and avoid sharing details in a way that would unnecessarily expose other users. A more formal private reporting process may be added later if this project grows enough to justify it.
+> [!CAUTION]
+> If the concern is sensitive and should not be posted publicly, please use your judgment and avoid sharing details in a way that would unnecessarily expose other users. A more formal private reporting process may be added later if this project grows enough to justify it.
 
 ## Third-party content
 
