@@ -573,9 +573,9 @@ print_launch_notice() {
   local ACCENT="${C_ACCENT}" INFO="${C_INFO}" WARN="${C_WARN}" RESET="${C_RESET}" BOLD="${C_BOLD}"
 
   echo ""
-  echo "${ACCENT}┌─────────────────────────────────────────────────────────────────────┐${RESET}"
-  echo "${ACCENT}│${RESET}  ${BOLD}${INFO}AUTOMATIC1111 Stable Diffusion WebUI${RESET}${ACCENT}                               │${RESET}"
-  echo "${ACCENT}└─────────────────────────────────────────────────────────────────────┘${RESET}"
+  echo "${ACCENT}┌─────────────────────────────────────────────────────────────────────┐"
+  echo "│  AUTOMATIC1111 Stable Diffusion WebUI                               │"
+  echo "└─────────────────────────────────────────────────────────────────────┘${RESET}"
   echo ""
 
   if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
@@ -585,12 +585,12 @@ print_launch_notice() {
   fi
 
   if [[ "${model_count}" -eq 0 ]]; then
-    echo "  ${WARN}⚠  No model checkpoints found in /data/models/Stable-diffusion/${RESET}"
-    echo "  ${WARN}   You will see a 'No checkpoints found' warning below — this is expected${RESET}"
-    echo "  ${WARN}   until you add a model. The WebUI will still start.${RESET}"
-    echo "  ${WARN}   Fix: add a .safetensors or .ckpt file to:${RESET}"
-    echo "  ${WARN}          /data/models/Stable-diffusion/${RESET}"
-    echo "  ${WARN}        then restart the container or use Settings → Refresh in the UI.${RESET}"
+    echo "  ${WARN}⚠  No model checkpoints found in /data/models/Stable-diffusion/"
+    echo "     You will see a 'No checkpoints found' warning below — this is expected"
+    echo "     until you add a model. The WebUI will still start."
+    echo "     Fix: add a .safetensors or .ckpt file to:"
+    echo "            /data/models/Stable-diffusion/"
+    echo "          then restart the container or use Settings → Refresh in the UI.${RESET}"
   else
     echo "  ${INFO}✓  Found ${model_count} checkpoint(s) in /data/models/Stable-diffusion/${RESET}"
   fi
