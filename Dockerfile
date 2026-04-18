@@ -47,7 +47,7 @@
 # Base image: NVIDIA CUDA runtime (Ubuntu 22.04), pinned by digest.
 # Update this digest intentionally whenever you choose to refresh the base image.
 # ------------------------------------------------------------------------------
-FROM nvidia/cuda:13.0.2-runtime-ubuntu22.04@sha256:cc28faec68e3dffcf6803683d34a03dcd62fe29e58a0b34b710b800a3d7b73b3
+FROM nvidia/cuda:13.2.1-runtime-ubuntu22.04@sha256:f48aa5c157006835b67f43e77bea3dfe32a7d9a46eeb2de3f8af1b5a464d0334
 
 # Use bash with pipefail for safer RUN pipelines.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
