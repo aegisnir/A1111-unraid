@@ -25,7 +25,7 @@
 set -euo pipefail
 
 IMAGE="ghcr.io/aegisnir/a1111-webui-aegisnir"
-VERSION="v1.0.3"
+VERSION="$(git describe --tags --always 2>/dev/null || echo 'dev')"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 if [[ "${BRANCH}" == "main" ]]; then

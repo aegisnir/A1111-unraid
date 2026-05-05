@@ -23,6 +23,18 @@
 
 set -euo pipefail
 
+# Signal handling: set early so SIGTERM during bootstrap (pip install) is caught.
+_DELIBERATE_STOP=0
+_WEBUI_PID=""
+_forward_signal() {
+  _DELIBERATE_STOP=1
+  if [[ -n "${_WEBUI_PID}" ]]; then
+    kill -TERM "${_WEBUI_PID}" 2>/dev/null || true
+    ( sleep 15; kill -KILL "${_WEBUI_PID}" 2>/dev/null ) &
+  fi
+}
+trap '_forward_signal' TERM INT
+
 # ── Color palette ────────────────────────────────────────────────────────────
 # C_INFO   (magenta) → informational / status messages
 # C_WARN   (orange)  → caution / warnings that need attention but are not fatal
@@ -160,7 +172,8 @@ mkdir -p "${TMPDIR}"
 # Partial pip downloads and extracted archives can silently accumulate under
 # /data/tmp across restarts and eat disk on the persistent share.
 # ${TMPDIR:?} expands with a fatal error if unset, preventing a bare rm -rf /*.
-rm -rf "${TMPDIR:?}"/* 2>/dev/null || true
+# find -mindepth 1 -delete catches dotfiles that glob expansion misses.
+find "${TMPDIR:?}" -mindepth 1 -delete 2>/dev/null || true
 mkdir -p "${PIP_CACHE_DIR}"
 # Ensure standard data subtrees exist so the WebUI finds expected paths on a
 # fresh or restored /data volume without requiring the user to re-create them.
@@ -222,25 +235,30 @@ if [[ -z "${available_kb}" || ! "${available_kb}" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 
-if [[ -e "${WEBUI_DIR}/config_states" && ! -L "${WEBUI_DIR}/config_states" ]]; then
-  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/config_states exists and is not a symlink.${C_RESET}" >&2
-  echo "${C_CRIT}       On a read-only container filesystem, start.sh cannot replace it at runtime.${C_RESET}" >&2
-  echo "${C_WARN}       Rebuild the image without that path, or remove it before enabling --read-only.${C_RESET}" >&2
-  exit 1
-fi
-
-if [[ -L "${WEBUI_DIR}/config_states" ]]; then
-  existing_target="$(readlink "${WEBUI_DIR}/config_states")"
-  if [[ "${existing_target}" != "${RUNTIME_CONFIG_STATES_DIR}" ]]; then
-    echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/config_states points to ${existing_target}, expected ${RUNTIME_CONFIG_STATES_DIR}.${C_RESET}" >&2
-    echo "${C_WARN}       Rebuild the image so the config_states symlink matches the persistent runtime path.${C_RESET}" >&2
+_validate_build_symlink() {
+  local name="$1" link_path="$2" expected_target="$3"
+  if [[ -e "${link_path}" && ! -L "${link_path}" ]]; then
+    echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${link_path} exists and is not a symlink.${C_RESET}" >&2
+    echo "${C_CRIT}       On a read-only container filesystem, start.sh cannot replace it at runtime.${C_RESET}" >&2
+    echo "${C_WARN}       Rebuild the image without that path, or remove it before enabling --read-only.${C_RESET}" >&2
     exit 1
   fi
-else
-  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/config_states symlink is missing.${C_RESET}" >&2
-  echo "${C_WARN}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
-  exit 1
-fi
+  if [[ -L "${link_path}" ]]; then
+    local existing_target
+    existing_target="$(readlink "${link_path}")"
+    if [[ "${existing_target}" != "${expected_target}" ]]; then
+      echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${link_path} points to ${existing_target}, expected ${expected_target}.${C_RESET}" >&2
+      echo "${C_WARN}       Rebuild the image so the ${name} symlink matches the persistent runtime path.${C_RESET}" >&2
+      exit 1
+    fi
+  else
+    echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${link_path} symlink is missing.${C_RESET}" >&2
+    echo "${C_WARN}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
+    exit 1
+  fi
+}
+
+_validate_build_symlink "config_states" "${WEBUI_DIR}/config_states" "${RUNTIME_CONFIG_STATES_DIR}"
 
 available_mb="$(( available_kb / 1024 ))"
 echo "${C_ACCENT}Detected free space in /data: ${available_mb} MiB${C_RESET}"
@@ -255,45 +273,9 @@ if [[ ! -f "${BOOTSTRAP_STAMP}" && "${available_kb}" -lt "${required_kb}" ]]; th
   exit 1
 fi
 
-if [[ -e "${WEBUI_DIR}/repositories" && ! -L "${WEBUI_DIR}/repositories" ]]; then
-  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/repositories exists and is not a symlink.${C_RESET}" >&2
-  echo "${C_CRIT}       On a read-only container filesystem, start.sh cannot replace it at runtime.${C_RESET}" >&2
-  echo "${C_WARN}       Rebuild the image with the symlink baked in, or remove that path before enabling --read-only.${C_RESET}" >&2
-  exit 1
-fi
+_validate_build_symlink "repositories" "${WEBUI_DIR}/repositories" "${RUNTIME_REPOS_DIR}"
 
-if [[ -L "${WEBUI_DIR}/repositories" ]]; then
-  existing_target="$(readlink "${WEBUI_DIR}/repositories")"
-  if [[ "${existing_target}" != "${RUNTIME_REPOS_DIR}" ]]; then
-    echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/repositories points to ${existing_target}, expected ${RUNTIME_REPOS_DIR}.${C_RESET}" >&2
-    echo "${C_WARN}       Rebuild the image so the repositories symlink matches the persistent runtime path.${C_RESET}" >&2
-    exit 1
-  fi
-else
-  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/repositories symlink is missing.${C_RESET}" >&2
-  echo "${C_WARN}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
-  exit 1
-fi
-
-if [[ -e "${WEBUI_DIR}/extensions" && ! -L "${WEBUI_DIR}/extensions" ]]; then
-  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/extensions exists and is not a symlink.${C_RESET}" >&2
-  echo "${C_CRIT}       On a read-only container filesystem, start.sh cannot replace it at runtime.${C_RESET}" >&2
-  echo "${C_WARN}       Rebuild the image with the symlink baked in, or remove that path before enabling --read-only.${C_RESET}" >&2
-  exit 1
-fi
-
-if [[ -L "${WEBUI_DIR}/extensions" ]]; then
-  existing_target="$(readlink "${WEBUI_DIR}/extensions")"
-  if [[ "${existing_target}" != "${RUNTIME_EXTENSIONS_DIR}" ]]; then
-    echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/extensions points to ${existing_target}, expected ${RUNTIME_EXTENSIONS_DIR}.${C_RESET}" >&2
-    echo "${C_WARN}       Rebuild the image so the extensions symlink matches the persistent runtime path.${C_RESET}" >&2
-    exit 1
-  fi
-else
-  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} ${WEBUI_DIR}/extensions symlink is missing.${C_RESET}" >&2
-  echo "${C_WARN}       This image now expects that symlink to be created at build time so startup works with --read-only.${C_RESET}" >&2
-  exit 1
-fi
+_validate_build_symlink "extensions" "${WEBUI_DIR}/extensions" "${RUNTIME_EXTENSIONS_DIR}"
 
 if [[ ! -x "${VENV_PYTHON}" ]]; then
   echo "${C_INFO}Creating persistent Python virtual environment in ${VENV_DIR}${C_RESET}" >&2
@@ -411,19 +393,23 @@ fi
 AUTH_ARGS=()
 USING_WEBUI_AUTH_FILE=0
 
-# extract_auth_file_csv: Read an auth file and return all username:password
-# pairs as a single comma-separated string. Ignores comments (#) and blank
-# lines. Used both for --api-auth (which needs CSV format) and for validation.
-extract_auth_file_csv() {
-  local auth_file_path="$1"
-  python3 - <<'PY' "${auth_file_path}"
+# _auth_file_tool: Unified auth file parser. Reads username:password entries
+# from an auth file (ignoring comments and blank lines).
+# Mode --csv: print all entries as comma-separated string (for --api-auth).
+# Mode --write <dest>: write sanitized one-entry-per-line file (for Gradio).
+_auth_file_tool() {
+  local mode="$1" source_file="$2"
+  shift 2
+  local dest_file="${1:-}"
+  python3 - <<'PY' "${mode}" "${source_file}" "${dest_file}"
 import sys
 from pathlib import Path
 
-path = Path(sys.argv[1])
+mode, src_path = sys.argv[1], Path(sys.argv[2])
+dst_path = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else None
 entries = []
 
-for raw_line in path.read_text(encoding='utf-8').splitlines():
+for raw_line in src_path.read_text(encoding='utf-8').splitlines():
     line = raw_line.strip()
     if not line or line.startswith('#'):
         continue
@@ -432,35 +418,22 @@ for raw_line in path.read_text(encoding='utf-8').splitlines():
         if cred:
             entries.append(cred)
 
-print(','.join(entries))
+if mode == '--csv':
+    print(','.join(entries))
+elif mode == '--write' and dst_path:
+    Path(dst_path).write_text("\n".join(entries) + "\n", encoding='utf-8')
+else:
+    print(f"Unknown mode: {mode}", file=sys.stderr)
+    sys.exit(1)
 PY
 }
 
-# write_runtime_auth_file: Build a sanitized copy of the auth file with one
-# username:password entry per line (no comments, no blank lines). Gradio's
-# --gradio-auth-path parser is strict and will crash on anything unexpected.
+extract_auth_file_csv() {
+  _auth_file_tool --csv "$1"
+}
+
 write_runtime_auth_file() {
-  local source_auth_file="$1"
-  local runtime_auth_file="$2"
-  python3 - <<'PY' "${source_auth_file}" "${runtime_auth_file}"
-import sys
-from pathlib import Path
-
-src = Path(sys.argv[1])
-dst = Path(sys.argv[2])
-entries = []
-
-for raw_line in src.read_text(encoding='utf-8').splitlines():
-  line = raw_line.strip()
-  if not line or line.startswith('#'):
-    continue
-  for cred in line.split(','):
-    cred = cred.strip()
-    if cred:
-      entries.append(cred)
-
-dst.write_text("\n".join(entries) + "\n", encoding='utf-8')
-PY
+  _auth_file_tool --write "$1" "$2"
 }
 
 if [[ -n "${COMMANDLINE_ARGS:-}" && " ${COMMANDLINE_ARGS} " =~ [[:space:]]--gradio-auth([=[:space:]]|$) ]]; then
@@ -896,7 +869,9 @@ while true; do
 
   if [[ "${_RESTART_ATTEMPT}" -gt 0 ]]; then
     echo "" >&2
-    echo "${C_WARN}${C_BOLD}── Restarting WebUI (attempt ${_RESTART_ATTEMPT}${RESTART_MAX_ATTEMPTS:+ of ${RESTART_MAX_ATTEMPTS}}) ──────────────────────────${C_RESET}" >&2
+    local _attempt_suffix=""
+    [[ "${RESTART_MAX_ATTEMPTS}" -gt 0 ]] && _attempt_suffix=" of ${RESTART_MAX_ATTEMPTS}"
+    echo "${C_WARN}${C_BOLD}── Restarting WebUI (attempt ${_RESTART_ATTEMPT}${_attempt_suffix}) ──────────────────────────${C_RESET}" >&2
     echo "" >&2
   else
     print_launch_notice

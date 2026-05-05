@@ -137,6 +137,16 @@ grep -rn 'uses:' .github/workflows/ | grep -vE '@[0-9a-f]{40}'  # should return 
 > - your environment may have different risks than mine
 > - you should validate the setup against your own threat model and risk tolerance
 
+## Known tradeoffs
+
+### Dev toolchain in final image
+
+`build-essential` and `python3-dev` are installed in the runtime image (not stripped via multi-stage build). This is intentional: A1111 extensions compile C dependencies at runtime via `pip install`. Removing the compiler breaks extension installation for users.
+
+The incremental attack surface is marginal because extensions already have arbitrary code execution within the container. The container runs non-root with `--read-only`, `--cap-drop=ALL`, `--no-new-privileges`, and `--pids-limit`, which limits what a compromised extension can escalate to.
+
+If a future version removes extension support, the dev toolchain should be stripped.
+
 ## Reporting security concerns
 
 If you notice a security issue, risky assumption, or something that looks clearly unsafe, constructive feedback is welcome.

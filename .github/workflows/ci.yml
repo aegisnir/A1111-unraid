@@ -77,14 +77,14 @@ jobs:
         # subprocess calls, insecure temp files, injection risks, etc.).
         # -ll: report only medium and high severity findings to reduce noise.
         run: |
-          pip install --quiet bandit
+          pip install --quiet "bandit==1.8.3"
           bandit -r WebUI/ -ll
 
       - name: YAML lint (.github/)
         # Validates syntax and style for all workflow files and dependabot.yml.
         # Style overrides are in .yamllint.yml (relaxes impractical defaults).
         run: |
-          pip install --quiet yamllint
+          pip install --quiet "yamllint==1.35.1"
           yamllint .github/
 
       - name: Trivy config scan

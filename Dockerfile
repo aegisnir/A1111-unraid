@@ -49,8 +49,8 @@
 # ------------------------------------------------------------------------------
 FROM nvidia/cuda:13.0.2-runtime-ubuntu22.04@sha256:cc28faec68e3dffcf6803683d34a03dcd62fe29e58a0b34b710b800a3d7b73b3
 
-# Use bash with pipefail for safer RUN pipelines.
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# Use bash with -euo pipefail for safer RUN pipelines (matches set -euo in scripts).
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # ------------------------------------------------------------------------------
 # Build-time configuration
@@ -121,6 +121,10 @@ RUN apt-get update \
   python3-setuptools \
   python3-venv \
   python3-pip \
+  # python3-dev + build-essential: Required in final image (not just build stage)
+  # because A1111 extensions compile C dependencies at runtime via pip install.
+  # Removing the compiler breaks extension installation. Attack surface is marginal
+  # given extensions already have arbitrary code execution. See SECURITY.md.
   python3-dev \
   build-essential \
   libglib2.0-0 \
