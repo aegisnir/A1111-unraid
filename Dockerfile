@@ -247,6 +247,9 @@ HEALTHCHECK --interval=120s --timeout=30s --start-period=600s --retries=5 \
 # filesystems (/proc, /sys, /dev) which are kernel-managed.
 RUN find / -perm /6000 -type f -not -path '/proc/*' -not -path '/sys/*' -not -path '/dev/*' -exec chmod a-s {} + || true
 
+# Strip Linux file capabilities (e.g. cap_net_raw+ep) which survive the SUID strip.
+RUN (find / -type f -not -path '/proc/*' -not -path '/sys/*' -not -path '/dev/*' -exec getcap {} + 2>/dev/null || true) | awk -F' ' '{print $1}' | xargs -r setcap -r 2>/dev/null || true
+
 # The container starts as root so entrypoint.sh can self-heal /data ownership.
 # It then drops to sdwebui (UID 99) via setpriv before exec-ing start.sh.
 # Runtime hardening should still be reviewed at the container runtime layer

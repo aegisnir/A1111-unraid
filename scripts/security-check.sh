@@ -45,7 +45,7 @@ PY
 
   local required_flags=(
     "--read-only"
-    "--tmpfs /tmp:rw,noexec,nosuid,size=2g"
+    "--tmpfs /tmp:rw,noexec,nosuid,nodev,size=2g"
     "--security-opt no-new-privileges:true"
     "--cap-drop=ALL"
     "--cap-add=CHOWN"

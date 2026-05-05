@@ -193,6 +193,8 @@ _ensure_appdata_link() {
   if [[ -e "${link}" && ! -e "${target}" ]]; then
     mv "${link}" "${target}"
   elif [[ -e "${link}" && -e "${target}" ]]; then
+    cp -a "${link}" "${link}.bak.$(date +%s)" 2>/dev/null || true
+    echo "${C_WARN}Both ${link} and ${target} exist. Backed up ${link} before removing.${C_RESET}" >&2
     rm -rf "${link}"
   fi
   ln -sf "${target}" "${link}"
@@ -301,8 +303,8 @@ fi
 if [[ ! -f "${BOOTSTRAP_STAMP}" ]]; then
   echo "${C_WARN}Installing first-start Python dependencies (this may take a while)...${C_RESET}" >&2
   echo "${C_ACCENT}Bootstrap dependency targets: torch=${TORCH_VERSION}, torchvision=${TORCHVISION_VERSION}, xformers=${XFORMERS_VERSION}${C_RESET}" >&2
-  # Upgrade pip to latest version
-  "${VENV_PYTHON}" -m pip install --upgrade pip
+  # Pin pip to a known-good version range (supply chain discipline)
+  "${VENV_PYTHON}" -m pip install --upgrade "pip>=24.0,<25.0"
   # Pin setuptools for compatibility, upgrade wheel
   "${VENV_PYTHON}" -m pip install --prefer-binary --upgrade "setuptools<70" wheel
   # Core dependencies
@@ -572,7 +574,7 @@ fi
 print_launch_notice() {
   local model_count=0
   if [[ -d "/data/models/Stable-diffusion" ]]; then
-    model_count="$(find /data/models/Stable-diffusion -maxdepth 1 \( -name '*.safetensors' -o -name '*.ckpt' \) 2>/dev/null | wc -l | tr -d ' ')"
+    model_count="$(find /data/models/Stable-diffusion \( -name '*.safetensors' -o -name '*.ckpt' \) 2>/dev/null | wc -l | tr -d ' ')"
   fi
 
   local ACCENT="${C_ACCENT}" INFO="${C_INFO}" WARN="${C_WARN}" RESET="${C_RESET}"

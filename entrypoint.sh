@@ -150,10 +150,11 @@ exec_as_app_user() {
 # In that case, skip straight to exec-ing start.sh and let it validate /data.
 if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
   data_owner_uid="$(stat -c '%u' "${DATA_DIR}")"
+  data_owner_gid="$(stat -c '%g' "${DATA_DIR}")"
 
   # ── Scenario 1: Wrong owner ──────────────────────────────────────────────
-  if [[ "${data_owner_uid}" != "${EXPECTED_UID}" ]]; then
-    echo "${C_WARN}[entrypoint] /data is owned by uid=${data_owner_uid}, expected uid=${EXPECTED_UID}.${C_RESET}" >&2
+  if [[ "${data_owner_uid}" != "${EXPECTED_UID}" || "${data_owner_gid}" != "${EXPECTED_GID}" ]]; then
+    echo "${C_WARN}[entrypoint] /data is owned by uid=${data_owner_uid}:gid=${data_owner_gid}, expected ${EXPECTED_UID}:${EXPECTED_GID}.${C_RESET}" >&2
     echo "${C_WARN}[entrypoint] Correcting ownership and permissions under /data...${C_RESET}" >&2
 
     # Fix ownership on top-level dir first so the app user can write immediately.
@@ -169,30 +170,20 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
     # Correct ownership on all children that ended up under wrong ownership.
     # find's filter (! -user) limits the walk to only misowned entries so this
     # is fast on a healthy volume and only slow on a truly broken one.
-    find "${DATA_DIR}" -not -type l ! -user "${EXPECTED_UID}" -exec chown "${EXPECTED_UID}:${EXPECTED_GID}" {} + 2>/dev/null || true
+    _repair_errors="$(mktemp 2>/dev/null || echo /tmp/entrypoint-repair.err)"
+    _repair_count="$(find "${DATA_DIR}" -not -type l ! -user "${EXPECTED_UID}" -o ! -group "${EXPECTED_GID}" 2>/dev/null | wc -l | tr -d ' ')"
+    find "${DATA_DIR}" -not -type l \( ! -user "${EXPECTED_UID}" -o ! -group "${EXPECTED_GID}" \) -exec chown "${EXPECTED_UID}:${EXPECTED_GID}" {} + 2>"${_repair_errors}" || true
+    if [[ -s "${_repair_errors}" ]]; then
+      echo "${C_WARN}[entrypoint] Some files could not be repaired:${C_RESET}" >&2
+      head -5 "${_repair_errors}" >&2
+    fi
+    rm -f "${_repair_errors}"
 
     # Restore sane permission modes after ownership repair.
-    #
-    # Why this is needed:
-    #   Changing file ownership (chown) does NOT change the permission bits.
-    #   If someone ran something like "chmod -R 700 <your-data-path>" on the
-    #   Unraid host, the directories and files would be locked to the original
-    #   owner. Even after we chown them to uid 99 above, the permission bits
-    #   still say "owner can read/write/execute, nobody else can do anything."
-    #   That's fine for the owner -- but directories also need the execute bit
-    #   (u+x) to be *traversable* (you can't cd into or list a directory
-    #   without it), and files need the read bit (u+r) to be readable.
-    #
-    # What we fix:
-    #   - Directories missing u+rwx → add read, write, and traverse permissions
-    #   - Files missing u+r        → add read permission
-    #
-    # This only runs in the degraded-ownership repair path, never on a healthy
-    # startup where permissions are already correct.
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
 
-    echo "${C_INFO}[entrypoint] /data ownership and permissions corrected. Continuing startup.${C_RESET}" >&2
+    echo "${C_INFO}[entrypoint] Repaired ${_repair_count} files under /data. Continuing startup.${C_RESET}" >&2
 
   # ── Permission repair (idempotent) ────────────────────────────────────────
   # Runs unconditionally when ownership is already correct. Catches the case
