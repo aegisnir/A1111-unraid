@@ -516,7 +516,7 @@ The image includes a built-in `HEALTHCHECK` that probes whether the Gradio HTTP 
 | `--start-period` | 10 min | First-run bootstrap installs ~3.5 GB of Python deps |
 | `--interval` | 2 min | Enough to catch crashes without spamming during model loads |
 | `--timeout` | 30 s | Absorbs brief pauses during model swaps and extension installs |
-| `--retries` | 5 | Requires ~12 min of total unresponsiveness before marking unhealthy |
+| `--retries` | 5 | 5 failures x 2 min interval = 10 min of unresponsiveness before marking unhealthy |
 
 > [!IMPORTANT]
 > Unhealthy status is **informational only**. Docker/Unraid will not auto-restart the container. It just shows a red dot vs green dot. Normal heavy operations (model loading, ControlNet preprocessing, image browser scanning) do **not** cause false positives because Gradio handles HTTP requests in separate threads.
@@ -607,11 +607,28 @@ chmod 775 /mnt/user/ai/data
 ```
 
 ### The container is unhealthy
-- The healthcheck is deliberately generous. The container must be completely unresponsive for ~12 minutes straight before Docker marks it unhealthy.
+- The healthcheck is deliberately generous. The container must be completely unresponsive for ~10 minutes (5 retries x 2 min interval) before Docker marks it unhealthy.
 - Normal heavy operations (model loading, extension installs, image browser scanning) do **not** cause false positives.
 - Unhealthy status is informational only. Docker/Unraid will **not** auto-restart the container.
 - If you see unhealthy status, check the container logs for crash output.
 - If you changed the port in `COMMANDLINE_ARGS`, the healthcheck still probes 7860. Either keep the default port or rebuild the image with a matching `HEALTHCHECK`.
+
+## Environment Variables Reference
+
+| Variable | Default | Description |
+|---|---|---|
+| `COMMANDLINE_ARGS` | *(empty)* | Arguments passed directly to the A1111 WebUI launch command |
+| `WEBUI_AUTH_FILE` | `/config/auth/webui-auth.txt` | Path to the managed authentication credentials file |
+| `API_AUTH_FILE_MODE` | `disabled` | Set to `mirror-webui-file` to copy WebUI creds to `--api-auth` when `--api` is enabled |
+| `RESTART_ON_EXIT` | `1` | `1` = restart WebUI after any exit; `0` = exit container on WebUI stop |
+| `RESTART_DELAY` | `5` | Seconds to wait before restarting after a clean exit |
+| `RESTART_DELAY_MAX` | `60` | Backoff ceiling (seconds) for crash restarts |
+| `RESTART_MAX_ATTEMPTS` | `0` | `0` = retry indefinitely; N = stop after N consecutive crash restarts |
+| `MIN_BOOTSTRAP_FREE_MB` | `8192` | Abort first-run bootstrap if `/data` has less than this free (MiB) |
+| `WEBUI_HOST_IP` | `0.0.0.0` | IP address the WebUI binds to inside the container |
+| `UMASK` | *(unset)* | Override default umask for all file creation (e.g., `022`) |
+| `NO_COLOR` | *(unset)* | Set to `1` to suppress ANSI color codes in container logs |
+| `TERM` | *(unset)* | Set to `dumb` to suppress ANSI color codes (alternative to `NO_COLOR`) |
 
 ## Advanced Topics
 

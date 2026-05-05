@@ -117,7 +117,7 @@ grep -E '^FROM .+@sha256:' Dockerfile
 grep -rn 'uses:' .github/workflows/ | grep -vE '@[0-9a-f]{40}'  # should return nothing
 ```
 
-### Current baseline (as of 2026-03-25)
+### Current baseline (as of 2026-05-05)
 
 - Runtime hardening defaults: PASS
 - Startup privilege model: PASS

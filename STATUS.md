@@ -101,8 +101,8 @@
 
 ## Session 13 Changes (dev → main promotion prep)
 
-- `template.xml`: all `dev` branch refs updated to `main`/`latest`
-  (`<Repository>`, `<Icon>`, Description image tag, Overview image/README links, `<Changelog>`, `<TemplateURL>`)
+- `template.xml`: branch refs updated to `main`/`latest` for promotion prep
+  (reverted to `:dev` pending merge; `main` refs will land with the actual merge commit)
 - `scripts/build-push.sh`: now branch-aware. Pushes `:latest` + `:<version>` on `main`, `:dev` + `:<version>` on dev
 - PR #6 opened: dev → main, all CI checks pass
 

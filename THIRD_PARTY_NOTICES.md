@@ -11,6 +11,27 @@ This file documents third-party software licenses relevant to this repository.
 
 This repository packages and runs AUTOMATIC1111 in a containerized Unraid workflow. If you distribute container images or other artifacts that include AGPL-covered components, ensure recipients can access the corresponding source and license notices for those components.
 
+## PyTorch
+
+- Project: PyTorch
+- Upstream source: https://github.com/pytorch/pytorch
+- Upstream license: BSD-3-Clause
+- Installed at runtime via pip into the persistent venv
+
+## torchvision
+
+- Project: torchvision
+- Upstream source: https://github.com/pytorch/vision
+- Upstream license: BSD-3-Clause
+- Installed at runtime via pip into the persistent venv
+
+## xformers
+
+- Project: xFormers
+- Upstream source: https://github.com/facebookresearch/xformers
+- Upstream license: BSD-3-Clause
+- Installed at runtime via pip into the persistent venv
+
 ## License Scope in This Repository
 
 - This repository is licensed under AGPL-3.0 (see LICENSE), consistent with the upstream AUTOMATIC1111 license.
