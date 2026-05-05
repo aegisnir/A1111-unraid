@@ -99,6 +99,26 @@
 - CA App Store submission (deferred until `:latest` is ready).
 - Close remaining Dependabot PRs (#1, #2, #4).
 
+## Session 14 Changes (adversarial code review remediation)
+
+40-finding adversarial code review + fix plan executed across 8 commits on `dev`.
+
+**Commits (not yet pushed):**
+- `655ec0e` CRITICAL: stdout buffering, symlink traversal, default creds RCE chain
+- `47fa9fe` HIGH: dead code, UID propagation, restart counter, torch URL, ownership, shlex.quote, API fallback
+- `25456c7` MEDIUM: error reporting, GID drift, migration backup, model count, tmpfs nodev, caps strip, pip pin, ngrok redaction
+- `85a244b` LOW: display bug, trap timing, dotfiles, SIGKILL escalation, DRY refactors, git version, SHELL -e, CI pins, build-essential docs
+- `9c01164` Doc drift: color alignment, stale comments, timing math, env vars reference, dates, third-party licenses
+- `8f7ba03` Post-impl: Dockerfile -e audit, build-push.sh comment, migration notes (breaking change), git-lfs cleanup
+- `c5bcc4e` shellcheck: fixed `local` outside function, SC2317 exclusion for trap handlers
+- `8d252ae` + pending: preflight report + CI comment count updates, shlex.quote test, STATUS.md update
+
+**Security baseline:** 29/29 (shellcheck now enabled locally + in CI)
+
+**Breaking change:** `--enable-insecure-extension-access` removed from defaults. Migration Notes section added to README.
+
+**One deferred item:** shlex.quote integration test with running container (verified via standalone Python test with 8 adversarial inputs).
+
 ## Session 13 Changes (dev → main promotion prep)
 
 - `template.xml`: branch refs updated to `main`/`latest` for promotion prep

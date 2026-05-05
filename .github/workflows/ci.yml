@@ -3,7 +3,7 @@ name: CI
 # Runs on every push and pull request to dev or main.
 # The security baseline script (scripts/security-check.sh) is the single
 # source of truth for the container security gates: bash syntax, shellcheck,
-# XML parse, and the 26 security baseline checks.
+# XML parse, and the 29 security baseline checks.
 #
 # Additional static analysis steps in this workflow:
 #   hadolint  -- Dockerfile best-practices lint (.hadolint.yaml for suppressions)
