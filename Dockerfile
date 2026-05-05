@@ -85,12 +85,12 @@ ARG IMAGE_VERSION=dev
 # Reference: https://github.com/opencontainers/image-spec/blob/main/annotations.md
 # ------------------------------------------------------------------------------
 LABEL org.opencontainers.image.title="A1111 Stable Diffusion WebUI (Unraid)" \
-      org.opencontainers.image.description="AUTOMATIC1111 Stable Diffusion WebUI packaged for Unraid with NVIDIA GPU support" \
-      org.opencontainers.image.source="https://github.com/aegisnir/A1111-unraid" \
-      org.opencontainers.image.url="https://github.com/aegisnir/A1111-unraid" \
-      org.opencontainers.image.licenses="AGPL-3.0-only" \
-      org.opencontainers.image.vendor="aegisnir" \
-      org.opencontainers.image.version="${IMAGE_VERSION}"
+  org.opencontainers.image.description="AUTOMATIC1111 Stable Diffusion WebUI packaged for Unraid with NVIDIA GPU support" \
+  org.opencontainers.image.source="https://github.com/aegisnir/A1111-unraid" \
+  org.opencontainers.image.url="https://github.com/aegisnir/A1111-unraid" \
+  org.opencontainers.image.licenses="AGPL-3.0-only" \
+  org.opencontainers.image.vendor="aegisnir" \
+  org.opencontainers.image.version="${IMAGE_VERSION}"
 
 # ------------------------------------------------------------------------------
 # Runtime defaults
@@ -100,7 +100,7 @@ LABEL org.opencontainers.image.title="A1111 Stable Diffusion WebUI (Unraid)" \
 # by network design, reverse proxies, VPNs, access controls, and container
 # runtime settings rather than trying to rely on this image alone.
 # ------------------------------------------------------------------------------
-ENV COMMANDLINE_ARGS="--listen --port 7860 --data-dir /data --xformers --no-download-sd-model --enable-insecure-extension-access"
+ENV COMMANDLINE_ARGS="--listen --port 7860 --data-dir /data --xformers --no-download-sd-model"
 ENV WEBUI_DIR="/opt/stable-diffusion-webui"
 ENV A1111_VENV_DIR="/data/venv"
 ENV TORCH_INDEX_URL="${TORCH_INDEX_URL}"
@@ -112,21 +112,21 @@ ENV PIP_NO_BUILD_ISOLATION=1
 # pick up updates. https://docs.docker.com/build/building/best-practices/
 # ------------------------------------------------------------------------------
 RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-      ca-certificates \
-      git \
-      python3 \
-      python3-setuptools \
-      python3-venv \
-      python3-pip \
-      python3-dev \
-      build-essential \
-      libglib2.0-0 \
-      libsm6 \
-      libxrender1 \
-      libxext6 \
-      libgl1 \
- && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends \
+  ca-certificates \
+  git \
+  python3 \
+  python3-setuptools \
+  python3-venv \
+  python3-pip \
+  python3-dev \
+  build-essential \
+  libglib2.0-0 \
+  libsm6 \
+  libxrender1 \
+  libxext6 \
+  libgl1 \
+  && rm -rf /var/lib/apt/lists/*
 
 # Keep the base image lean and install heavyweight Python dependencies on first
 # startup into a persistent virtual environment under /data.
@@ -138,14 +138,14 @@ RUN apt-get update \
 # This logic ensures the group and user are always named 'sdwebui', even if the UID/GID already exist with other names (Unraid compatibility).
 RUN set -eux; \
   if getent group "${APP_GID}" > /dev/null; then \
-    groupmod -n sdwebui "$(getent group "${APP_GID}" | cut -d: -f1)"; \
+  groupmod -n sdwebui "$(getent group "${APP_GID}" | cut -d: -f1)"; \
   else \
-    groupadd --gid "${APP_GID}" sdwebui; \
+  groupadd --gid "${APP_GID}" sdwebui; \
   fi; \
   if id -u sdwebui > /dev/null 2>&1; then \
-    usermod -u "${APP_UID}" -g "${APP_GID}" sdwebui; \
+  usermod -u "${APP_UID}" -g "${APP_GID}" sdwebui; \
   else \
-    useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash sdwebui; \
+  useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /bin/bash sdwebui; \
   fi
 
 # ------------------------------------------------------------------------------
@@ -191,9 +191,9 @@ COPY entrypoint.sh /entrypoint.sh
 COPY start.sh /start.sh
 COPY webui-auth.txt /webui-auth.txt
 RUN chmod 0755 /entrypoint.sh /start.sh \
- && chmod 0644 /webui-auth.txt \
- && chown root:root /entrypoint.sh \
- && chown sdwebui:sdwebui /start.sh
+  && chmod 0644 /webui-auth.txt \
+  && chown root:root /entrypoint.sh \
+  && chown sdwebui:sdwebui /start.sh
 
 # Include license and third-party notices in the image for distribution clarity.
 COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/doc/a1111-webui-aegisnir/

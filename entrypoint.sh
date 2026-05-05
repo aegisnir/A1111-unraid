@@ -169,7 +169,7 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
     # Correct ownership on all children that ended up under wrong ownership.
     # find's filter (! -user) limits the walk to only misowned entries so this
     # is fast on a healthy volume and only slow on a truly broken one.
-    find "${DATA_DIR}" ! -user "${EXPECTED_UID}" -exec chown "${EXPECTED_UID}:${EXPECTED_GID}" {} + 2>/dev/null || true
+    find "${DATA_DIR}" -not -type l ! -user "${EXPECTED_UID}" -exec chown "${EXPECTED_UID}:${EXPECTED_GID}" {} + 2>/dev/null || true
 
     # Restore sane permission modes after ownership repair.
     #

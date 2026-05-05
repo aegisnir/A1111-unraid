@@ -47,6 +47,10 @@ export TMPDIR=/data/tmp
 # Use persistent pip cache in /data for faster rebuilds
 export PIP_CACHE_DIR=/data/pip-cache
 
+# Force unbuffered Python output so log annotations appear immediately.
+# Upstream webui.sh passes `python -u`; we call launch.py directly and need this.
+export PYTHONUNBUFFERED=1
+
 if [[ "$(id -u)" == "0" ]]; then
   echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} Refusing to run as root. Please use a non-root user (UID 99 recommended for Unraid).${C_RESET}" >&2
   exit 1
@@ -84,7 +88,7 @@ WEBUI_AUTH_RUNTIME_FILE="/config/auth/.webui-auth.runtime.txt"
 
 # mirror-webui-file = copy WebUI credentials to --api-auth when --api is enabled
 # disabled        = do not auto-set --api-auth; user manages it manually
-API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-mirror-webui-file}"
+API_AUTH_FILE_MODE="${API_AUTH_FILE_MODE:-disabled}"
 
 UMASK="${UMASK:-}"                                                 # Optional: override default umask for all file creation
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -514,6 +518,14 @@ else
   AUTH_ARGS+=("--gradio-auth-path" "${WEBUI_AUTH_RUNTIME_FILE}")
   USING_WEBUI_AUTH_FILE=1
   echo "${C_INFO}WebUI authentication file is enabled via WEBUI_AUTH_FILE.${C_RESET}" >&2
+
+  if grep -q 'admin:changeme' "${WEBUI_AUTH_FILE}" 2>/dev/null; then
+    echo "" >&2
+    echo "${C_WARN}${C_BOLD}  WARNING: Default credentials detected (admin:changeme)${C_RESET}" >&2
+    echo "${C_WARN}  Anyone on your network can log in with these credentials.${C_RESET}" >&2
+    echo "${C_WARN}  Change your password in: ${WEBUI_AUTH_FILE}${C_RESET}" >&2
+    echo "" >&2
+  fi
 fi
 
 API_ENABLED=0
