@@ -230,7 +230,7 @@ EXPOSE 7860
 #                         heavy operations (model loading, image browser, etc.).
 #
 # Net effect: the container must be completely unresponsive for roughly
-# 12–13 minutes straight before Docker/Unraid flips the status to unhealthy.
+# 10 minutes (5 retries x 2 min) before Docker/Unraid flips the status to unhealthy.
 # Normal heavy workloads (ControlNet preprocessors, batch generation,
 # thousands of thumbnails) do NOT block the HTTP server that long because
 # Gradio handles requests in separate threads.

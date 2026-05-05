@@ -20,7 +20,7 @@
 # After pushing, verify the version label landed correctly:
 #   docker inspect ghcr.io/aegisnir/a1111-webui-aegisnir:latest \
 #     --format '{{index .Config.Labels "org.opencontainers.image.version"}}'
-#   Expected output: v1.0.3
+#   Expected output: the git tag (e.g. v1.0.3) or "dev" if no tags exist
 
 set -euo pipefail
 

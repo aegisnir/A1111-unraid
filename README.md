@@ -630,6 +630,20 @@ chmod 775 /mnt/user/ai/data
 | `NO_COLOR` | *(unset)* | Set to `1` to suppress ANSI color codes in container logs |
 | `TERM` | *(unset)* | Set to `dumb` to suppress ANSI color codes (alternative to `NO_COLOR`) |
 
+## Migration Notes
+
+### Extension management removed from defaults
+
+Previous versions included `--enable-insecure-extension-access` in the default `COMMANDLINE_ARGS`.  This flag bypasses A1111's built-in safety check that prevents installing extensions from the WebUI when the server is network-accessible.
+
+**What changed:** The flag is no longer in the default template.  If you install extensions through the WebUI's ==Extensions== tab, they will stop working after updating to this version.
+
+**How to restore it:** Add `--enable-insecure-extension-access` to your container's `COMMANDLINE_ARGS` environment variable (via Unraid template or Docker Compose).  This is an explicit opt-in to the security tradeoff.
+
+**Why:** Extensions have full code execution within the container.  Allowing unauthenticated remote installation of arbitrary code is a significant risk when combined with network exposure.  Users who need this feature can still enable it, but it should be a conscious decision.
+
+**Alternative:** Install extensions via the container's `/data/extensions/` directory by cloning them from the host or a startup script.  This does not require the flag.
+
 ## Advanced Topics
 
 ### Using the dev branch
