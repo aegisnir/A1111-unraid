@@ -869,7 +869,7 @@ while true; do
 
   if [[ "${_RESTART_ATTEMPT}" -gt 0 ]]; then
     echo "" >&2
-    local _attempt_suffix=""
+    _attempt_suffix=""
     [[ "${RESTART_MAX_ATTEMPTS}" -gt 0 ]] && _attempt_suffix=" of ${RESTART_MAX_ATTEMPTS}"
     echo "${C_WARN}${C_BOLD}── Restarting WebUI (attempt ${_RESTART_ATTEMPT}${_attempt_suffix}) ──────────────────────────${C_RESET}" >&2
     echo "" >&2

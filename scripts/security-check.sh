@@ -128,7 +128,8 @@ check_syntax_and_template() {
   fi
 
   if command -v shellcheck >/dev/null 2>&1; then
-    if shellcheck -s bash entrypoint.sh start.sh scripts/build-push.sh scripts/security-check.sh >/dev/null 2>&1; then
+    # SC2317: "unreachable" false positive for trap handler function bodies.
+    if shellcheck -s bash --exclude=SC2317 entrypoint.sh start.sh scripts/build-push.sh scripts/security-check.sh >/dev/null 2>&1; then
       pass "shellcheck passed (entrypoint.sh, start.sh, scripts/build-push.sh, scripts/security-check.sh)"
     else
       fail "shellcheck reported issues in startup scripts"
