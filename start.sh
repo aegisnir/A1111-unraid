@@ -65,7 +65,7 @@ LOCAL_WEBUI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/WebUI"  # Fallbac
 VENV_DIR="${A1111_VENV_DIR:-/data/venv}"                           # Persistent Python venv, survives container recreation
 VENV_PYTHON="${VENV_DIR}/bin/python"                               # Absolute path to the venv interpreter
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"            # Marker file: first-run pip install already done
-TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"  # PyPI extra index for CUDA wheels
+TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu130}"  # PyPI extra index for CUDA wheels
 RUNTIME_REPOS_DIR="/data/repositories"                             # Persistent upstream sub-repos (e.g. k-diffusion)
 RUNTIME_EXTENSIONS_DIR="/data/extensions"                          # Persistent user-installed extensions
 RUNTIME_CONFIG_STATES_DIR="/config/a1111/config_states"            # Persistent extension state snapshots (in appdata)
@@ -551,14 +551,7 @@ if [[ "${API_ENABLED}" == "1" ]]; then
     elif [[ "${API_AUTH_FILE_MODE}" == "disabled" ]]; then
       echo "${C_ACCENT}API auth mirroring from WEBUI_AUTH_FILE disabled via API_AUTH_FILE_MODE=disabled.${C_RESET}" >&2
     else
-      echo "${C_WARN}[WARNING] Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to mirror-webui-file." >&2
-      api_auth_value="$(extract_auth_file_csv "${WEBUI_AUTH_FILE}")"
-      if [[ -z "${api_auth_value}" ]]; then
-        echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} WEBUI_AUTH_FILE is set but no usable credentials were found in ${WEBUI_AUTH_FILE}${C_RESET}" >&2
-        exit 1
-      fi
-      AUTH_ARGS+=("--api-auth" "${api_auth_value}")
-      echo "${C_INFO}API authentication is mirrored from WEBUI_AUTH_FILE.${C_RESET}" >&2
+      echo "${C_WARN}[WARNING] Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to disabled.${C_RESET}" >&2
     fi
   else
     echo "${C_ACCENT}API auth mirroring skipped because auth is not sourced from WEBUI_AUTH_FILE.${C_RESET}" >&2
@@ -827,7 +820,7 @@ is_truthy() {
 if [[ ${#AUTH_ARGS[@]} -gt 0 ]]; then
   quoted_auth_args=()
   for arg in "${AUTH_ARGS[@]}"; do
-    quoted_auth_args+=("$(printf '%q' "${arg}")")
+    quoted_auth_args+=("$(python3 -c "import shlex,sys; print(shlex.quote(sys.argv[1]))" "${arg}")")
   done
   export COMMANDLINE_ARGS="${COMMANDLINE_ARGS:-} ${quoted_auth_args[*]}"
 fi
@@ -962,9 +955,10 @@ while true; do
 
   # 4. Choose restart delay and print reason.
   if [[ "${_WEBUI_EXIT}" -eq 0 ]]; then
-    # Clean exit ("Apply and quit") -- flat delay, reset crash backoff.
+    # Clean exit ("Apply and quit") -- flat delay, reset crash backoff and attempt counter.
     _delay="${RESTART_DELAY}"
     _CRASH_DELAY="${RESTART_DELAY}"
+    _RESTART_ATTEMPT=0
     echo "${C_WARN}WebUI exited cleanly (Apply and quit?). Restarting in ${_delay}s...${C_RESET}" >&2
   else
     # Crash or unexpected exit -- exponential backoff.

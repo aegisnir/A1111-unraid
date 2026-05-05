@@ -104,6 +104,8 @@ ENV COMMANDLINE_ARGS="--listen --port 7860 --data-dir /data --xformers --no-down
 ENV WEBUI_DIR="/opt/stable-diffusion-webui"
 ENV A1111_VENV_DIR="/data/venv"
 ENV TORCH_INDEX_URL="${TORCH_INDEX_URL}"
+ENV APP_UID="${APP_UID}"
+ENV APP_GID="${APP_GID}"
 ENV PIP_NO_BUILD_ISOLATION=1
 
 # ------------------------------------------------------------------------------
@@ -193,7 +195,7 @@ COPY webui-auth.txt /webui-auth.txt
 RUN chmod 0755 /entrypoint.sh /start.sh \
   && chmod 0644 /webui-auth.txt \
   && chown root:root /entrypoint.sh \
-  && chown sdwebui:sdwebui /start.sh
+  && chown root:root /start.sh
 
 # Include license and third-party notices in the image for distribution clarity.
 COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/doc/a1111-webui-aegisnir/

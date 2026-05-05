@@ -47,8 +47,8 @@ fi
 # On Unraid, UID 99 (nobody) and GID 100 (users) are the conventional defaults.
 
 DATA_DIR="/data"
-EXPECTED_UID=99
-EXPECTED_GID=100
+EXPECTED_UID="${APP_UID:-99}"
+EXPECTED_GID="${APP_GID:-100}"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Diagnostic helpers
@@ -194,29 +194,14 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
 
     echo "${C_INFO}[entrypoint] /data ownership and permissions corrected. Continuing startup.${C_RESET}" >&2
 
-  # ── Scenario 2: Right owner, wrong modes ─────────────────────────────────
-  elif [[ ! -w "${DATA_DIR}" || ! -x "${DATA_DIR}" ]]; then
-    # Ownership is correct (uid 99 owns /data), but the permission *bits* are
-    # too restrictive for the app to work. This can happen if someone ran
-    # something like "chmod 000 <your-data-path>" or "chmod 700 ..." on the
-    # Unraid host -- the directory ends up owned by the right user but with
-    # modes that block writing (-w) or traversal (-x).
-    #
-    # We restore mode 775 on /data itself (owner + group can read/write/traverse,
-    # others can read/traverse) and then fix any children the same way as the
-    # ownership-repair branch above.
-    echo "${C_WARN}[entrypoint] /data is owned by the correct user but is not writable/traversable.${C_RESET}" >&2
-    echo "${C_WARN}[entrypoint] Restoring mode 775 and fixing permission modes under /data...${C_RESET}" >&2
-
-    if ! chmod 775 "${DATA_DIR}"; then
-      warn_repair_blocked
-      exec_as_app_user
-    fi
-
+  # ── Permission repair (idempotent) ────────────────────────────────────────
+  # Runs unconditionally when ownership is already correct. Catches the case
+  # where someone ran chmod 000/700 on the host. The previous conditional
+  # ([[ ! -w || ! -x ]]) was dead code: root bypasses -w/-x via CAP_DAC_OVERRIDE.
+  else
+    chmod 775 "${DATA_DIR}" 2>/dev/null || true
     find "${DATA_DIR}" -type d ! -perm -u+rwx -exec chmod u+rwx {} + 2>/dev/null || true
     find "${DATA_DIR}" -type f ! -perm -u+r   -exec chmod u+r   {} + 2>/dev/null || true
-
-    echo "${C_INFO}[entrypoint] /data permissions restored. Continuing startup.${C_RESET}" >&2
   fi
 fi
 
