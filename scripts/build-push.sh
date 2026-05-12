@@ -24,6 +24,11 @@
 
 set -euo pipefail
 
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "ERROR: Working directory is dirty. Commit or stash changes before building." >&2
+  exit 1
+fi
+
 IMAGE="ghcr.io/aegisnir/a1111-webui-aegisnir"
 VERSION="$(git describe --tags --always 2>/dev/null || echo 'dev')"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -41,8 +46,27 @@ docker buildx build \
   --build-arg IMAGE_VERSION="${VERSION}" \
   --tag "${IMAGE}:${ROLLING_TAG}" \
   --tag "${IMAGE}:${VERSION}" \
-  --push \
+  --sbom=true \
+  --provenance=true \
+  --load \
   .
+
+echo ""
+echo "Scanning image before push..."
+if command -v trivy >/dev/null 2>&1; then
+  trivy image --severity HIGH,CRITICAL --exit-code 1 "${IMAGE}:${ROLLING_TAG}" || {
+    echo "ERROR: Trivy found HIGH/CRITICAL vulnerabilities. Fix before pushing." >&2
+    exit 1
+  }
+  echo "Trivy scan passed."
+else
+  echo "WARNING: trivy not installed. Skipping pre-push scan."
+fi
+
+echo ""
+echo "Pushing images..."
+docker push "${IMAGE}:${ROLLING_TAG}"
+docker push "${IMAGE}:${VERSION}"
 
 echo ""
 echo "Done. Verifying version label on pushed image..."

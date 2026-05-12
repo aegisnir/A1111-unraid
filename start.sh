@@ -78,6 +78,10 @@ VENV_DIR="${A1111_VENV_DIR:-/data/venv}"                           # Persistent 
 VENV_PYTHON="${VENV_DIR}/bin/python"                               # Absolute path to the venv interpreter
 BOOTSTRAP_STAMP="${VENV_DIR}/.a1111-bootstrap-complete"            # Marker file: first-run pip install already done
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu130}"  # PyPI extra index for CUDA wheels
+if [[ ! "${TORCH_INDEX_URL}" =~ ^https:// ]]; then
+  echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} TORCH_INDEX_URL must use https://. Got: ${TORCH_INDEX_URL}${C_RESET}" >&2
+  exit 1
+fi
 RUNTIME_REPOS_DIR="/data/repositories"                             # Persistent upstream sub-repos (e.g. k-diffusion)
 RUNTIME_EXTENSIONS_DIR="/data/extensions"                          # Persistent user-installed extensions
 RUNTIME_CONFIG_STATES_DIR="/config/a1111/config_states"            # Persistent extension state snapshots (in appdata)
