@@ -132,6 +132,7 @@ RUN apt-get update \
   libxrender1 \
   libxext6 \
   libgl1 \
+  && apt-get upgrade -y gnupg \
   && rm -rf /var/lib/apt/lists/*
 
 # Keep the base image lean and install heavyweight Python dependencies on first
