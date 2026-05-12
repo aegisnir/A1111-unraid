@@ -147,6 +147,34 @@ The incremental attack surface is marginal because extensions already have arbit
 
 If a future version removes extension support, the dev toolchain should be stripped.
 
+### tmpfs /tmp bypasses noexec for interpreted scripts (M-6)
+
+The `--tmpfs /tmp:rw,noexec,nosuid,nodev` mount prevents direct binary execution but does not prevent `python /tmp/script.py` or `bash /tmp/script.sh`. This is a fundamental limitation of `noexec`: it only blocks the kernel `execve` syscall, not interpreters reading files. Removing `/tmp` entirely would break Python (pip, tempfile) and many A1111 operations. Accepted as a defense-in-depth layer, not a complete execution barrier.
+
+### Gradio auth has no server-side rate limiting (M-7)
+
+A1111's Gradio authentication does not implement rate limiting or account lockout. Brute-force protection depends on network-level controls (firewall rules, reverse proxy rate limiting). This is an upstream limitation. The container is designed for trusted home-lab networks where this risk is low. If exposing to the internet, deploy behind a reverse proxy with rate limiting.
+
+### Plaintext credentials in auth file (M-8)
+
+`webui-auth.txt` stores credentials as `username:password` in plaintext. This is the format A1111's Gradio auth expects. The file is created with mode 600 (owner-read-only) and lives on a host-mounted volume. Hashing would require patching upstream Gradio auth. Accepted: file permissions are the primary control.
+
+### Default credentials on first launch (M-11)
+
+The container seeds `admin:changeme` on first launch to ensure the auth gate is never absent. A prominent startup warning is displayed. Blocking startup until custom credentials exist would break the first-boot experience (container starts, user configures via WebUI or file edit). The current approach prioritizes "always authenticated" over "never uses defaults."
+
+### SUID strip uses || true (L-6)
+
+The `find / -exec chmod a-s {} + || true` in the Dockerfile intentionally ignores errors. Some base image files may be immutable or on virtual filesystems. Stripping as many SUID/SGID bits as possible is a net security win even if a few resist.
+
+### Python subprocess inherits full environment (L-9)
+
+`start.sh` launches the Python WebUI via the full shell environment. Filtering env vars before exec would risk breaking A1111's dependency on CUDA, PyTorch, and pip configuration variables. The container already runs non-root with dropped capabilities, limiting what env-based attacks could achieve.
+
+### /data volume not mounted noexec (L-15)
+
+The `/data` volume cannot use `noexec` because A1111 installs and runs Python packages from `/data/venv`. This is fundamental to the container's design: heavy dependencies live on the persistent volume, not in the image. The `--read-only` rootfs and `--no-new-privileges` flags limit the blast radius.
+
 ## Reporting security concerns
 
 If you notice a security issue, risky assumption, or something that looks clearly unsafe, constructive feedback is welcome.
