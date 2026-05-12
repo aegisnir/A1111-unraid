@@ -7,7 +7,65 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ## [Unreleased]
 
-*(nothing yet)*
+### Security
+
+- **CRITICAL**: fix default credentials RCE chain: remove `--enable-insecure-extension-access`
+  from default `COMMANDLINE_ARGS` in Dockerfile and `template.xml`; restores A1111's own
+  `webui_is_non_local` safety mechanism that auto-disables extension management when `--listen`
+  is set; adds startup warning when default creds (`admin:changeme`) are detected; changes
+  `API_AUTH_FILE_MODE` default from `mirror-webui-file` to `disabled` (fail-safe)
+- **CRITICAL**: fix symlink traversal in entrypoint ownership repair: add `-not -type l` to
+  the `find`/`chown` command so a symlink at `/data/evil -> /etc/shadow` cannot cause `chown`
+  to follow through to the host filesystem as root
+- **CRITICAL**: fix Python stdout buffering: add `PYTHONUNBUFFERED=1` so log annotations
+  appear immediately instead of in delayed 8KB bursts (upstream `webui.sh` passes `-u`;
+  the container calls `launch.py` directly and missed this)
+- **HIGH**: fix dead code in entrypoint Scenario 2: replace unreachable `-w`/`-x` conditional
+  (root bypasses via `CAP_DAC_OVERRIDE`) with unconditional idempotent permission repair
+- **HIGH**: fix UID/GID propagation: add `APP_UID`/`APP_GID` as `ENV` vars in Dockerfile so
+  `entrypoint.sh` reads them instead of hardcoding `99`/`100`; custom builds with
+  `--build-arg APP_UID=1000` no longer silently mismatch
+- **HIGH**: fix restart counter: reset `_RESTART_ATTEMPT` to 0 on clean exit so repeated
+  "Apply and quit" cycles (extension installs) cannot exhaust the max-attempts limit
+- **HIGH**: fix `TORCH_INDEX_URL` fallback in `start.sh` from `cu128` to `cu130` to match
+  the Dockerfile; prevents xformers wheel mismatch on edge cases
+- **HIGH**: fix `start.sh` ownership from `sdwebui:sdwebui` to `root:root`; defense-in-depth
+  for executables even on read-only rootfs
+- **HIGH**: fix auth quoting: replace `printf '%q'` (bash-specific `$'...'` syntax) with
+  `shlex.quote()` (POSIX single-quote wrapping); A1111 parses `COMMANDLINE_ARGS` via
+  `shlex.split()` which cannot handle `$'...'` syntax
+- **HIGH**: fix API auth fallback: unrecognized `API_AUTH_FILE_MODE` now falls back to
+  `disabled` instead of `mirror-webui-file` (fail-safe for security settings)
+- **MEDIUM**: fix silent error swallowing in ownership repair: capture and report errors from
+  `find`/`chown`, report count of repaired files
+- **MEDIUM**: fix GID drift detection: check both UID and GID at the top-level `stat`
+  inspection; a file owned by `99:0` no longer passes silently
+- **MEDIUM**: fix migration backup: back up before deleting in `_ensure_appdata_link` when
+  both source and target exist; prevents silent data loss
+- **MEDIUM**: fix model count recursion: remove `-maxdepth 1` from checkpoint `find`; A1111
+  recurses with unlimited depth via `os.walk(followlinks=True)`
+- **MEDIUM**: add `nodev` to tmpfs mount options in `template.xml` (defense-in-depth)
+- **MEDIUM**: add `getcap`/`setcap` pass after SUID strip in Dockerfile; a binary with
+  `cap_net_raw+ep` would survive the SUID strip alone
+- **MEDIUM**: pin pip upgrade to `>=24.0,<25.0` instead of unconstrained `--upgrade`
+  (supply chain discipline)
+- **MEDIUM**: add `--ngrok` to `launch.py` `sensitive_flags` set; ngrok auth tokens were not
+  being redacted from startup log output
+
+### Fixed
+
+- fix "Attempt N of 0" display when `RESTART_MAX_ATTEMPTS=0`
+- move signal trap to top of `start.sh` (catches SIGTERM during bootstrap)
+- replace `rm -rf` glob with `find -delete` (catches dotfiles)
+- add SIGKILL escalation after 15s SIGTERM timeout
+- extract `_validate_build_symlink()` helper (removes 3 copy-pasted blocks)
+- merge auth file Python heredocs into unified `_auth_file_tool()`
+- derive `VERSION` from git tag in `build-push.sh`
+- add `-e` to Dockerfile `SHELL` instruction for consistency
+- fix shellcheck findings: remove `local` keyword from top-level while loop (SC2168),
+  exclude SC2317 in `security-check.sh` (false positive for trap handlers)
+- pin `bandit==1.8.3` and `yamllint==1.35.1` in CI
+- security baseline now 29/29 with shellcheck enabled
 
 ---
 
