@@ -6,7 +6,7 @@
 #   - Keep the runtime image reasonably small (avoid dev toolchains where possible)
 #   - Run as a non-root user where practical
 #   - Pin the CUDA base image by digest for reproducibility
-#   - Track upstream WebUI from a configurable ref (WEBUI_REF, default: dev)
+#   - Pin upstream WebUI to a specific commit SHA (WEBUI_REF, overridable at build time)
 #
 # This project is maintained as a personal, AI-assisted hobby project.
 # These comments try to explain the reasoning behind the current choices,
@@ -38,9 +38,9 @@
 #
 # 4) Supply chain & updates:
 #    - The CUDA base image is pinned by digest to reduce unexpected upstream change.
-#    - The WebUI source tracks a configurable ref via WEBUI_REF (default: dev).
-#      The default behavior follows a moving upstream branch, so behavior can
-#      change over time when you rebuild.
+#    - The WebUI source is pinned to a specific commit SHA via WEBUI_REF.
+#      Override at build time with --build-arg WEBUI_REF=<sha-or-tag> to track
+#      a different upstream version.
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # treats build args as poor places for sensitive values because they may show up
 # in build metadata, layer history, logs, or external attestations depending on
 # how and where the image is built.
-ARG WEBUI_REF=dev
+ARG WEBUI_REF=1937682a20f7f0442311a1ede68f9f0cb480163b
 
 # Unraid-friendly defaults (nobody/users). Adjust if you use a different strategy.
 ARG APP_UID=99
@@ -165,7 +165,9 @@ RUN set -eux; \
 # Symlink mutable directories into /data so the WebUI can write to them at
 # runtime even when the container filesystem is read-only. The actual
 # directories are created by start.sh on first launch under the /data volume.
-RUN git clone --branch "${WEBUI_REF}" --single-branch https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
+RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "${WEBUI_DIR}" \
+  && cd "${WEBUI_DIR}" && git checkout "${WEBUI_REF}" && cd / \
+  && rm -rf "${WEBUI_DIR}/.git" \
   && rm -rf "${WEBUI_DIR}/repositories" \
   && ln -s /data/repositories "${WEBUI_DIR}/repositories" \
   && rm -rf "${WEBUI_DIR}/config_states" \
