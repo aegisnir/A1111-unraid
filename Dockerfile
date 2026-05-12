@@ -142,6 +142,7 @@ RUN apt-get update \
 # ------------------------------------------------------------------------------
 # Create a dedicated non-root runtime user with Unraid-friendly UID/GID defaults.
 # This logic ensures the group and user are always named 'sdwebui', even if the UID/GID already exist with other names (Unraid compatibility).
+# groupmod -n renames existing system groups (e.g. 'users' at GID 100) which may affect other image layers that reference the old name.
 RUN set -eux; \
   if getent group "${APP_GID}" > /dev/null; then \
   groupmod -n sdwebui "$(getent group "${APP_GID}" | cut -d: -f1)"; \
@@ -249,6 +250,7 @@ HEALTHCHECK --interval=120s --timeout=30s --start-period=600s --retries=5 \
 # Strip all SUID/SGID bits from binaries so no binary in the image can
 # escalate privileges if the container is compromised. Skips virtual
 # filesystems (/proc, /sys, /dev) which are kernel-managed.
+# || true: intentional. Some base image files may be immutable; stripping as many as possible is still a net win.
 RUN find / -perm /6000 -type f -not -path '/proc/*' -not -path '/sys/*' -not -path '/dev/*' -exec chmod a-s {} + || true
 
 # Strip Linux file capabilities (e.g. cap_net_raw+ep) which survive the SUID strip.

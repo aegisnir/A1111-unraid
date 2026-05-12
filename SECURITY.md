@@ -34,7 +34,7 @@ Automated runner:
 
 - [ ] PASS if `template.xml` keeps `Privileged` set to `false`.
 - [ ] PASS if default `ExtraParams` includes all of the following:
-	`--read-only`, `--tmpfs /tmp:rw,noexec,nosuid,size=2g`,
+	`--read-only`, `--tmpfs /tmp:rw,noexec,nosuid,nodev,size=2g`,
 	`--security-opt no-new-privileges:true`, `--cap-drop=ALL`,
 	`--cap-add=CHOWN`, `--cap-add=FOWNER`, `--cap-add=SETUID`, `--cap-add=SETGID`,
 	and `--pids-limit=2048` (or documented equivalent).

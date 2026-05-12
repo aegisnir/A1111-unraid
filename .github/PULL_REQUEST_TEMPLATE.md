@@ -4,7 +4,7 @@
 
 - [ ] I have read [CONTRIBUTING.md](../CONTRIBUTING.md)
 - [ ] I have tested my changes locally
-- [ ] `bash scripts/security-check.sh` passes (29/29)
+- [ ] `bash scripts/security-check.sh` passes (0 failures)
 - [ ] `bash -n entrypoint.sh && bash -n start.sh` passes
 - [ ] I have updated documentation if applicable
 - [ ] I have not introduced new security risks (see [SECURITY.md](../SECURITY.md))

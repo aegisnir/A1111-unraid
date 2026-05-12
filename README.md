@@ -354,7 +354,7 @@ If `--api-auth` is provided without `--api`, startup logs now warn that API auth
 **Default** (from the Unraid template):
 
 ```
---listen --port 7860 --data-dir /data --xformers --no-download-sd-model --enable-insecure-extension-access
+--listen --port 7860 --data-dir /data --xformers --no-download-sd-model
 ```
 
 > [!TIP]
@@ -470,7 +470,7 @@ This container uses the following security options by default (set in the Unraid
 
 ```bash
 --read-only
---tmpfs /tmp:rw,noexec,nosuid,size=2g
+--tmpfs /tmp:rw,noexec,nosuid,nodev,size=2g
 --security-opt no-new-privileges:true
 --cap-drop=ALL
 --cap-add=CHOWN --cap-add=FOWNER --cap-add=SETUID --cap-add=SETGID
