@@ -326,6 +326,11 @@ PY
   touch "${BOOTSTRAP_STAMP}"
 fi
 
+if [[ "${_DELIBERATE_STOP}" == "1" ]]; then
+  echo "${C_WARN}[start.sh] SIGTERM received during bootstrap. Exiting cleanly.${C_RESET}" >&2
+  exit 0
+fi
+
 if ! TORCH_VERSION="${TORCH_VERSION}" TORCHVISION_VERSION="${TORCHVISION_VERSION}" XFORMERS_VERSION="${XFORMERS_VERSION}" "${VENV_PYTHON}" - <<'PY'
 import importlib
 import os
@@ -526,7 +531,8 @@ if [[ "${API_ENABLED}" == "1" ]]; then
     elif [[ "${API_AUTH_FILE_MODE}" == "disabled" ]]; then
       echo "${C_ACCENT}API auth mirroring from WEBUI_AUTH_FILE disabled via API_AUTH_FILE_MODE=disabled.${C_RESET}" >&2
     else
-      echo "${C_WARN}[WARNING] Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled. Falling back to disabled.${C_RESET}" >&2
+      echo "${C_CRIT}${C_BOLD}ERROR:${C_RESET}${C_CRIT} Unrecognized API_AUTH_FILE_MODE=${API_AUTH_FILE_MODE}. Expected mirror-webui-file or disabled.${C_RESET}" >&2
+      exit 1
     fi
   else
     echo "${C_ACCENT}API auth mirroring skipped because auth is not sourced from WEBUI_AUTH_FILE.${C_RESET}" >&2
@@ -851,8 +857,10 @@ _cleanup_monitor() {
 # shellcheck disable=SC2317
 _forward_signal() {
   _DELIBERATE_STOP=1
-  [[ -n "${_WEBUI_PID}" ]] && kill -TERM "${_WEBUI_PID}" 2>/dev/null
-  true
+  if [[ -n "${_WEBUI_PID}" ]]; then
+    kill -TERM "${_WEBUI_PID}" 2>/dev/null || true
+    ( sleep 15; kill -KILL "${_WEBUI_PID}" 2>/dev/null ) &
+  fi
 }
 
 trap '_cleanup_monitor' EXIT

@@ -47,6 +47,11 @@ DATA_DIR="/data"
 EXPECTED_UID="${APP_UID:-99}"
 EXPECTED_GID="${APP_GID:-100}"
 
+if [[ "${EXPECTED_UID}" == "0" || "${EXPECTED_GID}" == "0" ]]; then
+  echo "${C_CRIT}${C_BOLD}FATAL:${C_RESET}${C_CRIT} APP_UID/APP_GID must not be 0. Refusing to run as root.${C_RESET}" >&2
+  exit 1
+fi
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Diagnostic helpers
 # ─────────────────────────────────────────────────────────────────────────────
@@ -168,7 +173,7 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "${DATA_DIR}" ]]; then
     # find's filter (! -user) limits the walk to only misowned entries so this
     # is fast on a healthy volume and only slow on a truly broken one.
     _repair_errors="$(mktemp 2>/dev/null || echo /tmp/entrypoint-repair.err)"
-    _repair_count="$(find "${DATA_DIR}" -not -type l ! -user "${EXPECTED_UID}" -o ! -group "${EXPECTED_GID}" 2>/dev/null | wc -l | tr -d ' ')"
+    _repair_count="$(find "${DATA_DIR}" -not -type l \( ! -user "${EXPECTED_UID}" -o ! -group "${EXPECTED_GID}" \) 2>/dev/null | wc -l | tr -d ' ')"
     find "${DATA_DIR}" -not -type l \( ! -user "${EXPECTED_UID}" -o ! -group "${EXPECTED_GID}" \) -exec chown "${EXPECTED_UID}:${EXPECTED_GID}" {} + 2>"${_repair_errors}" || true
     if [[ -s "${_repair_errors}" ]]; then
       echo "${C_WARN}[entrypoint] Some files could not be repaired:${C_RESET}" >&2
@@ -205,7 +210,7 @@ if [[ "$(id -u)" == "0" ]] && [[ -d "/config" ]]; then
   if [[ "${config_owner_uid}" != "${EXPECTED_UID}" ]]; then
     echo "${C_WARN}[entrypoint] /config is owned by uid=${config_owner_uid}, expected uid=${EXPECTED_UID}.${C_RESET}" >&2
     echo "${C_WARN}[entrypoint] Correcting /config ownership...${C_RESET}" >&2
-    if ! chown -R "${EXPECTED_UID}:${EXPECTED_GID}" /config; then
+    if ! find /config -not -type l -exec chown "${EXPECTED_UID}:${EXPECTED_GID}" {} + 2>/dev/null; then
       echo "${C_WARN}[entrypoint] Could not fix /config ownership. Auth file seeding may fail.${C_RESET}" >&2
     else
       echo "${C_INFO}[entrypoint] /config ownership corrected.${C_RESET}" >&2
