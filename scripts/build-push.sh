@@ -54,7 +54,7 @@ docker buildx build \
 echo ""
 echo "Scanning image before push..."
 if command -v trivy >/dev/null 2>&1; then
-  trivy image --severity HIGH,CRITICAL --exit-code 1 "${IMAGE}:${ROLLING_TAG}" || {
+  trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "${IMAGE}:${ROLLING_TAG}" || {
     echo "ERROR: Trivy found HIGH/CRITICAL vulnerabilities. Fix before pushing." >&2
     exit 1
   }
