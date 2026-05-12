@@ -9,6 +9,29 @@ I am keeping this intentionally lightweight. This is a personal, AI-assisted hob
 
 ### Security
 
+- **HIGH**: pin `WEBUI_REF` to upstream commit SHA instead of mutable `dev` branch; clone
+  strategy changed to full clone + checkout + strip `.git` for reproducible builds
+- **MEDIUM**: fix `API_AUTH_FILE_MODE` to fail closed on unrecognized values instead of
+  silently falling back to `disabled`
+- **MEDIUM**: add SIGTERM checkpoint after bootstrap: if Docker sends SIGTERM during pip
+  install, the container now exits cleanly instead of continuing to launch the WebUI
+- **MEDIUM**: validate `TORCH_INDEX_URL` requires `https://` scheme at startup
+- **MEDIUM**: add dirty-tree guard to `build-push.sh` (rejects builds from uncommitted state)
+- **MEDIUM**: enable SBOM and provenance attestation in build pipeline
+- **MEDIUM**: add pre-push Trivy scan gate in `build-push.sh`
+- **LOW**: fix `find` operator precedence in `/data` repair count (symlink exclusion now
+  correctly applies to both `-user` and `-group` conditions)
+- **LOW**: replace `chown -R` with symlink-safe `find -not -type l -exec chown` on `/config`
+- **LOW**: reject `APP_UID=0` / `APP_GID=0` at entrypoint startup
+- **LOW**: add SIGKILL escalation (15s timeout) to supervisor loop signal handler
+
+### Documentation
+
+- fix documentation drift: remove stale `--enable-insecure-extension-access` from README
+  default args example, add missing `nodev` to tmpfs docs, fix stale check count in PR template
+- document `groupmod` system group rename side effect and intentional `|| true` on SUID strip
+- document 7 accepted security risks in SECURITY.md (M-6, M-7, M-8, M-11, L-6, L-9, L-15)
+
 - **CRITICAL**: fix default credentials RCE chain: remove `--enable-insecure-extension-access`
   from default `COMMANDLINE_ARGS` in Dockerfile and `template.xml`; restores A1111's own
   `webui_is_non_local` safety mechanism that auto-disables extension management when `--listen`
