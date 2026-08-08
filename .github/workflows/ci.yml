@@ -62,7 +62,7 @@ jobs:
         # NOTE: v3.3.0 bundles hadolint v2.14.0 which has the ignore-key config
         # regression. DL3008 is suppressed via the action's ignore: input below,
         # not via .hadolint.yaml, so this does not affect us.
-        uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
+        uses: hadolint/hadolint-action@2a66e89f53d0771bb131a7fa31f3136336094aa6 # v3.4.0
         with:
           dockerfile: Dockerfile
           failure-threshold: error
